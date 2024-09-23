@@ -177,4 +177,3 @@ if ($global:testtype -eq 2){
    move-item C:\Matter_AI\settings\_py\caseids.txt -Destination $backuppath\pycaseids_$($date).txt
 
   #>
-#renamelog -testid $($testid)
