@@ -122,10 +122,22 @@ if ($global:testtype -eq 2){
      $check=$caseid0 -match $pattern
     }
     $caseid = ($matches[0].replace(" ","")).trim()
-    $stepid=$csv.step
+    #$stepid=$csv.step
     $pylines=($csv.command).split("`n")
-    if($lastcaseid -ne $caseid){
+    
+    if($lastcaseid -and $lastcaseid -ne $caseid){
+      #record last case logs
+      if ($pycmdmerge){
+        $datetime=get-date -Format yyyyMMdd_HHmmss
+        copy-item C:\Matter_AI\logs\lastlog.log -Destination C:\Matter_AI\logs\"PASS_"$($lastcaseid)_$($datetime).log
+        }else{      
+        copy-item C:\Matter_AI\logs\lastlog.log -Destination C:\Matter_AI\logs\"FAIL_"$($lastcaseid)_$($datetime).log
+        }
       $lastcaseid=$caseid
+            $logtc="C:\Matter_AI\logs\lastlog_$($tcaseid).log"
+      if(!(test-path $logtc)){
+        new-item -ItemType File -Path $logtc | Out-Null
+      }
       #$sound.Play()
       #([System.Media.SystemSounds]::Asterisk).Play()
       $InfoParams = @{
@@ -141,21 +153,17 @@ if ($global:testtype -eq 2){
     }
     foreach($pyline in $pylines){
       $k=$pycmd=0
+      $pycmdmerge=1
       while (!$pycmd -and $k -lt $retesttime){
         $k++
         $pycmd=putty_paste -cmdline "rm -f admin_storage.json && $pyline" -line1 -1 -checkline1 "pass"
         write-host "round $k"
       }
-
-      $datetime=get-date -Format yyyyMMdd_HHmmss
-      if ($pycmd){
-      copy-item C:\Matter_AI\logs\lastlog.log -Destination C:\Matter_AI\logs\"PASS_"$($caseid)_$($datetime).log
-      }else{      
-      copy-item C:\Matter_AI\logs\lastlog.log -Destination C:\Matter_AI\logs\"FAIL_"$($caseid)_$($datetime).log
-      }
-
+      $pycmdmerge=$pycmdmerge -and $pycmd
+      add-content -path $logtc -Value (get-content -path C:\Matter_AI\logs\lastlog.log )
+      
     }
-
+    
           
   }
   }
