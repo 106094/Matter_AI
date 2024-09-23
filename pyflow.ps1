@@ -124,7 +124,7 @@ if ($global:testtype -eq 2){
     $caseid = ($matches[0].replace(" ","")).trim()
     #$stepid=$csv.step
     $pylines=($csv.command).split("`n")
-    
+
     if($lastcaseid -and $lastcaseid -ne $caseid){
       #record last case logs
       if ($pycmdmerge){
@@ -163,8 +163,7 @@ if ($global:testtype -eq 2){
       add-content -path $logtc -Value (get-content -path C:\Matter_AI\logs\lastlog.log )
       
     }
-    
-          
+              
   }
   }
 
