@@ -16,7 +16,7 @@ while(!$global:testtype -or ($global:testtype -ne 1 -and $global:testtype -ne 2)
  #region check ssh connection
 $settings=get-content C:\Matter_AI\settings\config_linux.txt
 $sship=($settings[0].split(":"))[-1]
-$sshusername=($settings[1].split(":"))[-1]
+#$sshusername=($settings[1].split(":"))[-1]
 write-host "check ssh ip $sship if connected"
 if (!(Test-Connection -ComputerName $sship -Count 1 -ErrorAction SilentlyContinue)) {
   $messinfo="SSH IP is not connected, please check RPI connection or SSH IP is correct"
