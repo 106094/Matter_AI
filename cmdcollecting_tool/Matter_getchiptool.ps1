@@ -98,20 +98,21 @@ $Indexlast=($worksheetNames.trim()).IndexOf("WNCV")
 $outputcsv = @()
 for($i=$Indexfirst;$i -le $Indexlast;$i++){
  $sheetname=$($worksheetNames[$i])
+ $snamesplit=($sheetname.split("("))[0].trim()
  #$sheetname
- if($sheetname.trim() -in $filteredsheets){
+ if($snamesplit -in $filteredsheets){
  #$sheetname
- $sheetdate= Import-Excel $excelfull -WorksheetName $($worksheetNames[$i]) -NoHeader
+ $sheetdate= Import-Excel $excelfull -WorksheetName $sheetname -NoHeader
  $colproperty = ($sheetdate[0] | Get-Member -MemberType NoteProperty).name
  $tcline=$null
  $numbercol=$null
  $precol=$null
  $toolcmd=$null
   foreach($content in $sheetdate){
-     if($content -match "\[TC-"){
+     if($content -match "\[TC\-"){
     $pattern = "\[(.*?)\]"
     $match = $content | Select-String -Pattern $pattern
-    $extractedText = $match.Matches[0].Groups[1].Value
+    $extractedText = ($match.Matches[0].Groups[1].Value).replace(" ","")
     if($extractedText -match "TC\-"){
       $tcline =$null
       $tcstep=$null
@@ -124,7 +125,7 @@ for($i=$Indexfirst;$i -le $Indexlast;$i++){
     
     if($extractedText -in $filteredtcs){
      ForEach($col in $colproperty){
-      if(($content.$col).length -gt 0 -and ($content.$col) -match "TC\-"){
+      if(($content.$col).length -gt 0 -and ($content.$col) -match "TC\-" ){
         $tcline=($content.$col).trim()
         #$tcline        
         break
@@ -132,7 +133,7 @@ for($i=$Indexfirst;$i -le $Indexlast;$i++){
        }
       }
       }
-      if(($content -match "precondition" -or $content -match "Pre-condition")-and $tcline -and !($numbercol) -and !($precol)){
+      if(($content -match "precondition" -or $content -match "Pre-condition") -and $tcline -and !($numbercol) -and !($precol)){
         ForEach($col in $colproperty){
           if(($content.$col) -match "precondition" -or ($content.$col) -match "Pre-condition"){
             $precol=$col
