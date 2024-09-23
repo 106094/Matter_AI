@@ -38,7 +38,7 @@ if($sship -ne "192.168.2.201"){
     $regfile="C:\Matter_AI\puttyreg1.reg"
     }
 
-$sshcmd=$sshusername+"@"+"$sship"
+#$sshcmd=$sshusername+"@"+"$sship"
 #$cdpath="cd $sshpath"
 
 $logpath="C:\Matter_AI\logs"
