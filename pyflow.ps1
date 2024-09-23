@@ -121,8 +121,8 @@ if ($global:testtype -eq 2){
      $pattern = 'TC-\w+-\d+'
      $check=$caseid0 -match $pattern
     }
-    $caseid = $matches[0]
-    $stepid=($csv.step)
+    $caseid = ($matches[0].replace(" ","")).trim()
+    $stepid=$csv.step
     $pylines=($csv.command).split("`n")
     if($lastcaseid -ne $caseid){
       $lastcaseid=$caseid
