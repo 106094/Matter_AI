@@ -1,0 +1,91 @@
+﻿Add-Type -AssemblyName System.Windows.Forms
+Add-Type -AssemblyName System.Drawing
+
+if(test-path C:\Matter_AI\settings\_py\caseids.txt){
+    if(!(test-path C:\Matter_AI\_backup\)){
+        new-item C:\Matter_AI\_backup -ItemType Directory |Out-Null
+    }
+    $date=get-date -Format yyyyMMdd_HHmmss
+    move-item C:\Matter_AI\settings\_py\caseids.txt -Destination C:\Matter_AI\_backup\caseids_$($date).txt
+    #move-item C:\Matter_AI\pylines.txt -Destination C:\Matter_AI\_backup\pylines_$($date).txt 
+}
+
+$form = New-Object System.Windows.Forms.Form
+$form.Text = 'Data Entry Form'
+$form.Size = New-Object System.Drawing.Size(300,250)
+$form.StartPosition = 'CenterScreen'
+
+$OKButton = New-Object System.Windows.Forms.Button
+$OKButton.Location = New-Object System.Drawing.Point(75,150)
+$OKButton.Size = New-Object System.Drawing.Size(75,23)
+$OKButton.Text = 'OK'
+$OKButton.DialogResult = [System.Windows.Forms.DialogResult]::OK
+$form.AcceptButton = $OKButton
+$form.Controls.Add($OKButton)
+
+$CancelButton = New-Object System.Windows.Forms.Button
+$CancelButton.Location = New-Object System.Drawing.Point(150,150)
+$CancelButton.Size = New-Object System.Drawing.Size(75,23)
+$CancelButton.Text = 'Cancel'
+$CancelButton.DialogResult = [System.Windows.Forms.DialogResult]::Cancel
+$form.CancelButton = $CancelButton
+$form.Controls.Add($CancelButton)
+
+$label = New-Object System.Windows.Forms.Label
+$label.Location = New-Object System.Drawing.Point(10,20)
+$label.Size = New-Object System.Drawing.Size(280,20)
+$label.Text = 'Please make a selection from the list below:'
+$form.Controls.Add($label)
+
+$listBox = New-Object System.Windows.Forms.Listbox
+$listBox.Location = New-Object System.Drawing.Point(10,40)
+$listBox.Size = New-Object System.Drawing.Size(260,20)
+
+$listBox.SelectionMode = 'MultiExtended'
+
+#select testcase
+$sels=@()
+$pylines=@()
+
+$caseids=(import-csv C:\Matter_AI\settings\_py\py.csv).TestCaseID
+
+foreach ($caseid in $caseids){
+[void] $listBox.Items.Add($caseid)
+}
+
+$listBox.Height = 100
+$form.Controls.Add($listBox)
+$form.Topmost = $true
+
+$result = $form.ShowDialog()
+
+if ($result -eq [System.Windows.Forms.DialogResult]::OK)
+{
+    $x = $listBox.SelectedItems
+    if($x){
+        $sels+=@($x.trim())
+    }
+    
+}
+
+if($sels.count -eq 0){
+
+    $messages=[System.Windows.Forms.MessageBox]::Show("Please select testcases","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
+    return 0
+    
+}
+
+foreach($s in $sels){
+    $pyline=(import-csv C:\Matter_AI\settings\_py\py.csv | Where-Object{ $_.TestCaseID -eq $s}|Where-Object{$_.command.length -gt 0}).command
+    $pylines+=@($pyline.trim())
+}
+
+if($sels.count -eq $pylines.count){
+    new-item C:\Matter_AI\settings\_py\caseids.txt  -force |Out-Null
+    add-content C:\Matter_AI\settings\_py\caseids.txt -value $sels
+}
+else{
+    [System.Windows.Forms.MessageBox]::Show("Please check testcases $($sels.count), command count $($pylines.count) not matched","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)    
+}
+
+return $sels.count
