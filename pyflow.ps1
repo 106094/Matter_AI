@@ -166,7 +166,6 @@ if ($global:testtype -eq 2){
               
   }
   }
-
   <#
    $date=get-date -Format yyyyMMdd_HHmmss
 
