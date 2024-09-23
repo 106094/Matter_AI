@@ -1,15 +1,6 @@
 ﻿Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
-if(test-path C:\Matter_AI\settings\_py\caseids.txt){
-    if(!(test-path C:\Matter_AI\_backup\)){
-        new-item C:\Matter_AI\_backup -ItemType Directory |Out-Null
-    }
-    $date=get-date -Format yyyyMMdd_HHmmss
-    move-item C:\Matter_AI\settings\_py\caseids.txt -Destination C:\Matter_AI\_backup\caseids_$($date).txt
-    #move-item C:\Matter_AI\pylines.txt -Destination C:\Matter_AI\_backup\pylines_$($date).txt 
-}
-
 $form = New-Object System.Windows.Forms.Form
 $form.Text = 'Data Entry Form'
 $form.Size = New-Object System.Drawing.Size(300,250)
@@ -80,12 +71,8 @@ foreach($s in $sels){
     $pylines+=@($pyline.trim())
 }
 
-if($sels.count -eq $pylines.count){
-    new-item C:\Matter_AI\settings\_py\caseids.txt  -force |Out-Null
-    add-content C:\Matter_AI\settings\_py\caseids.txt -value $sels
-}
-else{
+if(!$sels){
     [System.Windows.Forms.MessageBox]::Show("Please check testcases $($sels.count), command count $($pylines.count) not matched","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)    
 }
 
-return $sels.count
+return $sels

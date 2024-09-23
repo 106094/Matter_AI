@@ -79,16 +79,13 @@ if(!$checkfile){
     exit
 }
 $selchek=. $selectionpsfile
-if($selchek -eq 0){
-   [System.Windows.Forms.MessageBox]::Show("Fail to create test case id lists","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
-    exit
+if(!$selchek){
+   [System.Windows.Forms.MessageBox]::Show("Fail to select the test case id","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
+   exit
 }
 }
 if ($global:testtype -eq 2){
   $getcmdpsfile="C:\Matter_AI\cmdcollecting_tool\Matter_getchiptool.ps1"
-  $selectionpsfile=""
-  $cmdcsvfile=""
-
   $result = [System.Windows.Forms.MessageBox]::Show("Need update UI-Manual database?", "Check", [System.Windows.Forms.MessageBoxButtons]::YesNo)
   if ($result -eq "Yes") {
     $InfoParams = @{
@@ -109,7 +106,21 @@ if ($global:testtype -eq 2){
      if(!(test-path $global:csvfilename)){      
       exit
      }
-    } 
+    }
+    else{
+      $excelfile=. "C:\Matter_AI\cmdcollecting_tool\selections_xlsx.ps1"
+      if(!$excelfile){
+        [System.Windows.Forms.MessageBox]::Show("Fail to select the excel file","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
+        exit
+      }
+    }
+    $csvname="C:\Matter_AI\settings\_manual\manualcmd_"+(Get-ChildItem -path $excelfile).basename.replace("TestPlanVerificationSteps_Auto","")+".csv"
+    $data=Import-Csv $csvname
+    $selchek=selection_manual -data $data -column1 "catg" -column2 "TestCaseID"
+    if(!$selchek){
+      [System.Windows.Forms.MessageBox]::Show("Fail to select the test case id","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
+      exit
+    }
 
 }
 ###########################
@@ -121,11 +132,9 @@ while ($continueq -eq "Yes"){
 . C:\Matter_AI\pyflow.ps1
 $continueq = [System.Windows.Forms.MessageBox]::Show("Need test again?", "Check", [System.Windows.Forms.MessageBoxButtons]::YesNo)
 if($continueq -eq "Yes"){
-    $selchek=. "C:\Matter_AI\selections.ps1"
-   
-  if($selchek -eq 0){
-   [System.Windows.Forms.MessageBox]::Show("Fail to create test case id lists","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
-    exit
+    $selchek
+  if(!$selchek){
+   [System.Windows.Forms.MessageBox]::Show("Fail to create test case id lists, test will be stopped","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
    }
   }
 }
