@@ -296,7 +296,7 @@ $csvcontent|export-csv $csvname -NoTypeInformation
 $timegap=(new-timespan -start $starttime -end (get-date)).Minutes
 $timegap2=(new-timespan -start $starttime -end (get-date)).Seconds
 
-[System.Windows.Forms.MessageBox]::Show("Collecting done. It took $timegap min $timegap2 sec","Info",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Information)
+$checktime=[System.Windows.Forms.MessageBox]::Show("Collecting done. It took $timegap min $timegap2 sec","Info",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Information)
 
 $csvname
 #pause
