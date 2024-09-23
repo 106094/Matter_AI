@@ -112,7 +112,7 @@ if ($global:testtype -eq 2){
     } 
 
 }
-#################
+###########################
 $starttime=get-date
 . C:\Matter_AI\putty_starting.ps1
 
