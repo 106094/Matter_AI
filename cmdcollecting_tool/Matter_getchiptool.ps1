@@ -85,7 +85,12 @@ $csvname="C:\Matter_AI\settings\_manual\manualcmd_"+$excelfile.basename.replace(
 #reg read excel to csv
 $columncor=(import-csv "C:\Matter_AI\settings\filesettings.csv"|Where-Object{$_.filename -eq ($excelfile).name}|Select-Object -Property column_title).column_title
 $worksheetNames = (Get-ExcelSheetInfo -Path $excelfull).Name
-#filter manual and as client
+
+#save parameter settings
+$a=(Import-Excel $excelfull -WorksheetName "Python Script Command" -StartRow 2 -EndRow 1 -StartColumn 7)
+$a[-1]|export-csv C:\Matter_AI\settings\_manual\settings.csv -NoTypeInformation -force
+
+#filter manual and as client and UI-Manual
 $sumsheetname=$worksheetNames|Where-Object{$_ -match "cert_repo"}
 $worksheetsum=Import-Excel $excelfull -WorksheetName $sumsheetname
 $filteredtcs = ($worksheetsum |Where-Object{$_."Test Case ID".length -gt 0}|  Where-Object {$_."$columncor" -eq "UI-Manual" `
