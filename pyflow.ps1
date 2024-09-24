@@ -1,3 +1,10 @@
+$retesttimecheck=(get-content "C:\Matter_AI\settings\config_linux.txt"|Select-String "retest.") -match "\d+"
+if($retesttimecheck){
+  $retesttime= [int32]($matches[0])
+}
+else{
+  $retesttime= [int32]1
+}
 
 if ($global:testtype -eq 1){
 
@@ -7,13 +14,6 @@ $settigns=import-csv C:\Matter_AI\settings\_py\settings.csv
 $headers=$settigns[0].PSObject.Properties.Name
 $sound = New-Object -TypeName System.Media.SoundPlayer
 $sound.SoundLocation = "C:\Windows\Media\notify.wav"
-$retesttimecheck=(get-content "C:\Matter_AI\settings\config_linux.txt"|Select-String "retest.") -match "\d+"
-if($retesttimecheck){
-  $retesttime= [int32]($matches[0])
-}
-else{
-  $retesttime= [int32]1
-}
 
 foreach($csv in $csvdata){
     #$sound.Play()
@@ -113,13 +113,6 @@ if ($global:testtype -eq 2){
   $csvdata=import-csv $csvname | Where-Object {$_.TestCaseID -in $caseids}
   $sound = New-Object -TypeName System.Media.SoundPlayer
   $sound.SoundLocation = "C:\Windows\Media\notify.wav"
-  $retesttimecheck=(get-content "C:\Matter_AI\settings\config_linux.txt"|Select-String "retest.") -match "\d+"
-  if($retesttimecheck){
-    $retesttime= [int32]($matches[0])
-  }
-  else{
-    $retesttime= [int32]1
-  }
   
   foreach($csv in $csvdata){
     $caseid0=$csv.TestCaseID
@@ -187,7 +180,6 @@ if ($global:testtype -eq 2){
     if ($paircmd){
       foreach($pyline in $pylines){
         $pycmd=putty_paste -cmdline "rm -f admin_storage.json && $pyline"
-        write-host "round $k"
         add-content -path $logtc -Value (get-content -path C:\Matter_AI\logs\lastlog.log)
     }
     }
