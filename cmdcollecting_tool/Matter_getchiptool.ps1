@@ -181,6 +181,7 @@ for($i=$Indexfirst;$i -le $Indexlast;$i++){
     }
     
     if($content -match "\#" -and $content -match "Cert\sDescription"){
+      $picscol=$null
       ForEach($col in $colproperty){
         if(($content.$col) -eq "#"){
           $numbercol=$col
@@ -207,10 +208,26 @@ for($i=$Indexfirst;$i -le $Indexlast;$i++){
       $pics=$content.$picscol
       $tcstep=$content.$numbercol
       $results=$null
-       #check if PICS not support
-      if($pics.length -gt 0 -and $pics -in $picexclusions){
-         $results="(PICS not support)"
-        } 
+      if($pics.length -ne 0){
+      #check if PICS not support    
+       try{
+        $pics.split("(").split("&").trim()
+       }catch{
+        $a=1
+       }
+      $pics.split("(").split("&").trim()|ForEach-Object{
+          if( $_ -in $picexclusions){
+            $results+=@($_)
+          }
+          }
+          if($results){
+            $results=$results -join "`n"
+          }
+        $lastresult=$results
+      }else{
+        $results=$lastresult
+      }   
+
        #incase with cmd but no steps
       if($tcstep.length -ne 0){
         $tcsteplast=$tcstep
@@ -248,7 +265,7 @@ $outputcsv|export-csv $csvname -NoTypeInformation
 $csvcontent=import-csv $csvname
 
 foreach($line in $csvcontent){
-  if($line.results -notlike "*PICS not support*"){
+  if($line.results.length -eq 0){
    $cmd=$null
    $splitcontent=$line.flow.split("`n")|Where-Object{$_.length -gt 0}
     ForEach($splitct in $splitcontent){
@@ -290,7 +307,7 @@ foreach($line in $csvcontent){
   }
 }
 $csvcontent|export-csv $csvname -NoTypeInformation
-
+#$csvcontent|Where-Object{$_.cmd.length -gt 0 -and $_.results.length -eq 0}|export-csv $csvname -NoTypeInformation
 #endregion
 
 $timegap=(new-timespan -start $starttime -end (get-date)).Minutes
