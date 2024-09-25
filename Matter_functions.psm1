@@ -804,7 +804,7 @@ function selection_manual($data, $column1, $column2) {
     $doneButton.add_Click({
         $sels = @()
         foreach ($item in $selectedListBox.Items) {
-            $sels += $item += $item
+            $sels += $item 
         }
         $form.Close()  # Close the form after saving the final list
     })
