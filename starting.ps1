@@ -110,6 +110,7 @@ if($continueq -eq "Yes"){
   if(!$selchek){
    [System.Windows.Forms.MessageBox]::Show("Fail to create test case id lists, test will be stopped","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
    }
+   
   }
 }
   

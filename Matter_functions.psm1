@@ -173,7 +173,7 @@ $checkresult
 
 #region puttyexit
 function puttyexit ([int32]$pidd){
-$checkexit=get-process putty
+$checkexit=get-process putty -ErrorAction SilentlyContinue
 while($checkexit){
     if($pidd -eq 0){
      putty_paste -cmdline "exit"
@@ -717,7 +717,7 @@ Function New-WPFMessageBox {
 
 #region manual GUI
 function selection_manual($data, $column1, $column2) {
-    
+    $global:finalSelection.Clear()
     # Load Windows Forms
     Add-Type -AssemblyName System.Windows.Forms
     
@@ -864,7 +864,7 @@ function puttystart ([string]$puttyname) {
     start-process reg -ArgumentList "import $regfile"
 
     $beforepid="na"
-    if(get-process -name putty){
+    if(get-process -name putty -ErrorAction SilentlyContinue){
     $beforepid=(get-process -name putty).id
     }
     $putty="C:\Matter_AI\putty.exe"

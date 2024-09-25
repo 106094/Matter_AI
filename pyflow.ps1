@@ -15,6 +15,9 @@ $headers=$settigns[0].PSObject.Properties.Name
 $sound = New-Object -TypeName System.Media.SoundPlayer
 $sound.SoundLocation = "C:\Windows\Media\notify.wav"
 $logtc="C:\Matter_AI\logs\_py\$($datetime)"
+if(!(test-path $logtc)){
+  new-item -ItemType Directory -Path $logtc | Out-Null
+}
 foreach($csv in $csvdata){
     #$sound.Play()
     #([System.Media.SystemSounds]::Asterisk).Play()
@@ -107,7 +110,7 @@ if ($global:testtype -eq 2){
   $datetime=get-date -Format yyyyMMdd_HHmmss
   $logtc="C:\Matter_AI\logs\_manual\$($datetime)"
   if(!(test-path $logtc)){
-    new-item -ItemType File -Path $logtc | Out-Null
+    new-item -ItemType Directory -Path $logtc | Out-Null
   }
   $caseids=$selchek
   $csvdata=import-csv $csvname | Where-Object {$_.TestCaseID -in $caseids}
