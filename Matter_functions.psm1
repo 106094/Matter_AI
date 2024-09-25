@@ -121,7 +121,7 @@ $lastlogline=(get-content $logfile).count -1
 [Microsoft.VisualBasic.interaction]::AppActivate($pidd)|out-null
 Set-Clipboard -Value $cmdline
 start-sleep -s 3
-$Handle= (get-process -name putty).MainWindowHandle 
+$Handle= (get-process -id $pidd).MainWindowHandle 
 $WindowRect = New-Object RECT
 $GotWindowRect = [Window]::GetWindowRect($Handle, [ref]$WindowRect)
 #Write-Host $WindowRect.Left $WindowRect.Top $WindowRect.Right $WindowRect.Bottom
