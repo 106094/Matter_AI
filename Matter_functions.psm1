@@ -100,16 +100,19 @@ Add-Type @"
 #endregion
 
 #region putty cmd and check    
-function putty_paste([string]$cmdline,[int64]$check_sec,[int64]$line1,[string]$checkline1,[int64]$line2,[string]$checkline2){
+function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int64]$line1,[string]$checkline1,[int64]$line2,[string]$checkline2){
 
 if(get-process putty){
-$pidd=(get-process putty|Sort-Object StartTime|Select-Object -Last 1).Id
+    if($puttyname.length -eq 0){
+        $pidd=(get-process putty|Sort-Object StartTime|Select-Object -Last 1).Id
+        $logputty="C:\Matter_AI\logs\*putty.log"      
+    }
+    else{
+        $pidd=($global:puttyset|Where-Object{$_.name -eq $puttyname}).puttypid
+        $logputty="C:\Matter_AI\logs\*putty_$($puttyname).log"
+    }
 
-if(((get-process -name putty).id).count -gt 1){
-get-process putty|Where-Object{$_.id -ne $pidd}|Stop-Process
-}
-
-$logfile=(Get-ChildItem C:\Matter_AI\logs\*putty.log|Sort-Object LastWriteTime|Select-Object -last 1).fullname
+$logfile=(Get-ChildItem $logputty|Sort-Object LastWriteTime|Select-Object -last 1).fullname
 start-process notepad $logfile -WindowStyle Minimized
 start-sleep -s 3
 (get-process notepad).CloseMainWindow()|Out-Null
@@ -140,7 +143,7 @@ start-sleep -s 2
 if($check_sec -eq 0){$check_sec = 1}
 do{
 start-sleep -s $check_sec
-$logfile=(Get-ChildItem C:\Matter_AI\logs\*putty.log|Sort-Object LastWriteTime|Select-Object -last 1).fullname
+$logfile=(Get-ChildItem $logputty|Sort-Object LastWriteTime|Select-Object -last 1).fullname
 start-process notepad $logfile -WindowStyle Minimized
 start-sleep -s 5
 (get-process notepad).CloseMainWindow()|Out-Null
@@ -158,8 +161,7 @@ if($line1 -ne 0){
     }
 if($checkline1.Length -gt 0){
 $checkresult=$checklog -like "*$checkline1*"
-
-if($checkline2.Length -gt 0){
+if($checkresult -and $checkline2.Length -gt 0){
 $checkresult=$checklog -like "*$checkline2*"
 }
 $checkresult
@@ -170,12 +172,20 @@ $checkresult
 #endregion
 
 #region puttyexit
-function puttyexit{
+function puttyexit ([int32]$pidd){
 $checkexit=get-process putty
 while($checkexit){
-putty_paste -cmdline "exit"
-start-sleep -s 5
-$checkexit=get-process -name putty -ea SilentlyContinue
+    if($pidd -eq 0){
+     putty_paste -cmdline "exit"
+    start-sleep -s 2
+     $checkexit=get-process -name putty -ea SilentlyContinue
+    }
+    else{
+        putty_paste -cmdline "exit" -pidd $pidd
+        start-sleep -s 2
+        $checkexit=get-process -id $pidd -ea SilentlyContinue
+    }
+
 }
 start-sleep -s 10
 }
@@ -827,3 +837,85 @@ function selection_manual($data, $column1, $column2) {
     )
     #>
    #endregion 
+
+#region putty starting functions
+function puttystart ([string]$puttyname) {
+    $settings=get-content C:\Matter_AI\settings\config_linux.txt
+    $sship=($settings[0].split(":"))[-1]
+
+    $regfile="C:\Matter_AI\puttyreg.reg"
+      if($sship -ne "192.168.2.201"){
+        (get-content "C:\Matter_AI\puttyreg.reg").replace("192.168.2.201",$sship)|Set-Content "C:\Matter_AI\puttyreg1.reg"
+        $regfile="C:\Matter_AI\puttyreg1.reg"
+       }
+    
+    $sesname="matter"
+    if($puttyname.length -gt 0){
+      $sesname="matter_$($puttyname)"
+      $newputtyreg="C:\Matter_AI\puttyreg_$($puttyname).reg"
+      $sessionname="Sessions\matter_$($puttyname)"
+        Copy-Item $regfile $newputtyreg
+        $puttylogpath="C:\\Matter_AI\\logs\\&Y&M&D&T_&H_putty.log"
+        $puttylogpathnew="C:\\Matter_AI\\logs\\&Y&M&D&T_&H_putty_$($puttyname).log"
+        ((get-content $newputtyreg).replace("Sessions\matter",$sessionname)).replace($puttylogpath,$puttylogpathnew)|Set-Content $newputtyreg
+        $regfile=$newputtyreg
+    }
+    start-process reg -ArgumentList "import $regfile"
+
+    $beforepid="na"
+    if(get-process -name putty){
+    $beforepid=(get-process -name putty).id
+    }
+    $putty="C:\Matter_AI\putty.exe"
+    start-sleep -s 2
+
+    start-process $putty -ArgumentList "-load $sesname" -WindowStyle Maximized
+    $afterpid=(get-process -name putty|Where-Object{$_.id -notin $beforepid}).id
+    $global:puttyset+=New-Object -TypeName PSObject -Property @{
+        name=$puttyname
+        puttypid=$afterpid
+    }
+   
+}
+
+#endregion
+
+#region putty login
+function puttylogin ([string]$puttyname){
+    if($puttyname.length -eq 0){
+     $puttypid=(get-process putty|Sort-Object StartTime|Select-Object -last 1).id 
+    }
+    else{
+      $puttypid=($global:puttyset|Where-Object{$_.name -eq $puttyname}).puttypid
+    }
+    
+    $settings=get-content C:\Matter_AI\settings\config_linux.txt
+    $pskey=($settings[2].split(":"))[-1]
+    #$sshpath=($settings[3].split(":"))[-1]
+    $fname=(Get-ChildItem $global:excelfile).name
+    $sshpath=(import-csv C:\Matter_AI\settings\filesettings.csv|Where-Object{$_.filename -eq $fname}).path
+    
+    $wshell = New-Object -ComObject WScript.Shell
+    $wshell.AppActivate($puttypid)
+    start-sleep -s 5
+    $wshell.SendKeys("raspberrypi")
+    start-sleep -s 2
+    $wshell.SendKeys("{enter}")
+    start-sleep -s 2
+    putty_paste -cmdline "sudo -s"
+    putty_paste -cmdline $pskey
+    putty_paste -cmdline "docker ps -a"
+    $idlogin=get-content "C:\Matter_AI\logs\lastlog.log"
+    $checkmatch=$idlogin -match "\/bin\/bash"
+    if($checkmatch){
+      $ctnid= (($idlogin -match "\/bin\/bash").split(" "))[0]
+    }
+    else{
+        puttyexit
+    }
+    putty_paste -cmdline "docker start $ctnid"
+    putty_paste -cmdline "docker exec -it $ctnid /bin/bash"
+    putty_paste -cmdline "cd $sshpath"
+}
+
+#endregion

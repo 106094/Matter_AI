@@ -31,15 +31,7 @@ write-host "ssh ip $sship is connected"
 $timestart=get-date
 
 Import-Module C:\Matter_AI\Matter_functions.psm1
-
-$regfile="C:\Matter_AI\puttyreg.reg"
-if($sship -ne "192.168.2.201"){
-    (get-content "C:\Matter_AI\puttyreg.reg").replace("192.168.2.201",$sship)|Set-Content "C:\Matter_AI\puttyreg1.reg"
-    $regfile="C:\Matter_AI\puttyreg1.reg"
-    }
-
-#$sshcmd=$sshusername+"@"+"$sship"
-#$cdpath="cd $sshpath"
+$global:puttyset = @()
 
 $logpath="C:\Matter_AI\logs"
 if(!(test-path $logpath)){
