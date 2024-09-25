@@ -82,6 +82,10 @@ $excelfile=get-childitem -path $global:excelfile
 $excelfull=$excelfile.FullName
 #$excelfiles=get-childitem "C:\Matter_AI\settings\_docs\*TestPlanVerificationSteps_Auto.xlsx"
 $csvname="C:\Matter_AI\settings\_manual\manualcmd_"+$excelfile.basename.replace("TestPlanVerificationSteps_Auto","")+".csv"
+$TH2list="C:\Matter_AI\settings\_manual\TH2_TClist_"+$excelfile.basename.replace("TestPlanVerificationSteps_Auto","")+".txt"
+if(test-path $TH2list){
+  Remove-Item $TH2list -force
+}
 #reg read excel to csv
 $columncor=(import-csv "C:\Matter_AI\settings\filesettings.csv"|Where-Object{$_.filename -eq ($excelfile).name}|Select-Object -Property column_title).column_title
 $worksheetNames = (Get-ExcelSheetInfo -Path $excelfull).Name
@@ -108,12 +112,19 @@ for($i=$Indexfirst;$i -le $Indexlast;$i++){
  if($snamesplit -in $filteredsheets){
  #$sheetname
  $sheetdate= Import-Excel $excelfull -WorksheetName $sheetname -NoHeader
+ $worksheet = (Open-ExcelPackage -path $excelfull).Workbook.WorkSheets[$sheetname]
  $colproperty = ($sheetdate[0] | Get-Member -MemberType NoteProperty).name
  $tcline=$null
  $numbercol=$null
  $precol=$null
  $toolcmd=$null
+ $row=0
+ $TH2=0
   foreach($content in $sheetdate){
+    $row++
+    if($content -match "TH2"){
+      $TH2=1
+    }
      if($content -match "\[TC\-"){
     $pattern = "\[(.*?)\]"
     $match = $content | Select-String -Pattern $pattern
@@ -125,6 +136,7 @@ for($i=$Indexfirst;$i -le $Indexlast;$i++){
       $cmdcol=$null
       $results=$null
       $precon=$null
+      $mergerow=$null
       $preconall=@()
      }
     
@@ -137,6 +149,16 @@ for($i=$Indexfirst;$i -le $Indexlast;$i++){
         }
        }
       }
+      }
+      if($tcline -and $TH2){
+        if(!(test-path $TH2list)){
+          new-item -ItemType File -Path $TH2list | Out-Null
+        }
+        $th2lists=get-content $TH2list
+        if (!($tcline -in $th2lists)){
+        add-content $TH2list -value $tcline
+        }
+        $TH2=0
       }
       if(($content -match "precondition" -or $content -match "Pre-condition") -and $tcline -and !($numbercol) -and !($precol)){
         ForEach($col in $colproperty){
@@ -157,13 +179,18 @@ for($i=$Indexfirst;$i -le $Indexlast;$i++){
     if($content -match "\#" -and $content -match "Step" -and $tcline -and !($numbercol)){
       ForEach($col in $colproperty){
         if(($content.$col) -eq "#"){
-          $numbercol=$col          
+          $numbercol=$col
+          $matchchk=$numbercol -match "\d"
+          $numbercol2=$matches[0]    
         }
         if(($content.$col) -match "verification Steps"){
-          $cmdcol=$col          
+          $cmdcol=$col   
         }
         if(($content.$col) -match "pics"){
-          $picscol=$col          
+          $picscol=$col
+          $matchchk=$picscol -match "\d"
+          $picscol2=$matches[0]
+                  
         }
       }
       if($numbercol -and !$cmdcol){
@@ -179,6 +206,7 @@ for($i=$Indexfirst;$i -le $Indexlast;$i++){
           flow=($preconall|out-string).trim()
           cmd=$toolcmd
           results=$results
+          session=$null
           }
         $precol=$null
         }
@@ -186,10 +214,12 @@ for($i=$Indexfirst;$i -le $Indexlast;$i++){
     }
     
     if($content -match "\#" -and $content -match "Cert\sDescription"){
-      $picscol=$null
+      $picscol=$picscol2=$null
       ForEach($col in $colproperty){
         if(($content.$col) -eq "#"){
           $numbercol=$col
+          $matchchk=$numbercol -match "\d"
+          $numbercol2=$matches[0]   
           $cmdcol="P7"
           break      
         }
@@ -202,7 +232,8 @@ for($i=$Indexfirst;$i -le $Indexlast;$i++){
           step="precondition"
           flow=($preconall|out-string).trim()
           cmd=$toolcmd
-          results=$results
+          results=$results          
+          session=$null
           }
         $precol=$null
         }
@@ -212,35 +243,50 @@ for($i=$Indexfirst;$i -le $Indexlast;$i++){
     if($content.$numbercol -ne "#" -and ($content.$cmdcol.Length -gt 0)){
       $pics=$content.$picscol
       $tcstep=$content.$numbercol
+      $picsmerge=($worksheet.Cells[$row, $picscol2]).merge      
+      #$stepmerge=($worksheet.Cells[$row, $numbercol2]).merge
       $results=$null
       if($pics.length -ne 0){
-      #check if PICS not support    
-       try{
-        $pics.split("(").split("&").trim()
-       }catch{
-        $a=1
-       }
-      $pics.split("(").split("&").trim()|ForEach-Object{
+      #check if PICS not support and if merged cell
+      $pics.split("(").split("&").split(" ").trim()|ForEach-Object{
           if( $_ -in $picexclusions){
             $results+=@($_)
           }
           }
           if($results){
             $results=$results -join "`n"
+            $lastresult=$results
           }
-        $lastresult=$results
+          if(!$mergerow){ #find the 1st merged cell
+            $mergerow=$row
+          }
+          if(!($picsmerge)){
+            $mergerow=$null
+          }
       }else{
-        $results=$lastresult
-      }   
+        if(!($picsmerge)){
+          $mergerow=$null
+          $lastresult=$results
+        }      
+        else{
+          if(!$mergerow){ #find the 1st merged cell which is empty
+            $mergerow=$row
+            $lastresult=$results
+          }
+          else{
+            $results=$lastresult
+          }         
+          
+         }
+      }
 
-       #incase with cmd but no steps
-      if($tcstep.length -ne 0){
+      #incase steps is empty (merged cell)
+      if($tcstep.Length -gt 0){
         $tcsteplast=$tcstep
-        $lastresult=$results
       }else{
         $tcstep=$tcsteplast
-        $results=$lastresult
-      }    
+      }
+
       <# Action to perform if the condition is true #>
        $tccmd=$content.$cmdcol
          # line by line check
@@ -252,6 +298,7 @@ for($i=$Indexfirst;$i -le $Indexlast;$i++){
             flow=($tccmd|out-string).trim()
             cmd=$toolcmd
             results=$results
+            session=$null
             }
          }
        
@@ -272,8 +319,14 @@ $csvcontent=import-csv $csvname
 foreach($line in $csvcontent){
   if($line.results.length -eq 0){
    $cmd=$null
+   $sessioncheck=$($line.flow) -match "\sTH_CR\d+"
+   if($sessioncheck){
+   $line.session=$matches[0].trim()
+   }
+ 
    $splitcontent=$line.flow.split("`n")|Where-Object{$_.length -gt 0}
     ForEach($splitct in $splitcontent){
+      if(!($splitct -match "\sTH_CR\d+") -and !($splitct -match "\sobtained\sfrom\s") -and !($splitct -match "\son\sTH1$")){
       $toolcmd=0
       if ( $splitct -match "\S+\.$"){
           $splitct=$splitct.Substring(0,$splitct.length-1)
@@ -293,17 +346,21 @@ foreach($line in $csvcontent){
                $apostrophecheck=( $newcmd  | Select-String -Pattern "'" -AllMatches).Matches.Count
                if($apostrophecheck -eq 1){
                   $newcmd=$newcmd.replace("'","")
-               }              
+               }
+               if($newcmd -match "\("){
+                  $newcmd=($newcmd.split("("))[0].trim()
+               }
              $cmd+=@($newcmd)
            $toolcmd=1 
           break
+          }
         }
-      }
        } 
       }
       else{
           break
       }
+     }
     }
    }
    if($cmd){

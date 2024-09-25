@@ -96,7 +96,7 @@ if ($global:testtype -eq 2){
       ContentTextForeground = 'Red'
       ButtonType = 'OK'
         }
-    New-WPFMessageBox @InfoParams -Content "Need About 5 to 10 minutes to update UI-Manual database"
+    New-WPFMessageBox @InfoParams -Content "Need About 10+ minutes to update UI-Manual database"
       
    $getchiptool=. $getcmdpsfile
    $global:csvfilename=$getchiptool[-1]
