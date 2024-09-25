@@ -108,7 +108,7 @@ if(get-process putty){
         $logputty="C:\Matter_AI\logs\*putty.log"      
     }
     else{
-        $pidd=($global:puttyset|Where-Object{$_.name -eq $puttyname}).puttypid
+        $pidd=($global:puttyset|Where-Object{$_.name -eq $puttyname}|Select-Object -last 1).puttypid
         $logputty="C:\Matter_AI\logs\*putty_$($puttyname).log"
     }
 
@@ -840,6 +840,7 @@ function selection_manual($data, $column1, $column2) {
 
 #region putty starting functions
 function puttystart ([string]$puttyname) {
+ 
     $settings=get-content C:\Matter_AI\settings\config_linux.txt
     $sship=($settings[0].split(":"))[-1]
 
@@ -875,7 +876,6 @@ function puttystart ([string]$puttyname) {
         name=$puttyname
         puttypid=$afterpid
     }
-   
 }
 
 #endregion

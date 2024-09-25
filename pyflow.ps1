@@ -130,6 +130,7 @@ if ($global:testtype -eq 2){
   foreach($csv in $csvdata){
     $caseid0=$csv.TestCaseID
     $stepid=$csv.step
+    $sessionid=$csv.session
     $pattern = 'TC-\w+-\d+\.\d+'
     $caseid = $null
     $check=$caseid0 -match $pattern
@@ -186,8 +187,14 @@ if ($global:testtype -eq 2){
     }
     #start step cmd if connected pass
     if ($pairresult){
+      if($sessionid.length -gt 0){
+        $sessionid= ($global:puttyset|Where-Object{$_.name -eq $puttyname}|Select-Object -Last 1).puttypid
+        if(!(get-process -id $sessionid)){   
+           puttystart -puttyname $sessionid
+        }
+      }
       foreach($pyline in $pylines){
-        $pycmd=putty_paste -cmdline "rm -f admin_storage.json && $pyline"
+        $pycmd=putty_paste -cmdline "rm -f admin_storage.json && $pyline" -puttyname $sessionid
         add-content -path $logtc -Value (get-content -path C:\Matter_AI\logs\lastlog.log)
     }
     }
