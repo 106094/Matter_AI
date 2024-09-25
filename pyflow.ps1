@@ -111,9 +111,22 @@ if ($global:testtype -eq 2){
   }
   $caseids=$selchek
   $csvdata=import-csv $csvname | Where-Object {$_.TestCaseID -in $caseids}
-  $sound = New-Object -TypeName System.Media.SoundPlayer
-  $sound.SoundLocation = "C:\Windows\Media\notify.wav"
-  
+  #$sound = New-Object -TypeName System.Media.SoundPlayer
+  #$sound.SoundLocation = "C:\Windows\Media\notify.wav"
+   $paring_thread="TBD"
+   $paring_manual="./chip-tool pairing code-wifi node-id --wifi-ssid --wifi-passphrase --manual-code --paa-trust-store-path /home/ubuntu/PAA/ --trace_decode 1"
+   $paring_ble="./chip-tool pairing ble-wifi node-id --wifi-ssid --wifi-passphrase --discriminator --passcode --paa-trust-store-path /home/ubuntu/PAA/ --trace_decode 1"
+   
+   if ($pairsettings."--thread".length -gt 0){
+    $paringcmd=$paring_thread
+   }
+   if(!$paringcmd -and $pairsettings."--manual-code".length -gt 0){
+    $paringcmd=$paring_manual
+   }
+   if(!$paringcmd){
+    $paringcmd=$paring_ble
+   }
+
   foreach($csv in $csvdata){
     $caseid0=$csv.TestCaseID
     $stepid=$csv.step
@@ -154,30 +167,25 @@ if ($global:testtype -eq 2){
     New-WPFMessageBox @InfoParams -Content "Please Reset Your DUT, then click ok"
     
     #start pairing with restest
-    $pyline="./chip-tool pairing ble-wifi node-id --wifi-ssid --wifi-passphrase --discriminator --passcode --paa-trust-store-path /home/ubuntu/PAA/ --trace_decode 1"
-    if ($caseid0 -match "using\sECM"){
-      $pyline="./chip-tool pairing code-wifi node-id --wifi-ssid --wifi-passphrase --qr-code --paa-trust-store-path /home/ubuntu/PAA/ --trace_decode 1"
-    }
-    elseif ($caseid0 -match "using\sPCM"){
-      $pyline="./chip-tool pairing code-wifi node-id --wifi-ssid --wifi-passphrase --manual-code --paa-trust-store-path /home/ubuntu/PAA/ --trace_decode 1"
-    }
+    $pyline=$paringcmd
+
     foreach($header in $headers){
-      if ($pyline -match $hearder){
-        $pyline=$pyline -replace $header, $pairsettings."$header"
+      if ($paringcmd -match $hearder){
+        $paringcmd=$paringcmd -replace $header, $pairsettings."$header"
       }
     }   
-        $pyline=$pyline.replace("node-id", $nodeid)
-        $k=$paircmd=0
+    $paringcmd=$paringcmd.replace("node-id", $nodeid)
+        $k=$pairresult=0
         while (!$pycmd -and $k -lt $retesttime){
           $k++
-          $paircmd=putty_paste -cmdline "rm -f admin_storage.json && $pyline" -line1 -1 -checkline1 "pass"
+          $pairresult=putty_paste -cmdline "rm -f admin_storage.json && $paringcmd" -line1 -1 -checkline1 "pass"
           add-content -path $logpair -Value (get-content -path C:\Matter_AI\logs\lastlog.log )
           write-host "round $k"
         }
 
     }
     #start step cmd if connected pass
-    if ($paircmd){
+    if ($pairresult){
       foreach($pyline in $pylines){
         $pycmd=putty_paste -cmdline "rm -f admin_storage.json && $pyline"
         add-content -path $logtc -Value (get-content -path C:\Matter_AI\logs\lastlog.log)
