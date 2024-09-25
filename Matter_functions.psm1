@@ -717,7 +717,6 @@ Function New-WPFMessageBox {
 
 #region manual GUI
 function selection_manual($data, $column1, $column2) {
-    $global:finalSelection.Clear()
     # Load Windows Forms
     Add-Type -AssemblyName System.Windows.Forms
     
@@ -803,9 +802,9 @@ function selection_manual($data, $column1, $column2) {
     
     
     $doneButton.add_Click({
-        $global:finalSelection = @()
+        $sels = @()
         foreach ($item in $selectedListBox.Items) {
-            $global:finalSelection += $item += $item
+            $sels += $item += $item
         }
         $form.Close()  # Close the form after saving the final list
     })
@@ -823,7 +822,7 @@ function selection_manual($data, $column1, $column2) {
     # Show the form
     $form.Add_Shown({ $form.Activate() })
     [void]$form.ShowDialog()
-    $global:finalSelection
+    $sels
     }
     <#
     $data = @(

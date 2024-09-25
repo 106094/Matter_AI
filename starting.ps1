@@ -98,16 +98,18 @@ puttystart
 
 $continueq="Yes"
 while ($continueq -eq "Yes"){
-. C:\Matter_AI\pyflow.ps1
+  if($global:selchek){
+    . C:\Matter_AI\pyflow.ps1
+  }
 $continueq = [System.Windows.Forms.MessageBox]::Show("Need test again?", "Check", [System.Windows.Forms.MessageBoxButtons]::YesNo)
 if($continueq -eq "Yes"){
   if ($global:testtype -eq 1){
-    $selchek=. $selectionpsfile
+    $global:selchek=. $selectionpsfile
   }
   if ($global:testtype -eq 2){
-    $selchek=selection_manual -data $data -column1 "catg" -column2 "TestCaseID"
+    $global:selchek=selection_manual -data $data -column1 "catg" -column2 "TestCaseID"
   }
-  if(!$selchek){
+  if(!$global:selchek){
    [System.Windows.Forms.MessageBox]::Show("Fail to create test case id lists, test will be stopped","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
    }
    
