@@ -906,7 +906,7 @@ function puttystart ([string]$puttyname) {
          $ctnid= (($idlogin -match "\/bin\/bash").split(" "))[0]
        }
        else{
-           puttyexit
+        # puttyexit
        }
        putty_paste -cmdline "docker start $ctnid"
        putty_paste -cmdline "docker exec -it $ctnid /bin/bash"
