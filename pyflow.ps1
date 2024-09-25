@@ -14,7 +14,7 @@ $settigns=import-csv C:\Matter_AI\settings\_py\settings.csv
 $headers=$settigns[0].PSObject.Properties.Name
 $sound = New-Object -TypeName System.Media.SoundPlayer
 $sound.SoundLocation = "C:\Windows\Media\notify.wav"
-
+$logtc="C:\Matter_AI\logs\_py\$($datetime)"
 foreach($csv in $csvdata){
     #$sound.Play()
     #([System.Media.SystemSounds]::Asterisk).Play()
@@ -90,9 +90,9 @@ foreach($csv in $csvdata){
     }
     $datetime=get-date -Format yyyyMMdd_HHmmss
     if ($pycmd){
-    copy-item C:\Matter_AI\logs\lastlog.log -Destination C:\Matter_AI\logs\"PASS_"$($caseid)_$($datetime).log
+    copy-item C:\Matter_AI\logs\lastlog.log -Destination "$($logtc)\PASS_$($caseid)_$($datetime).log"
     }else{      
-    copy-item C:\Matter_AI\logs\lastlog.log -Destination C:\Matter_AI\logs\"FAIL_"$($caseid)_$($datetime).log
+    copy-item C:\Matter_AI\logs\lastlog.log -Destination "$($logtc)\FAIL_$($caseid)_$($datetime).log"
     }
     #>
         
@@ -105,7 +105,7 @@ if ($global:testtype -eq 2){
   $nodeid=((get-content C:\Matter_AI\settings\config_linux.txt | Select-String "nodeid"|out-string).split(":"))[-1].trim()
   $paircmd=0
   $datetime=get-date -Format yyyyMMdd_HHmmss
-  $logtc="C:\Matter_AI\logs\_py\$($datetime)"
+  $logtc="C:\Matter_AI\logs\_manual\$($datetime)"
   if(!(test-path $logtc)){
     new-item -ItemType File -Path $logtc | Out-Null
   }
@@ -149,7 +149,7 @@ if ($global:testtype -eq 2){
         }
         $datetime2=get-date -Format yyyyMMdd_HHmmss
         $logtc="C:\Matter_AI\logs\$tclogfd\$($datetime2)_$($tcaseid)_$($stepid).log"
-        $logpair="C:\Matter_AI\logs\$tclogfd\$($datetime2)_$($tcaseid)_pairing.log"
+        $logpair="C:\Matter_AI\logs\$tclogfd\$($datetime2)_$($tcaseid)_0pairing.log"
       if(!(test-path $logtc)){
         new-item -ItemType File -Path $logtc | Out-Null
         new-item -ItemType File -Path $logpair | Out-Null

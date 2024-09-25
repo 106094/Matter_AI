@@ -27,36 +27,13 @@ if (!(Test-Connection -ComputerName $sship -Count 1 -ErrorAction SilentlyContinu
 write-host "ssh ip $sship is connected"
 #endregion
 
-
 $timestart=get-date
-
 Import-Module C:\Matter_AI\Matter_functions.psm1
 $global:puttyset = @()
-
 $logpath="C:\Matter_AI\logs"
 if(!(test-path $logpath)){
 new-item -Path $logpath -ItemType directory|out-null
 }
-#reg import $regfile
-start-process reg -ArgumentList "import $regfile"
-<#
-$checksession=(Get-ChildItem HKCU:\Software\SimonTatham\PuTTY\Sessions|Select-Object -Property PSChildName).PSChildName
-if((!$checksession) -or "matter" -notin $checksession){
- $checklog= (Get-ItemProperty HKCU:\Software\SimonTatham\PuTTY\Sessions\matter -name LogFileName).LogFileName
- if((!$checklog) -or $checklog -ne "C:\Matter_AI\logs\&Y&M&D&T_&H_putty.log"){
-  reg import "C:\Matter_AI\puttyreg.reg"
-  }
-  }
-$registryPath = "HKCU:\Software\SimonTatham\PuTTY\Sessions\matter"
-$currentsetting=(Get-ItemProperty -Path $registryPath -Name "HostName").HostName
-if($currentsetting -ne $sshcmd){
-Set-ItemProperty -Path $registryPath -Name "HostName" -Value $sshcmd
- } 
- # Verify the change
- #(Get-ItemProperty -Path $registryPath -Name "HostName").HostName
- #>
-
-write-host "add reg done"
 
 if ($global:testtype -eq 1){
   
@@ -117,14 +94,19 @@ if ($global:testtype -eq 2){
 }
 ###########################
 $starttime=get-date
-. C:\Matter_AI\putty_starting.ps1
+puttystart
 
 $continueq="Yes"
 while ($continueq -eq "Yes"){
 . C:\Matter_AI\pyflow.ps1
 $continueq = [System.Windows.Forms.MessageBox]::Show("Need test again?", "Check", [System.Windows.Forms.MessageBoxButtons]::YesNo)
 if($continueq -eq "Yes"){
-    $selchek
+  if ($global:testtype -eq 1){
+    $selchek=. $selectionpsfile
+  }
+  if ($global:testtype -eq 2){
+    $selchek=selection_manual -data $data -column1 "catg" -column2 "TestCaseID"
+  }
   if(!$selchek){
    [System.Windows.Forms.MessageBox]::Show("Fail to create test case id lists, test will be stopped","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
    }

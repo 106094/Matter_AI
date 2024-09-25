@@ -75,4 +75,4 @@ if(!$sels){
     [System.Windows.Forms.MessageBox]::Show("Please check testcases $($sels.count), command count $($pylines.count) not matched","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)    
 }
 
-return $sels
+$sels
