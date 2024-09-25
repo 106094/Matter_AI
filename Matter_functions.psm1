@@ -876,46 +876,41 @@ function puttystart ([string]$puttyname) {
         name=$puttyname
         puttypid=$afterpid
     }
-}
-
-#endregion
-
-#region putty login
-function puttylogin ([string]$puttyname){
+    
     if($puttyname.length -eq 0){
-     $puttypid=(get-process putty|Sort-Object StartTime|Select-Object -last 1).id 
-    }
-    else{
-      $puttypid=($global:puttyset|Where-Object{$_.name -eq $puttyname}).puttypid
-    }
-    
-    $settings=get-content C:\Matter_AI\settings\config_linux.txt
-    $pskey=($settings[2].split(":"))[-1]
-    #$sshpath=($settings[3].split(":"))[-1]
-    $fname=(Get-ChildItem $global:excelfile).name
-    $sshpath=(import-csv C:\Matter_AI\settings\filesettings.csv|Where-Object{$_.filename -eq $fname}).path
-    
-    $wshell = New-Object -ComObject WScript.Shell
-    $wshell.AppActivate($puttypid)
-    start-sleep -s 5
-    $wshell.SendKeys("raspberrypi")
-    start-sleep -s 2
-    $wshell.SendKeys("{enter}")
-    start-sleep -s 2
-    putty_paste -cmdline "sudo -s"
-    putty_paste -cmdline $pskey
-    putty_paste -cmdline "docker ps -a"
-    $idlogin=get-content "C:\Matter_AI\logs\lastlog.log"
-    $checkmatch=$idlogin -match "\/bin\/bash"
-    if($checkmatch){
-      $ctnid= (($idlogin -match "\/bin\/bash").split(" "))[0]
-    }
-    else{
-        puttyexit
-    }
-    putty_paste -cmdline "docker start $ctnid"
-    putty_paste -cmdline "docker exec -it $ctnid /bin/bash"
-    putty_paste -cmdline "cd $sshpath"
+        $puttypid=(get-process putty|Sort-Object StartTime|Select-Object -last 1).id 
+       }
+       else{
+         $puttypid=($global:puttyset|Where-Object{$_.name -eq $puttyname}|Select-Object -last 1).puttypid
+       }
+       
+       $settings=get-content C:\Matter_AI\settings\config_linux.txt
+       $pskey=($settings[2].split(":"))[-1]
+       #$sshpath=($settings[3].split(":"))[-1]
+       $fname=(Get-ChildItem $global:excelfile).name
+       $sshpath=(import-csv C:\Matter_AI\settings\filesettings.csv|Where-Object{$_.filename -eq $fname}).path
+       
+       $wshell = New-Object -ComObject WScript.Shell
+       $wshell.AppActivate($puttypid)
+       start-sleep -s 5
+       $wshell.SendKeys("raspberrypi")
+       start-sleep -s 2
+       $wshell.SendKeys("{enter}")
+       start-sleep -s 2
+       putty_paste -cmdline "sudo -s"
+       putty_paste -cmdline $pskey
+       putty_paste -cmdline "docker ps -a"
+       $idlogin=get-content "C:\Matter_AI\logs\lastlog.log"
+       $checkmatch=$idlogin -match "\/bin\/bash"
+       if($checkmatch){
+         $ctnid= (($idlogin -match "\/bin\/bash").split(" "))[0]
+       }
+       else{
+           puttyexit
+       }
+       putty_paste -cmdline "docker start $ctnid"
+       putty_paste -cmdline "docker exec -it $ctnid /bin/bash"
+       putty_paste -cmdline "cd $sshpath"
 }
 
 #endregion
