@@ -83,8 +83,7 @@ if ($global:testtype -eq 2){
         exit
       }
     }
-    $csvname="C:\Matter_AI\settings\_manual\manualcmd_"+(Get-ChildItem -path $excelfile).basename.replace("TestPlanVerificationSteps_Auto","")+".csv"
-    $data=Import-Csv $csvname
+    $data=Import-Csv  $global:csvfilename
     $global:selchek=selection_manual -data $data -column1 "catg" -column2 "TestCaseID"
     if(!$global:selchek){
       [System.Windows.Forms.MessageBox]::Show("Fail to select the test case id","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
