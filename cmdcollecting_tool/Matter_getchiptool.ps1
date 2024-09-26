@@ -101,7 +101,6 @@ $filteredtcs = ($worksheetsum |Where-Object{$_."Test Case ID".length -gt 0}|  Wh
  -and $_."Test Case Name" -notlike "*as client*"})."Test Case ID"
 
  $filteredsheets=$filteredtcs|foreach-object{($_.split("-"))[1]}|Get-Unique
- $filteredsheets+="Diag log"
 $Indexfirst=($worksheetNames.trim()).IndexOf("ACE")
 $Indexlast=($worksheetNames.trim()).IndexOf("WNCV")
 $outputcsv = @()
@@ -126,7 +125,7 @@ for($i=$Indexfirst;$i -le $Indexlast;$i++){
  $row=0
  $TH2=0
   foreach($content in $sheetdate){
-    $row++
+   
     if($content -match "TH2"){
       $TH2=1
     }
@@ -310,7 +309,7 @@ for($i=$Indexfirst;$i -le $Indexlast;$i++){
         
       }
           
-        
+      $row++  
     }
    }
   }
