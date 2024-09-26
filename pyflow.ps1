@@ -142,7 +142,7 @@ if ($global:testtype -eq 2){
      $check=$caseid0 -match $pattern
     }
     $caseid = ($matches[0].replace(" ","")).trim()
-    $pylines=($csv.command).split("`n")
+    $pylines=($csv.cmd).split("`n")
     
     if($lastcaseid -and $lastcaseid -ne $caseid){
         $paircmd=0
