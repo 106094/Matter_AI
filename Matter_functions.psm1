@@ -802,9 +802,9 @@ function selection_manual($data, $column1, $column2) {
     
     
     $doneButton.add_Click({
-        $sels = @()
+        $global:sels = @()
         foreach ($item in $selectedListBox.Items) {
-            $sels += $item 
+            $global:sels += $item 
         }
         $form.Close()  # Close the form after saving the final list
     })
@@ -822,7 +822,7 @@ function selection_manual($data, $column1, $column2) {
     # Show the form
     $form.Add_Shown({ $form.Activate() })
     [void]$form.ShowDialog()
-    $sels
+    $global:sels
     }
     <#
     $data = @(

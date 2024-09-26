@@ -56,6 +56,7 @@ if(!$global:selchek){
 if ($global:testtype -eq 2){
   $getcmdpsfile="C:\Matter_AI\cmdcollecting_tool\Matter_getchiptool.ps1"
   $result = [System.Windows.Forms.MessageBox]::Show("Need update UI-Manual database?", "Check", [System.Windows.Forms.MessageBoxButtons]::YesNo)
+  
   if ($result -eq "Yes") {
     $InfoParams = @{
       Title = "INFORMATION"
@@ -77,15 +78,16 @@ if ($global:testtype -eq 2){
      }
     }
     else{
-      $excelfile=. "C:\Matter_AI\cmdcollecting_tool\selections_xlsx.ps1"
-      if(!$excelfile){
+      $global:excelfile=. "C:\Matter_AI\cmdcollecting_tool\selections_xlsx.ps1"
+      if(!$global:excelfile){
         [System.Windows.Forms.MessageBox]::Show("Fail to select the excel file","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
         exit
       }
+      $global:csvfilename="C:\Matter_AI\settings\_manual\manualcmd_"+(get-childitem $global:excelfile).basename.replace("TestPlanVerificationSteps_Auto","")+".csv"
     }
     $data=Import-Csv  $global:csvfilename
-    $global:selchek=selection_manual -data $data -column1 "catg" -column2 "TestCaseID"
-    if(!$global:selchek){
+    $selchek=selection_manual -data $data -column1 "catg" -column2 "TestCaseID"
+    if(!$selchek){
       [System.Windows.Forms.MessageBox]::Show("Fail to select the test case id","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
       exit
     }
@@ -97,16 +99,16 @@ puttystart
 
 $continueq="Yes"
 while ($continueq -eq "Yes"){
-  if($global:selchek){
+  if($selchek){
     . C:\Matter_AI\pyflow.ps1
   }
 $continueq = [System.Windows.Forms.MessageBox]::Show("Need test again?", "Check", [System.Windows.Forms.MessageBoxButtons]::YesNo)
 if($continueq -eq "Yes"){
   if ($global:testtype -eq 1){
-    $global:selchek=. $selectionpsfile
+    $selchek=. $selectionpsfile
   }
   if ($global:testtype -eq 2){
-    $global:selchek=selection_manual -data $data -column1 "catg" -column2 "TestCaseID"
+    $selchek=selection_manual -data $data -column1 "catg" -column2 "TestCaseID"
   }
   if(!$global:selchek){
    [System.Windows.Forms.MessageBox]::Show("Fail to create test case id lists, test will be stopped","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)

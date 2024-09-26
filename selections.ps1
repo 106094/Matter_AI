@@ -1,4 +1,5 @@
-﻿Add-Type -AssemblyName System.Windows.Forms
+﻿
+Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
 $form = New-Object System.Windows.Forms.Form
@@ -49,30 +50,23 @@ $form.Controls.Add($listBox)
 $form.Topmost = $true
 
 $result = $form.ShowDialog()
+$global:sels=@()
 
 if ($result -eq [System.Windows.Forms.DialogResult]::OK)
 {
     $x = $listBox.SelectedItems
     if($x){
-        $sels+=@($x.trim())
+        $global:sels+=@($x.trim())
     }
     
 }
 
-if($sels.count -eq 0){
+if($global:sels.count -eq 0){
 
-    $messages=[System.Windows.Forms.MessageBox]::Show("Please select testcases","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
+    [System.Windows.Forms.MessageBox]::Show("Please select testcases","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
     return 0
     
 }
 
-foreach($s in $sels){
-    $pyline=(import-csv C:\Matter_AI\settings\_py\py.csv | Where-Object{ $_.TestCaseID -eq $s}|Where-Object{$_.command.length -gt 0}).command
-    $pylines+=@($pyline.trim())
-}
 
-if(!$sels){
-    [System.Windows.Forms.MessageBox]::Show("Please check testcases $($sels.count), command count $($pylines.count) not matched","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)    
-}
-
-$sels
+$global:sels
