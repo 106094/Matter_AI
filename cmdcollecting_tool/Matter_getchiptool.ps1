@@ -109,13 +109,13 @@ for($i=$Indexfirst;$i -le $Indexlast;$i++){
  $thisneed=0
  $sheetname=$($worksheetNames[$i])
  ($sheetname.split("(").split(")").split(","))|Where-Object{
-  if($_ -in $filteredsheets){
+  if($_.trim() -in $filteredsheets){
    $thisneed=1
   } 
  }
  #$sheetname
  if($thisneed){
- #$sheetname
+ $sheetname
  $sheetdate= Import-Excel $excelfull -WorksheetName $sheetname -NoHeader
  $worksheet = (Open-ExcelPackage -path $excelfull).Workbook.WorkSheets[$sheetname]
  $colproperty = ($sheetdate[0] | Get-Member -MemberType NoteProperty).name
