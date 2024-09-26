@@ -869,7 +869,7 @@ function puttystart ([string]$puttyname) {
       $sesname="matter_$($puttyname)"
       $newputtyreg="C:\Matter_AI\puttyreg_$($puttyname).reg"
       $sessionname="Sessions\matter_$($puttyname)"
-        Copy-Item $regfile $newputtyreg
+        Copy-Item $regfile $newputtyreg -Force
         $puttylogpath="C:\\Matter_AI\\logs\\&Y&M&D&T_&H_putty.log"
         $puttylogpathnew="C:\\Matter_AI\\logs\\&Y&M&D&T_&H_putty_$($puttyname).log"
         ((get-content $newputtyreg).replace("Sessions\matter",$sessionname)).replace($puttylogpath,$puttylogpathnew)|Set-Content $newputtyreg
