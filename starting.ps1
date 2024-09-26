@@ -102,6 +102,7 @@ while ($continueq -eq "Yes"){
   if($selchek){
     . C:\Matter_AI\pyflow.ps1
   }
+$endtime=get-date
 $continueq = [System.Windows.Forms.MessageBox]::Show("Need test again?", "Check", [System.Windows.Forms.MessageBoxButtons]::YesNo)
 if($continueq -eq "Yes"){
   if ($global:testtype -eq 1){
@@ -119,6 +120,6 @@ if($continueq -eq "Yes"){
   
 #puttyexit
 
-$timepassed=New-TimeSpan -start $starttime -end (get-date)
+$timepassed=New-TimeSpan -start $starttime -end $endtime
 $timegap="{0} Hours, {1} minutes, {2} seconds" -f $timepassed.Hours, $timepassed.Minutes, $timepassed.Seconds
 [System.Windows.Forms.MessageBox]::Show("Matter auto test completed in $timegap","Info",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Information)

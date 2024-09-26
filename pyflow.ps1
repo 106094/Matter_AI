@@ -186,7 +186,7 @@ if ($global:testtype -eq 2){
 
     }
     #start step cmd if connected pass
-    #if ($pairresult){ #test
+    if ($pairresult){ #test
       $datetime2=get-date -Format yyyyMMdd_HHmmss
       $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid).log"
       new-item -ItemType File -Path $logtcstep | Out-Null
@@ -200,7 +200,7 @@ if ($global:testtype -eq 2){
         $pycmd=putty_paste -cmdline "rm -f admin_storage.json && $pyline" -puttyname $puttyname
         add-content -path $logtcstep -Value (get-content -path C:\Matter_AI\logs\lastlog.log)
     }
-   # }  #test
+    }  #test
               
   }
   }
