@@ -106,10 +106,15 @@ $Indexfirst=($worksheetNames.trim()).IndexOf("ACE")
 $Indexlast=($worksheetNames.trim()).IndexOf("WNCV")
 $outputcsv = @()
 for($i=$Indexfirst;$i -le $Indexlast;$i++){
+ $thisneed=0
  $sheetname=$($worksheetNames[$i])
- $snamesplit=($sheetname.split("("))[0].trim()
+ ($sheetname.split("(").split(")").split(","))|Where-Object{
+  if($_ -in $filteredsheets){
+   $thisneed=1
+  } 
+ }
  #$sheetname
- if($snamesplit -in $filteredsheets){
+ if($thisneed){
  #$sheetname
  $sheetdate= Import-Excel $excelfull -WorksheetName $sheetname -NoHeader
  $worksheet = (Open-ExcelPackage -path $excelfull).Workbook.WorkSheets[$sheetname]
