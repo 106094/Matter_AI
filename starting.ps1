@@ -114,7 +114,7 @@ while ($continueq -eq "Yes"){
     . C:\Matter_AI\pyflow.ps1
   }
 $endtime=get-date
-$continueq = [System.Windows.Forms.MessageBox]::Show("Need test again?", "Check", [System.Windows.Forms.MessageBoxButtons]::YesNo)
+$continueq = [System.Windows.Forms.MessageBox]::Show("Need Retest?", "Check", [System.Windows.Forms.MessageBoxButtons]::YesNo)
 if($continueq -eq "Yes"){
   if ($global:testtype -eq 1){
     $selchek=. $selectionpsfile
