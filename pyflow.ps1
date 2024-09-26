@@ -133,7 +133,7 @@ if ($global:testtype -eq 2){
   foreach($csv in $csvdata){
     $caseid0=$csv.TestCaseID
     $stepid=$csv.step
-    $sessionid=$csv.session
+    $puttyname=$csv.session
     $pattern = 'TC-\w+-\d+\.\d+'
     $caseid = $null
     $check=$caseid0 -match $pattern
@@ -176,7 +176,6 @@ if ($global:testtype -eq 2){
     $datetime2=get-date -Format yyyyMMdd_HHmmss
     $logpair="$tclogfd\$($datetime2)_$($caseid)_0pairing.log"    
     new-item -ItemType File -Path $logpair | Out-Null
-
         $k=$pairresult=0
         while (!$pycmd -and $k -lt $retesttime){
           $k++
@@ -187,21 +186,21 @@ if ($global:testtype -eq 2){
 
     }
     #start step cmd if connected pass
-    if ($pairresult){
+    #if ($pairresult){ #test
       $datetime2=get-date -Format yyyyMMdd_HHmmss
       $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid).log"
       new-item -ItemType File -Path $logtcstep | Out-Null
-     if($sessionid.length -gt 0){
+     if($puttyname.length -gt 0){
         $sessionid= ($global:puttyset|Where-Object{$_.name -eq $puttyname}|Select-Object -Last 1).puttypid
-        if(!(get-process -id $sessionid)){   
-           puttystart -puttyname $sessionid
+        if(!$sessionid -or !($sessionid -and (get-process -id $sessionid -ErrorAction SilentlyContinue))){   
+           puttystart -puttyname $puttyname
         }
       }
       foreach($pyline in $pylines){
-        $pycmd=putty_paste -cmdline "rm -f admin_storage.json && $pyline" -puttyname $sessionid
-        add-content -path $logtc -Value (get-content -path C:\Matter_AI\logs\lastlog.log)
+        $pycmd=putty_paste -cmdline "rm -f admin_storage.json && $pyline" -puttyname $puttyname
+        add-content -path $logtcstep -Value (get-content -path C:\Matter_AI\logs\lastlog.log)
     }
-    }
+   # }  #test
               
   }
   }
