@@ -151,13 +151,7 @@ if ($global:testtype -eq 2){
         if(!(test-path $tclogfd)){
           new-item -ItemType Directory -Path $tclogfd | Out-Null
         }
-        $datetime2=get-date -Format yyyyMMdd_HHmmss
-        $logtc="$tclogfd\$($datetime2)_$($tcaseid)_$($stepid).log"
-        $logpair="$tclogfd\$($datetime2)_$($tcaseid)_0pairing.log"
-      if(!(test-path $logtc)){
-        new-item -ItemType File -Path $logtc | Out-Null
-        new-item -ItemType File -Path $logpair | Out-Null
-      }
+
       #$sound.Play()
       #([System.Media.SystemSounds]::Asterisk).Play()
       $InfoParams = @{
@@ -179,10 +173,14 @@ if ($global:testtype -eq 2){
       }
     }   
     $paringcmd=$paringcmd.replace("node-id", $nodeid)
+    $datetime2=get-date -Format yyyyMMdd_HHmmss
+    $logpair="$tclogfd\$($datetime2)_$($caseid)_0pairing.log"    
+    new-item -ItemType File -Path $logpair | Out-Null
+
         $k=$pairresult=0
         while (!$pycmd -and $k -lt $retesttime){
           $k++
-          $pairresult=putty_paste -cmdline "rm -f admin_storage.json && $paringcmd" -line1 -1 -checkline1 "pass"
+          $pairresult=putty_paste -cmdline "rm -f admin_storage.json && $paringcmd" -line1 -1 -checkline1 "pass"  
           add-content -path $logpair -Value (get-content -path C:\Matter_AI\logs\lastlog.log )
           write-host "round $k"
         }
@@ -190,7 +188,10 @@ if ($global:testtype -eq 2){
     }
     #start step cmd if connected pass
     if ($pairresult){
-      if($sessionid.length -gt 0){
+      $datetime2=get-date -Format yyyyMMdd_HHmmss
+      $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid).log"
+      new-item -ItemType File -Path $logtcstep | Out-Null
+     if($sessionid.length -gt 0){
         $sessionid= ($global:puttyset|Where-Object{$_.name -eq $puttyname}|Select-Object -Last 1).puttypid
         if(!(get-process -id $sessionid)){   
            puttystart -puttyname $sessionid
