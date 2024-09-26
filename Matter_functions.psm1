@@ -764,9 +764,15 @@ function selection_manual($data, $column1, $column2) {
     
     # Button to move selected items from Column2 ListBox to Selected ListBox
     $button = New-Object System.Windows.Forms.Button
-    $button.Text = "Add"
+    $button.Text = "+"
     $button.Size =  New-Object System.Drawing.Size(40,20)
     $button.Location = New-Object System.Drawing.Point(355,120)
+
+    # Button to remove selected items from  final list ListBox to Column2 ListBox
+    $rmbutton = New-Object System.Windows.Forms.Button
+    $rmbutton.Text = "-"
+    $rmbutton.Size =  New-Object System.Drawing.Size(40,20)
+    $rmbutton.Location = New-Object System.Drawing.Point(355,150)
     
     # Create "Done" button to save the final list and close the form
     $doneButton = New-Object System.Windows.Forms.Button
@@ -800,6 +806,14 @@ function selection_manual($data, $column1, $column2) {
         }
     })
     
+  # Event: remove selected items from the third ListBox to Column2 
+    $rmbutton.add_Click({
+        $rmselectedItems = @($selectedListBox.SelectedItems)
+        $rmselectedItems
+        foreach ($item in $rmselectedItems) {
+            $selectedListBox.Items.Remove($item)            
+        }
+    })
     
     $doneButton.add_Click({
         $global:sels = @()
@@ -817,6 +831,7 @@ function selection_manual($data, $column1, $column2) {
     $form.Controls.Add($filteredListBox)
     $form.Controls.Add($selectedListBox)
     $form.Controls.Add($button)
+    $form.Controls.Add($rmbutton)
     $form.Controls.Add($doneButton)
     
     # Show the form
