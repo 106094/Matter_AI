@@ -144,7 +144,7 @@ if ($global:testtype -eq 2){
     $caseid = ($matches[0].replace(" ","")).trim()
     $pylines=($csv.cmd).split("`n")
     
-    if($lastcaseid -and $lastcaseid -ne $caseid){
+    if($lastcaseid -ne $caseid){
         $paircmd=0
         $lastcaseid=$caseid
         $tclogfd="$logtc\$($caseid)"
