@@ -14,10 +14,8 @@ $settigns=import-csv C:\Matter_AI\settings\_py\settings.csv
 $headers=$settigns[0].PSObject.Properties.Name
 $sound = New-Object -TypeName System.Media.SoundPlayer
 $sound.SoundLocation = "C:\Windows\Media\notify.wav"
-$logtc="C:\Matter_AI\logs\_py\$($datetime)"
-if(!(test-path $logtc)){
-  new-item -ItemType Directory -Path $logtc | Out-Null
-}
+$logtc=(get-childitem -path "C:\Matter_AI\logs\_py" -directory | Sort-Object LastWriteTime -Descending | Select-Object -First 1).fullname
+
 foreach($csv in $csvdata){
     #$sound.Play()
     #([System.Media.SystemSounds]::Asterisk).Play()
@@ -106,12 +104,8 @@ if ($global:testtype -eq 2){
   $pairsettings=import-csv C:\Matter_AI\settings\_manual\settings.csv
   $headers=$pairsettings[0].PSObject.Properties.Name
   $nodeid=((get-content C:\Matter_AI\settings\config_linux.txt | Select-String "nodeid"|out-string).split(":"))[-1].trim()
-  $paircmd=0
-  $datetime=get-date -Format yyyyMMdd_HHmmss
-  $logtc="C:\Matter_AI\logs\_manual\$($datetime)"
-  if(!(test-path $logtc)){
-    new-item -ItemType Directory -Path $logtc | Out-Null
-  }
+  $logtc=(get-childitem -path "C:\Matter_AI\logs\_manual" -directory | Sort-Object LastWriteTime -Descending | Select-Object -First 1).fullname
+
   $caseids=$global:selchek
   $csvdata=import-csv $global:csvfilename | Where-Object {$_.TestCaseID -in $caseids -and $_.cmd.length -gt 0}
   #$sound = New-Object -TypeName System.Media.SoundPlayer
@@ -145,7 +139,6 @@ if ($global:testtype -eq 2){
     $pylines=($csv.cmd).split("`n")
     
     if($lastcaseid -ne $caseid){
-        $paircmd=0
         $lastcaseid=$caseid
         $tclogfd="$logtc\$($caseid)"
         if(!(test-path $tclogfd)){

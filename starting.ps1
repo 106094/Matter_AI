@@ -52,6 +52,12 @@ if(!$global:selchek){
    [System.Windows.Forms.MessageBox]::Show("Fail to select the test case id","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
    exit
 }
+#create a log folder
+$datetime=get-date -Format yyyyMMdd_HHmmss
+$logtc="C:\Matter_AI\logs\_py\$($datetime)"
+if(!(test-path $logtc)){
+  new-item -ItemType Directory -Path $logtc | Out-Null
+}
 }
 if ($global:testtype -eq 2){
   $getcmdpsfile="C:\Matter_AI\cmdcollecting_tool\Matter_getchiptool.ps1"
@@ -91,7 +97,12 @@ if ($global:testtype -eq 2){
       [System.Windows.Forms.MessageBox]::Show("Fail to select the test case id","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
       exit
     }
-
+#create a log folder
+$datetime=get-date -Format yyyyMMdd_HHmmss
+$logtc="C:\Matter_AI\logs\_manual\$($datetime)"
+if(!(test-path $logtc)){
+  new-item -ItemType Directory -Path $logtc | Out-Null
+}
 }
 ###########################
 $starttime=get-date
