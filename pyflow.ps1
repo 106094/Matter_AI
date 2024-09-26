@@ -152,8 +152,8 @@ if ($global:testtype -eq 2){
           new-item -ItemType Directory -Path $tclogfd | Out-Null
         }
         $datetime2=get-date -Format yyyyMMdd_HHmmss
-        $logtc="C:\Matter_AI\logs\$tclogfd\$($datetime2)_$($tcaseid)_$($stepid).log"
-        $logpair="C:\Matter_AI\logs\$tclogfd\$($datetime2)_$($tcaseid)_0pairing.log"
+        $logtc="$tclogfd\$($datetime2)_$($tcaseid)_$($stepid).log"
+        $logpair="$tclogfd\$($datetime2)_$($tcaseid)_0pairing.log"
       if(!(test-path $logtc)){
         new-item -ItemType File -Path $logtc | Out-Null
         new-item -ItemType File -Path $logpair | Out-Null
