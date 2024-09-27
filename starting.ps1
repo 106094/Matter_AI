@@ -12,14 +12,22 @@ while(!$global:testtype -or ($global:testtype -ne 1 -and $global:testtype -ne 2)
   }
  }
  #endregion
+#region check internet connection
+if (!(test-Connection "www.google.com" -count 1 -ErrorAction SilentlyContinue)) {
+  $messinfo="Internet disconnected, please check internet connection"
+  [System.Windows.Forms.MessageBox]::Show($messinfo,"Info",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Information)
+  exit
+}
 
- #region check ssh connection
+#endregion
+
+#region check ssh connection
 $settings=get-content C:\Matter_AI\settings\config_linux.txt
 $sship=($settings[0].split(":"))[-1]
 #$sshusername=($settings[1].split(":"))[-1]
 write-host "check ssh ip $sship if connected"
 if (!(Test-Connection -ComputerName $sship -Count 1 -ErrorAction SilentlyContinue)) {
-  $messinfo="SSH IP is not connected, please check RPI connection or SSH IP is correct"
+  $messinfo="SSH IP disconnected, please check RPI connection or SSH IP is correct"
   [System.Windows.Forms.MessageBox]::Show($messinfo,"Info",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Information)
   start-process C:\Matter_AI\settings\config_linux.txt
   exit
@@ -96,6 +104,15 @@ if ($global:testtype -eq 2){
     if($selchek){
       [System.Windows.Forms.MessageBox]::Show("Fail to select the test case id","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
       exit
+    #region download manual speacial settings
+    $goo_link="https://docs.google.com/spreadsheets/d/19ZPA2Z6SYYtvIj9qXM0FuDASF0FaZP2xjx7jcebrJEQ/"
+    $gid="1307777084"
+    $sv_range="A1:J1000"
+    $savepath="C:\Matter_AI\settings\"
+    $errormessage="matter manual set download failed"
+    webdownload -goo_link $goo_link -gid $gid -sv_range $sv_range -savepath $savepath -errormessage $errormessage
+    #endregion
+
     }
 #create a log folder
 $datetime=get-date -Format yyyyMMdd_HHmmss

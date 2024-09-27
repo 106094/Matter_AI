@@ -935,3 +935,53 @@ function puttystart ([string]$puttyname) {
 }
 
 #endregion
+
+
+function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$savepath,[string]$errormessage){
+  
+    if(!(test-path $savepath)){
+  
+      $paramHash = @{
+        To="shuningyu17120@allion.com.tw"
+        from = 'Notioce <npl_siri@allion.com.tw>'
+        BodyAsHtml = $True
+        Subject = "fail to open $savepath"
+        Body ="go check"
+       }
+       
+       Send-MailMessage @paramHash -Encoding utf8 -SmtpServer zimbra.allion.com.tw 
+     exit
+    }
+  
+    Remove-Item "$ENV:UserProfile\downloads\*.csv" -force
+    $link_save=$goo_link+"export?format=csv&gid=1307777084&range=A1:J1000"
+    $link_save
+    $starttime=get-date
+    Start-Process msedge $link_save
+    
+    do{
+    Start-Sleep -s 1
+    $lsnewc=(Get-ChildItem -path "$ENV:UserProfile\Downloads\*.csv" -file).count
+    $timepassed=(new-timespan -start $starttime -end (get-date)).TotalSeconds
+    }until($lsnewc -eq 1 -or $timepassed -gt 60)
+    
+    if($lsnewc){
+    $downloadname= (Get-ChildItem -path "$ENV:UserProfile\Downloads\*.csv").FullName
+    copy-item $downloadname -Destination $savepath -Force  
+    Remove-Item "$ENV:UserProfile\downloads\*.csv" -force
+    }
+    else{
+      $paramHash = @{
+      To="shuningyu17120@allion.com.tw"
+      from = 'Notioce <npl_siri@allion.com.tw>'
+      BodyAsHtml = $True
+      Subject = $errormessage
+      Body = "go check $goo_link"
+     }
+     
+     Send-MailMessage @paramHash -Encoding utf8 -SmtpServer zimbra.allion.com.tw 
+  
+    }
+    (get-process -name "chrome" -ea SilentlyContinue).CloseMainWindow()
+  }
+  
