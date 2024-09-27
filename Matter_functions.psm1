@@ -928,9 +928,10 @@ function puttystart ([string]$puttyname) {
        else{
         # puttyexit
        }
-       putty_paste -cmdline "docker start $ctnid"
-       putty_paste -cmdline "docker exec -it $ctnid /bin/bash"
-       putty_paste -cmdline "cd $sshpath"
+       #putty_paste -cmdline "docker start $ctnid"
+       #putty_paste -cmdline "docker exec -it $ctnid /bin/bash"
+       #putty_paste -cmdline "cd $sshpath"
+       putty_paste -cmdline "docker start $ctnid; docker exec -it $ctnid /bin/bash; cd $sshpath"
 }
 
 #endregion
