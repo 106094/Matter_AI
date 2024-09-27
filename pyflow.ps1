@@ -197,8 +197,7 @@ if ($global:testtype -eq 2){
         $k++
           $specialset=$specialsets|Where-Object{$_.source -eq $global:excelfile -and $_.TC -eq $caseid -and $_.step -eq $stepid -and $_.cmdline -eq $k}
           if ($specialset){
-           foreach($special in $specialset){         
-             $cmdrank=$specialset."cmdline"
+           foreach($special in $specialset){ 
              $method=$specialset."method"
                if($method -match "repalce"){
                  $keyword=$specialset."cmd_keyword"
@@ -225,9 +224,7 @@ if ($global:testtype -eq 2){
             setvalue = $matchvalue
            })
           }
-          add-content -path $logtcstep -Value $lastlogcontent
-     
-        
+          add-content -path $logtcstep -Value $lastlogcontent       
     }
     }  #test
               
