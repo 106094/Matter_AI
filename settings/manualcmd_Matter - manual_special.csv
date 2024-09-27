@@ -1,5 +1,0 @@
-source,TC,step,cmdline,method,cmd_keyword,replace,lastlog_keyword,para_name,notice
-Matter_V_1_2_TestPlanVerificationSteps_Auto.xlsx,[TC-CNET-4.11] [WiFi] Verification for ConnectNetwork Command [DUT-Server],2,1,getlastlog,,,NetworkID:,var:BDX1,Pei
-Matter_V_1_2_TestPlanVerificationSteps_Auto.xlsx,[TC-CNET-4.11] [WiFi] Verification for ConnectNetwork Command [DUT-Server],4,1,replace,<your 1st network id in hex>,var:BDX1,,,Pei
-Matter_V_1_2_TestPlanVerificationSteps_Auto.xlsx,[TC-CNET-4.11] [WiFi] Verification for ConnectNetwork Command [DUT-Server],6,1,getlastlog,,,NetworkID:,var:BDX2,Pei
-Matter_V_1_2_TestPlanVerificationSteps_Auto.xlsx,[TC-CNET-4.11] [WiFi] Verification for ConnectNetwork Command [DUT-Server],7,1,replace,<your second network id in hex>,var:BDX2,,,Pei
