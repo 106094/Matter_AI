@@ -100,8 +100,8 @@ $sumsheetname=$worksheetNames|Where-Object{$_ -match "cert_repo"}
 $worksheetsum=Import-Excel $excelfull -WorksheetName $sumsheetname
 $filteredtcs = ($worksheetsum |Where-Object{$_."Test Case ID".length -gt 0}|  Where-Object {$_."$columncor" -eq "UI-Manual" `
  -and $_."Test Case Name" -notlike "*as client*"})."Test Case ID"
-
- $filteredsheets=$filteredtcs|foreach-object{($_.split("-"))[1]}|Get-Unique
+$filteredsheets=$filteredtcs|foreach-object{($_.split("-"))[1]}|Get-Unique
+$filteredsheets+="Diag Log"
 $Indexfirst=($worksheetNames.trim()).IndexOf("ACE")
 $Indexlast=($worksheetNames.trim()).IndexOf("WNCV")
 $outputcsv = @()
