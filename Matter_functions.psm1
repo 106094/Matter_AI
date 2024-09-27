@@ -837,6 +837,12 @@ function selection_manual($data, $column1, $column2) {
     # Show the form
     $form.Add_Shown({ $form.Activate() })
     [void]$form.ShowDialog()
+    if($global:sels.count -eq 0){
+
+        [System.Windows.Forms.MessageBox]::Show("Please select testcases","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
+        return 0
+        
+    }
     $global:sels
     }
     <#

@@ -93,7 +93,7 @@ if ($global:testtype -eq 2){
     }
     $data=Import-Csv  $global:csvfilename
     $selchek=selection_manual -data $data -column1 "catg" -column2 "TestCaseID"
-    if(!$global:sels){
+    if($selchek){
       [System.Windows.Forms.MessageBox]::Show("Fail to select the test case id","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
       exit
     }
@@ -122,7 +122,7 @@ if($continueq -eq "Yes"){
   if ($global:testtype -eq 2){
     $selchek=selection_manual -data $data -column1 "catg" -column2 "TestCaseID"
   }
-  if(!$global:selchek){
+  if($selchek){
    [System.Windows.Forms.MessageBox]::Show("Fail to create test case id lists, test will be stopped","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
    }
    
