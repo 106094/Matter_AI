@@ -81,6 +81,7 @@ $matchcmds=$ctcmds.name|Get-Unique
 $excelfile=get-childitem -path $global:excelfile
 $excelfull=$excelfile.FullName
 #$excelfiles=get-childitem "C:\Matter_AI\settings\_docs\*TestPlanVerificationSteps_Auto.xlsx"
+$csvname0="C:\Matter_AI\settings\_manual\manualcmd_"+$excelfile.basename.replace("TestPlanVerificationSteps_Auto","")+"0.csv"
 $csvname="C:\Matter_AI\settings\_manual\manualcmd_"+$excelfile.basename.replace("TestPlanVerificationSteps_Auto","")+".csv"
 $TH2list="C:\Matter_AI\settings\_manual\TH2_TClist_"+$excelfile.basename.replace("TestPlanVerificationSteps_Auto","")+".txt"
 if(test-path $TH2list){
@@ -160,6 +161,7 @@ for($i=$Indexfirst;$i -le $Indexlast;$i++){
         }
         $th2lists=get-content $TH2list
         if (!($tcline -in $th2lists)){
+        $TH2tcline+=@($tcline)
         add-content $TH2list -value $tcline
         }
         $TH2=0
@@ -372,8 +374,8 @@ foreach($line in $csvcontent){
    }
   }
 }
-$csvcontent|export-csv $csvname -NoTypeInformation
-#$csvcontent|Where-Object{$_.cmd.length -gt 0 -and $_.results.length -eq 0}|export-csv $csvname -NoTypeInformation
+$csvcontent|export-csv $csvname0 -NoTypeInformation
+$csvcontent|Where-Object{$_.cmd.length -gt 0 -and $_.results.length -eq 0 -and $_.TestCaseID -notin $TH2tcline}|export-csv $csvname -NoTypeInformation
 #endregion
 
 $timegap=(new-timespan -start $starttime -end (get-date)).Minutes
