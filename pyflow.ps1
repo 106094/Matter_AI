@@ -106,6 +106,8 @@ if ($global:testtype -eq 2){
   $nodeid=((get-content C:\Matter_AI\settings\config_linux.txt | Select-String "nodeid"|out-string).split(":"))[-1].trim()
   $logtc=(get-childitem -path "C:\Matter_AI\logs\_manual" -directory | Sort-Object LastWriteTime -Descending | Select-Object -First 1).fullname
 
+  $specialsets=import-csv -path C:\Matter_AI\settings\*manual_special.csv
+  $varhash=@()
   $caseids=$global:selchek
   $csvdata=import-csv $global:csvfilename | Where-Object {$_.TestCaseID -in $caseids -and $_.cmd.length -gt 0}
   #$sound = New-Object -TypeName System.Media.SoundPlayer
@@ -189,9 +191,43 @@ if ($global:testtype -eq 2){
            puttystart -puttyname $puttyname
         }
       }
+      $k=0
       foreach($pyline in $pylines){
-        $pycmd=putty_paste -cmdline "rm -f admin_storage.json && $pyline" -puttyname $puttyname
-        add-content -path $logtcstep -Value (get-content -path C:\Matter_AI\logs\lastlog.log)
+        $getlastkey=0
+        $k++
+          $specialset=$specialsets|Where-Object{$_.source -eq $global:excelfile -and $_.TC -eq $caseid -and $_.step -eq $stepid -and $_.cmdline -eq $k}
+          if ($specialset){
+           foreach($special in $specialset){         
+             $cmdrank=$specialset."cmdline"
+             $method=$specialset."method"
+               if($method -match "repalce"){
+                 $keyword=$specialset."cmd_keyword"
+                 $replaceby=$specialset."repalce"
+                 if($replaceby -match "var\:"){
+                   $paraname=$replaceby.replace("var:","")
+                   $replaceby=($varhash|Where-Object{$_.paraname -eq $paraname})."setvalue"
+                 }
+                 $pyline = $pyline.replace($keyword, $replaceby)
+               }
+               if($method -match "getlastlog"){
+                $getlastkey=$specialset."lastlog_keyword"
+                $paraname=$specialset."para_name"
+                }
+              }
+          }
+          $pycmd=putty_paste -cmdline "rm -f admin_storage.json && $pyline" -puttyname $puttyname
+          $lastlogcontent=get-content -path C:\Matter_AI\logs\lastlog.log
+          if ($getlastkey){
+           $matchvalue= (($lastlogcontent -match $getlastkey).split($getlastkey))[-1].trim()
+           #$matchvalue= (($lastlogcontent|Select-String -Pattern "($getlastkey).*" -AllMatches |  ForEach-Object {$_.matches.value}).split($getlastkey))[-1].trim()
+           $varhash+=@([PSCustomObject]@{           
+            para_name = $paraname
+            setvalue = $matchvalue
+           })
+          }
+          add-content -path $logtcstep -Value $lastlogcontent
+     
+        
     }
     }  #test
               
