@@ -26,6 +26,7 @@ foreach($csv in $csvdata){
       TitleBackground = 'LightSkyBlue'
       ContentTextForeground = 'Red'
       ButtonType = 'OK'
+      ButtonTextForeground = "Blue"
         }
   New-WPFMessageBox @InfoParams -Content "Please Reset Your DUT, then click ok"
     $caseid=($csv.TestCaseID).trim()

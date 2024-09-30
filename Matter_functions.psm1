@@ -507,7 +507,7 @@ Function New-WPFMessageBox {
 "@
 
 [XML]$ButtonXaml = @"
-<Button xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Width="Auto" Height="30" FontFamily="Segui" FontSize="16" Background="Transparent" Foreground="White" BorderThickness="$($PSBoundParameters.ButtonBorderThickness)" BorderBrush="Red" Margin="10" Padding="20,0,20,0" HorizontalAlignment="Right" Cursor="Hand"/>
+<Button xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Width="Auto" Height="30" FontFamily="Segui" FontSize="16" Background="Transparent" Foreground="White" BorderThickness="$($PSBoundParameters.ButtonBorderThickness)" BorderBrush="Red" Margin="10" Padding="20,0,20,0" HorizontalAlignment="Right" IsDefault="True" Cursor="Hand" Focusable="True"/>
 "@
 
 [XML]$ButtonTextXaml = @"
@@ -539,6 +539,7 @@ Function New-WPFMessageBox {
           $Window.Close()
       })
       $Window.FindName('ButtonHost').AddChild($Button)
+     
   }
 
   # Add buttons
