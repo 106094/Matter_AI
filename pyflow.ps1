@@ -101,6 +101,7 @@ foreach($csv in $csvdata){
 }
 
 if ($global:testtype -eq 2){
+  $excelfilename=(get-childitem $global:excelfile).Name
   $pairsettings=import-csv C:\Matter_AI\settings\_manual\settings.csv
   $headers=$pairsettings[0].PSObject.Properties.Name
   $nodeid=((get-content C:\Matter_AI\settings\config_linux.txt | Select-String "nodeid"|out-string).split(":"))[-1].trim()
@@ -160,8 +161,6 @@ if ($global:testtype -eq 2){
     New-WPFMessageBox @InfoParams -Content "Please Reset Your DUT, then click ok"
     
     #start pairing with restest
-    $pyline=$paringcmd
-
     foreach($header in $headers){
       if ($paringcmd -match $hearder){
         $paringcmd=$paringcmd -replace $header, $pairsettings."$header"
@@ -195,16 +194,16 @@ if ($global:testtype -eq 2){
       foreach($pyline in $pylines){
         $getlastkey=0
         $k++
-          $specialset=$specialsets|Where-Object{$_.source -eq $global:excelfile -and $_.TC -eq $caseid -and $_.step -eq $stepid -and $_.cmdline -eq $k}
+          $specialset=$specialsets|Where-Object{$_.source -eq $excelfilename -and $_.TC -eq $caseid -and $_.step -eq $stepid -and $_.cmdline -eq $k}
           if ($specialset){
            foreach($special in $specialset){ 
              $method=$specialset."method"
-               if($method -match "repalce"){
+               if($method -match "replace"){
                  $keyword=$specialset."cmd_keyword"
                  $replaceby=$specialset."repalce"
                  if($replaceby -match "var\:"){
                    $paraname=$replaceby.replace("var:","")
-                   $replaceby=($varhash|Where-Object{$_.paraname -eq $paraname})."setvalue"
+                   $replaceby=($varhash|Where-Object{$_.para_name -eq $paraname})."setvalue"
                  }
                  $pyline = $pyline.replace($keyword, $replaceby)
                }
@@ -217,7 +216,7 @@ if ($global:testtype -eq 2){
           $pycmd=putty_paste -cmdline "rm -f admin_storage.json && $pyline" -puttyname $puttyname
           $lastlogcontent=get-content -path C:\Matter_AI\logs\lastlog.log
           if ($getlastkey){
-           $matchvalue= (($lastlogcontent -match $getlastkey).split($getlastkey))[-1].trim()
+           $matchvalue= ([regex]::Match(($lastlogcontent -match $getlastkey), "$getlastkey(.*)").Groups[1].value).tostring().trim()
            #$matchvalue= (($lastlogcontent|Select-String -Pattern "($getlastkey).*" -AllMatches |  ForEach-Object {$_.matches.value}).split($getlastkey))[-1].trim()
            $varhash+=@([PSCustomObject]@{           
             para_name = $paraname
