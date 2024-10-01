@@ -101,9 +101,10 @@ if ($global:testtype -eq 2){
     }
     $data=Import-Csv  $global:csvfilename
     $selchek=selection_manual -data $data -column1 "catg" -column2 "TestCaseID"
-    if($selchek){
+    if(!$selchek){
       [System.Windows.Forms.MessageBox]::Show("Fail to select the test case id","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
       exit
+    }
     #region download manual speacial settings
     $goo_link="https://docs.google.com/spreadsheets/d/19ZPA2Z6SYYtvIj9qXM0FuDASF0FaZP2xjx7jcebrJEQ/"
     $gid="1307777084"
@@ -112,8 +113,7 @@ if ($global:testtype -eq 2){
     $errormessage="matter manual set download failed"
     webdownload -goo_link $goo_link -gid $gid -sv_range $sv_range -savepath $savepath -errormessage $errormessage
     #endregion
-
-    }
+    
 #create a log folder
 $datetime=get-date -Format yyyyMMdd_HHmmss
 $logtc="C:\Matter_AI\logs\_manual\$($datetime)"

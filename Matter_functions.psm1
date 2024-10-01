@@ -928,6 +928,8 @@ function puttystart ([string]$puttyname) {
        start-sleep -s 2
        putty_paste -cmdline "sudo -s"
        putty_paste -cmdline $pskey
+       
+       if($global:testtype -eq 1){     
        putty_paste -cmdline "docker ps -a"
        $idlogin=get-content "C:\Matter_AI\logs\lastlog.log"
        $checkmatch=$idlogin -match "\/bin\/bash"
@@ -935,12 +937,16 @@ function puttystart ([string]$puttyname) {
          $ctnid= (($idlogin -match "\/bin\/bash").split(" "))[0]
        }
        else{
-        # puttyexit
+         puttyexit
        }
        #putty_paste -cmdline "docker start $ctnid"
        #putty_paste -cmdline "docker exec -it $ctnid /bin/bash"
        #putty_paste -cmdline "cd $sshpath"
        putty_paste -cmdline "docker start $ctnid; docker exec -it $ctnid /bin/bash; cd $sshpath"
+       }
+       if($global:testtype -eq 2){
+       putty_paste -cmdline "cd root/apps"
+       }
 }
 
 #endregion
