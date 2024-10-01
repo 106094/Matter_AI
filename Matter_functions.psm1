@@ -945,7 +945,7 @@ function puttystart ([string]$puttyname) {
        putty_paste -cmdline "docker start $ctnid; docker exec -it $ctnid /bin/bash; cd $sshpath"
        }
        if($global:testtype -eq 2){
-       putty_paste -cmdline "cd /home/ubuntu/apps/"
+       putty_paste -cmdline "cd /root/apps"
        }
 }
 
