@@ -87,7 +87,7 @@ if(test-path $TH2list){
 #save parameter settings
 $a=(Import-Excel $excelfull -WorksheetName "Python Script Command" -StartRow 2 -EndRow 1 -StartColumn 7)
 $a[-1]|export-csv C:\Matter_AI\settings\_manual\settings.csv -NoTypeInformation -force
-$csvname
+
 #filter manual and as client and UI-Manual
 if ($global:updatechiptool -eq "Yes"){
   #region get chiptool related command
@@ -383,8 +383,8 @@ $timegap=(new-timespan -start $starttime -end (get-date)).Minutes
 $timegap2=(new-timespan -start $starttime -end (get-date)).Seconds
 
 $checktime=[System.Windows.Forms.MessageBox]::Show("Collecting done. It took $timegap min $timegap2 sec","Info",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Information)
-$csvname
-}
 
+}
+$csvname
 #pause
 #endregion
