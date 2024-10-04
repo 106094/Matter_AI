@@ -70,6 +70,7 @@ if ($global:testtype -eq 2){
   $getcmdpsfile="C:\Matter_AI\cmdcollecting_tool\Matter_getchiptool.ps1"
   $global:updatechiptool = [System.Windows.Forms.MessageBox]::Show("Need update UI-Manual database?", "Check", [System.Windows.Forms.MessageBoxButtons]::YesNo, [System.Windows.Forms.MessageBoxIcon]::Question, [System.Windows.Forms.MessageBoxDefaultButton]::Button2)
   $getchiptool=. $getcmdpsfile
+  $global:csvfilename=$getchiptool
   if ($global:updatechiptool -eq "Yes") {
     $InfoParams = @{
       Title = "INFORMATION"
@@ -81,23 +82,16 @@ if ($global:testtype -eq 2){
         }
     New-WPFMessageBox @InfoParams -Content "Need About 10+ minutes to update UI-Manual database"
     $global:csvfilename=$getchiptool[-1]
-    if($global:excelfile -eq 0){
-     exit
       }
-      if(!(test-path $global:csvfilename)){      
+    if(!$global:excelfile){
+      [System.Windows.Forms.MessageBox]::Show("Fail to select the excel file","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
+      exit
+      }
+     if(!(test-path $global:csvfilename)){
+      [System.Windows.Forms.MessageBox]::Show("Fail to get csv file","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
        exit
-      }
-     
-  }
+      }    
 
-    else{
-      $global:excelfile=. "C:\Matter_AI\cmdcollecting_tool\selections_xlsx.ps1"
-      if(!$global:excelfile){
-        [System.Windows.Forms.MessageBox]::Show("Fail to select the excel file","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
-        exit
-      }
-      $global:csvfilename="C:\Matter_AI\settings\_manual\manualcmd_"+(get-childitem $global:excelfile).basename.replace("TestPlanVerificationSteps_Auto","")+".csv"
-    }
     $data=Import-Csv  $global:csvfilename
     $selchek=selection_manual -data $data -column1 "catg" -column2 "TestCaseID"
     if(!$selchek){
@@ -113,12 +107,12 @@ if ($global:testtype -eq 2){
     webdownload -goo_link $goo_link -gid $gid -sv_range $sv_range -savepath $savepath -errormessage $errormessage
     #endregion
     
-#create a log folder
-$datetime=get-date -Format yyyyMMdd_HHmmss
-$logtc="C:\Matter_AI\logs\_manual\$($datetime)"
-if(!(test-path $logtc)){
-  new-item -ItemType Directory -Path $logtc | Out-Null
-}
+    #create a log folder
+    $datetime=get-date -Format yyyyMMdd_HHmmss
+    $logtc="C:\Matter_AI\logs\_manual\$($datetime)"
+    if(!(test-path $logtc)){
+      new-item -ItemType Directory -Path $logtc | Out-Null
+    }
 }
 ###########################
 $starttime=get-date
