@@ -172,9 +172,10 @@ if ($global:testtype -eq 2){
     $logpair="$tclogfd\$($datetime2)_$($caseid)_0pairing.log"    
     new-item -ItemType File -Path $logpair | Out-Null
         $k=$pairresult=0
-        while (!$pycmd -and $k -lt $retesttime){
+        putty_paste -cmdline "rm -rf /tmp/chip_*"
+        while (!$pairresult -and $k -lt $retesttime){
           $k++
-          $pairresult=putty_paste -cmdline "rm -f admin_storage.json && $paringcmd" -line1 -1 -checkline1 "pass"  
+          $pairresult=putty_paste -cmdline "$paringcmd" -line1 -1 -checkline1 "pass"
           add-content -path $logpair -Value (get-content -path C:\Matter_AI\logs\lastlog.log )
           write-host "round $k"
         }
@@ -214,8 +215,9 @@ if ($global:testtype -eq 2){
                 }
               }
           }
-          $pycmd=putty_paste -cmdline "rm -f admin_storage.json && $pyline" -puttyname $puttyname
+          $pycmd=putty_paste -cmdline "$pyline" -puttyname $puttyname
           $lastlogcontent=get-content -path C:\Matter_AI\logs\lastlog.log
+          add-content -path $logtcstep -Value $lastlogcontent
           if ($getlastkey){
            $matchvalue= ([regex]::Match(($lastlogcontent -match $getlastkey), "$getlastkey(.*)").Groups[1].value).tostring().trim()
            #$matchvalue= (($lastlogcontent|Select-String -Pattern "($getlastkey).*" -AllMatches |  ForEach-Object {$_.matches.value}).split($getlastkey))[-1].trim()
@@ -224,7 +226,7 @@ if ($global:testtype -eq 2){
             setvalue = $matchvalue
            })
           }
-          add-content -path $logtcstep -Value $lastlogcontent       
+   
     }
     }  #test
               
