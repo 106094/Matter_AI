@@ -965,8 +965,8 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
     }
   
     Remove-Item "$ENV:UserProfile\downloads\*.csv" -force
-    $link_save=$goo_link+"export?format=csv&gid=1307777084&range=A1:J1000"
-    $link_save
+    $link_save=$goo_link+"export?format=csv&gid=$($gid)&range=$($sv_range)"
+    #$link_save
     $starttime=get-date
     Start-Process msedge $link_save
     

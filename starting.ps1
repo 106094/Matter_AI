@@ -68,9 +68,9 @@ if(!(test-path $logtc)){
 }
 if ($global:testtype -eq 2){
   $getcmdpsfile="C:\Matter_AI\cmdcollecting_tool\Matter_getchiptool.ps1"
-  $result = [System.Windows.Forms.MessageBox]::Show("Need update UI-Manual database?", "Check", [System.Windows.Forms.MessageBoxButtons]::YesNo)
+  $global:updatechiptool = [System.Windows.Forms.MessageBox]::Show("Need update UI-Manual database?", "Check", [System.Windows.Forms.MessageBoxButtons]::YesNo)
   
-  if ($result -eq "Yes") {
+  if ($global:updatechiptool -eq "Yes") {
     $InfoParams = @{
       Title = "INFORMATION"
       TitleFontSize = 22
@@ -80,7 +80,7 @@ if ($global:testtype -eq 2){
       ButtonType = 'OK'
         }
     New-WPFMessageBox @InfoParams -Content "Need About 10+ minutes to update UI-Manual database"
-      
+  }
    $getchiptool=. $getcmdpsfile
    $global:csvfilename=$getchiptool[-1]
    if($global:excelfile -eq 0){
@@ -89,7 +89,7 @@ if ($global:testtype -eq 2){
      if(!(test-path $global:csvfilename)){      
       exit
      }
-    }
+    
     else{
       $global:excelfile=. "C:\Matter_AI\cmdcollecting_tool\selections_xlsx.ps1"
       if(!$global:excelfile){
@@ -107,7 +107,7 @@ if ($global:testtype -eq 2){
     #region download manual speacial settings
     $goo_link="https://docs.google.com/spreadsheets/d/19ZPA2Z6SYYtvIj9qXM0FuDASF0FaZP2xjx7jcebrJEQ/"
     $gid="1307777084"
-    $sv_range="A1:J1000"
+    $sv_range="A1:L1000"
     $savepath="C:\Matter_AI\settings\"
     $errormessage="matter manual set download failed"
     webdownload -goo_link $goo_link -gid $gid -sv_range $sv_range -savepath $savepath -errormessage $errormessage
