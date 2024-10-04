@@ -103,12 +103,13 @@ Add-Type @"
 function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int64]$line1,[string]$checkline1,[int64]$line2,[string]$checkline2){
 
 if(get-process putty){
+    
+    $pidd=($global:puttyset|Where-Object{$_.name -eq $puttyname}|Select-Object -last 1).puttypid
     if($puttyname.length -eq 0){
-        $pidd=(get-process putty|Sort-Object StartTime|Select-Object -Last 1).Id
+        #$pidd=(get-process putty|Sort-Object StartTime|Select-Object -Last 1).Id
         $logputty="C:\Matter_AI\logs\*putty.log"      
     }
     else{
-        $pidd=($global:puttyset|Where-Object{$_.name -eq $puttyname}|Select-Object -last 1).puttypid
         $logputty="C:\Matter_AI\logs\*putty_$($puttyname).log"
     }
 
