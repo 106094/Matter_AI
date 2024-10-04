@@ -77,23 +77,23 @@ foreach($line in $piccontent){
 $excelfile=get-childitem -path $global:excelfile
 $excelfull=$excelfile.FullName
 
+#$excelfiles=get-childitem "C:\Matter_AI\settings\_docs\*TestPlanVerificationSteps_Auto.xlsx"
+$csvname0="C:\Matter_AI\settings\_manual\manualcmd_"+$excelfile.basename.replace("TestPlanVerificationSteps_Auto","")+"0.csv"
+$csvname="C:\Matter_AI\settings\_manual\manualcmd_"+$excelfile.basename.replace("TestPlanVerificationSteps_Auto","")+".csv"
+$TH2list="C:\Matter_AI\settings\_manual\TH2_TClist_"+$excelfile.basename.replace("TestPlanVerificationSteps_Auto","")+".txt"
+if(test-path $TH2list){
+  Remove-Item $TH2list -force
+}
 #save parameter settings
 $a=(Import-Excel $excelfull -WorksheetName "Python Script Command" -StartRow 2 -EndRow 1 -StartColumn 7)
 $a[-1]|export-csv C:\Matter_AI\settings\_manual\settings.csv -NoTypeInformation -force
-Write-Output "update py sheet settings done"
+$csvname
 #filter manual and as client and UI-Manual
 if ($global:updatechiptool -eq "Yes"){
   #region get chiptool related command
   $ctcmds=import-csv C:\Matter_AI\settings\chiptoolcmds.csv
   $matchcmds=$ctcmds.name|Get-Unique
   #endregion
-  #$excelfiles=get-childitem "C:\Matter_AI\settings\_docs\*TestPlanVerificationSteps_Auto.xlsx"
-  $csvname0="C:\Matter_AI\settings\_manual\manualcmd_"+$excelfile.basename.replace("TestPlanVerificationSteps_Auto","")+"0.csv"
-  $csvname="C:\Matter_AI\settings\_manual\manualcmd_"+$excelfile.basename.replace("TestPlanVerificationSteps_Auto","")+".csv"
-  $TH2list="C:\Matter_AI\settings\_manual\TH2_TClist_"+$excelfile.basename.replace("TestPlanVerificationSteps_Auto","")+".txt"
-  if(test-path $TH2list){
-    Remove-Item $TH2list -force
-  }
 #reg read excel to csv
 $columncor=(import-csv "C:\Matter_AI\settings\filesettings.csv"|Where-Object{$_.filename -eq ($excelfile).name}|Select-Object -Property column_title).column_title
 $worksheetNames = (Get-ExcelSheetInfo -Path $excelfull).Name
@@ -383,8 +383,8 @@ $timegap=(new-timespan -start $starttime -end (get-date)).Minutes
 $timegap2=(new-timespan -start $starttime -end (get-date)).Seconds
 
 $checktime=[System.Windows.Forms.MessageBox]::Show("Collecting done. It took $timegap min $timegap2 sec","Info",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Information)
-
 $csvname
 }
+
 #pause
 #endregion

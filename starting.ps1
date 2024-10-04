@@ -68,8 +68,8 @@ if(!(test-path $logtc)){
 }
 if ($global:testtype -eq 2){
   $getcmdpsfile="C:\Matter_AI\cmdcollecting_tool\Matter_getchiptool.ps1"
-  $global:updatechiptool = [System.Windows.Forms.MessageBox]::Show("Need update UI-Manual database?", "Check", [System.Windows.Forms.MessageBoxButtons]::YesNo)
-  
+  $global:updatechiptool = [System.Windows.Forms.MessageBox]::Show("Need update UI-Manual database?", "Check", [System.Windows.Forms.MessageBoxButtons]::YesNo, [System.Windows.Forms.MessageBoxIcon]::Question, [System.Windows.Forms.MessageBoxDefaultButton]::Button2)
+  $getchiptool=. $getcmdpsfile
   if ($global:updatechiptool -eq "Yes") {
     $InfoParams = @{
       Title = "INFORMATION"
@@ -80,16 +80,16 @@ if ($global:testtype -eq 2){
       ButtonType = 'OK'
         }
     New-WPFMessageBox @InfoParams -Content "Need About 10+ minutes to update UI-Manual database"
+    $global:csvfilename=$getchiptool[-1]
+    if($global:excelfile -eq 0){
+     exit
+      }
+      if(!(test-path $global:csvfilename)){      
+       exit
+      }
+     
   }
-   $getchiptool=. $getcmdpsfile
-   $global:csvfilename=$getchiptool[-1]
-   if($global:excelfile -eq 0){
-    exit
-     }
-     if(!(test-path $global:csvfilename)){      
-      exit
-     }
-    
+
     else{
       $global:excelfile=. "C:\Matter_AI\cmdcollecting_tool\selections_xlsx.ps1"
       if(!$global:excelfile){
