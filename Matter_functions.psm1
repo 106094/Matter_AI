@@ -993,6 +993,6 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
      Send-MailMessage @paramHash -Encoding utf8 -SmtpServer zimbra.allion.com.tw 
   
     }
-    (get-process -name "chrome" -ea SilentlyContinue).CloseMainWindow()
+    (get-process -name "msedge" -ea SilentlyContinue).CloseMainWindow()
   }
   
