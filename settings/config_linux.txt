@@ -2,3 +2,4 @@ sship:192.168.2.101
 sshname:ubuntu
 sshpasswd:raspberrypi
 retest:3
+nodeid:1

@@ -1,5 +1,4 @@
-﻿
-Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Bypass -Force;
+﻿Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Bypass -Force;
 Add-Type -AssemblyName Microsoft.VisualBasic,System.Windows.Forms,System.Drawing
 $shell=New-Object -ComObject shell.application
 $wshell=New-Object -ComObject wscript.shell
@@ -12,13 +11,13 @@ while(!$global:testtype -or ($global:testtype -ne 1 -and $global:testtype -ne 2)
   }
  }
  #endregion
+
 #region check internet connection
 if (!(test-Connection "www.google.com" -count 1 -ErrorAction SilentlyContinue)) {
   $messinfo="Internet disconnected, please check internet connection"
   [System.Windows.Forms.MessageBox]::Show($messinfo,"Info",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Information)
   exit
 }
-
 #endregion
 
 #region check ssh connection
