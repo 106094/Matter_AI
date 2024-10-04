@@ -906,13 +906,8 @@ function puttystart ([string]$puttyname) {
         puttypid=$afterpid
     }
     
-    if($puttyname.length -eq 0){
-        $puttypid=(get-process putty|Sort-Object StartTime|Select-Object -last 1).id 
-       }
-       else{
-         $puttypid=($global:puttyset|Where-Object{$_.name -eq $puttyname}|Select-Object -last 1).puttypid
-       }
-       
+    $puttypid=($global:puttyset|Where-Object{$_.name -eq $puttyname}|Select-Object -last 1).puttypid
+    
        $settings=get-content C:\Matter_AI\settings\config_linux.txt
        $pskey=($settings[2].split(":"))[-1]
        #$sshpath=($settings[3].split(":"))[-1]
