@@ -112,7 +112,7 @@ if ($global:testtype -eq 2){
     #region download manual speacial settings
     $goo_link="https://docs.google.com/spreadsheets/d/19ZPA2Z6SYYtvIj9qXM0FuDASF0FaZP2xjx7jcebrJEQ/"
     $gid="1307777084"
-    $sv_range="A1:L1000"
+    $sv_range="A1:M1000"
     $savepath="C:\Matter_AI\settings\"
     $errormessage="matter manual set download failed"
     webdownload -goo_link $goo_link -gid $gid -sv_range $sv_range -savepath $savepath -errormessage $errormessage
