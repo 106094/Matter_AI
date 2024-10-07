@@ -203,6 +203,7 @@ if ($global:testtype -eq 2){
       
       $k=0
       foreach($pyline in $pylines){
+        $runflag=1
         $getlastkey=0
         $k++
           $specialset=$specialsets|Where-Object{$_.source -eq $excelfilename -and $_.TC -eq $caseid -and $_.step -eq $stepid -and $_.cmdline -eq $k}
@@ -217,13 +218,38 @@ if ($global:testtype -eq 2){
                    $replaceby=($varhash|Where-Object{$_.para_name -eq $paraname})."setvalue"
                  }
                  $pyline = $pyline.replace($keyword, $replaceby)
-               }
+                }
                if($method -match "getlastlog"){
                 $getlastkey=$specialset."lastlog_keyword"
                 $paraname=$specialset."para_name"
                 }
+                if($method -match "skip"){
+                  $runflag=0
+                }
+                if($method -match "message"){
+                  $message=$specialset."message"
+                  $InfoParams = @{
+                    Title = "INFORMATION" 
+                    TitleFontSize = 22
+                    ContentFontSize = 30
+                    TitleBackground = 'LightSkyBlue'
+                    ContentTextForeground = 'Red'
+                    ButtonType = 'OK'
+                      }
+                    New-WPFMessageBox @InfoParams -Content "Please Reset Your DUT, then click ok"
+                }
+                if($method -match "diff_session"){
+                  $puttyname=$specialset."diff_session"
+                }
+                if($method -match "add"){
+                  $addcmd=$specialset."add_cmd"
+                  $pycmd=putty_paste -cmdline "$addcmd" -puttyname $puttyname
+                  $lastlogcontent=get-content -path C:\Matter_AI\logs\lastlog.log
+                  add-content -path $logtcstep -Value $lastlogcontent
+                }
               }
           }
+          if($runflag -eq 1){  
           $pycmd=putty_paste -cmdline "$pyline" -puttyname $puttyname
           $lastlogcontent=get-content -path C:\Matter_AI\logs\lastlog.log
           add-content -path $logtcstep -Value $lastlogcontent
@@ -235,6 +261,7 @@ if ($global:testtype -eq 2){
             setvalue = $matchvalue
            })
           }
+        }
    
     }
     }  #test

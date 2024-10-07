@@ -84,36 +84,24 @@ if ($global:testtype -eq 2){
 
       }
       $getchiptool=. $getcmdpsfile
-      $global:csvfilename=$getchiptool 
-   if ($global:updatechiptool -eq "Yes") {
-    $global:csvfilename=$getchiptool[-1]
+
+      
+    if(!$getchiptool){
+      [System.Windows.Forms.MessageBox]::Show("Fail to create import-excel module","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
+      exit  
     }
 
-  if(!$getchiptool){
-    [System.Windows.Forms.MessageBox]::Show("Fail to create import-excel module","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
-     exit  
-  }
-
-  if ($global:updatechiptool -eq "Yes") {
-    $InfoParams = @{
-      Title = "INFORMATION"
-      TitleFontSize = 22
-      ContentFontSize = 30
-      TitleBackground = 'LightSkyBlue'
-      ContentTextForeground = 'Red'
-      ButtonType = 'OK'
-        }
-    New-WPFMessageBox @InfoParams -Content "Need About 10+ minutes to update UI-Manual database"
-    $global:csvfilename=$getchiptool[-1]
-      }
+    if($getchiptool[-1].length -eq 1){
+      $global:csvfilename=$getchiptool 
+    }
     if(!$global:excelfile){
       [System.Windows.Forms.MessageBox]::Show("Fail to select the excel file","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
       exit
       }
-     if(!(test-path $global:csvfilename)){
-      [System.Windows.Forms.MessageBox]::Show("Fail to get csv file","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
-       exit
-      }    
+    if(!(test-path $global:csvfilename)){
+    [System.Windows.Forms.MessageBox]::Show("Fail to get csv file","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
+      exit
+    }    
 
     $data=Import-Csv  $global:csvfilename
     $selchek=selection_manual -data $data -column1 "catg" -column2 "TestCaseID"
