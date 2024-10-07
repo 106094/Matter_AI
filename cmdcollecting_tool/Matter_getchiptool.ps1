@@ -333,7 +333,7 @@ foreach($line in $csvcontent){
  
    $splitcontent=$line.flow.split("`n")|Where-Object{$_.length -gt 0}
     ForEach($splitct in $splitcontent){
-      if(!($splitct -match "\sTH_CR\d+") -and !($splitct -match "\sobtained\sfrom\s") -and !($splitct -match "\son\sTH1$")){
+      if(!($splitct -match "\sTH_CR\d+") -and !($splitct -match "\sobtained\sfrom\s") -and !($splitct -match "\son\sTH1")){
       $toolcmd=0
       if ( $splitct -match "\S+\.$"){
           $splitct=$splitct.Substring(0,$splitct.length-1)
