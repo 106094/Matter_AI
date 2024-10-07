@@ -922,10 +922,11 @@ function puttystart ([string]$puttyname) {
        start-sleep -s 2
        $wshell.SendKeys("{enter}")
        start-sleep -s 2
-       putty_paste -cmdline "sudo -s"
-       putty_paste -cmdline $pskey
+
        
-       if($global:testtype -eq 1){     
+       if($global:testtype -eq 1){
+       putty_paste -cmdline "sudo -s"
+       putty_paste -cmdline $pskey  
        putty_paste -cmdline "docker ps -a"
        $idlogin=get-content "C:\Matter_AI\logs\lastlog.log"
        $checkmatch=$idlogin -match "\/bin\/bash"
@@ -941,7 +942,9 @@ function puttystart ([string]$puttyname) {
        putty_paste -cmdline "docker start $ctnid; docker exec -it $ctnid /bin/bash; cd $sshpath"
        }
        if($global:testtype -eq 2){
-       putty_paste -cmdline "cd /root/apps"
+       putty_paste -cmdline "sudo -s" -puttyname $puttyname
+       putty_paste -cmdline $pskey -puttyname $puttyname
+       putty_paste -cmdline "cd /root/apps" -puttyname $puttyname
        }
 }
 
@@ -965,8 +968,8 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
     }
   
     Remove-Item "$ENV:UserProfile\downloads\*.csv" -force
-    $link_save=$goo_link+"export?format=csv&gid=1307777084&range=A1:J1000"
-    $link_save
+    $link_save=$goo_link+"export?format=csv&gid=$($gid)&range=$($sv_range)"
+    #$link_save
     $starttime=get-date
     Start-Process msedge $link_save
     
@@ -993,6 +996,6 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
      Send-MailMessage @paramHash -Encoding utf8 -SmtpServer zimbra.allion.com.tw 
   
     }
-    (get-process -name "chrome" -ea SilentlyContinue).CloseMainWindow()
+    (get-process -name "msedge" -ea SilentlyContinue).CloseMainWindow()
   }
   

@@ -107,7 +107,7 @@ if ($global:testtype -eq 2){
   $headers=$pairsettings[0].PSObject.Properties.Name
   $nodeid=((get-content C:\Matter_AI\settings\config_linux.txt | Select-String "nodeid"|out-string).split(":"))[-1].trim()
   $logtc=(get-childitem -path "C:\Matter_AI\logs\_manual" -directory | Sort-Object LastWriteTime -Descending | Select-Object -First 1).fullname
-
+  $lastcaseid=$null
   $specialsets=import-csv -path C:\Matter_AI\settings\*manual_special.csv
   $varhash=@()
   $caseids=$global:selchek
@@ -116,7 +116,7 @@ if ($global:testtype -eq 2){
   #$sound.SoundLocation = "C:\Windows\Media\notify.wav"
    $paring_thread="TBD"
    $paring_manual="./chip-tool pairing code-wifi node-id --wifi-ssid --wifi-passphrase --manual-code --paa-trust-store-path /home/ubuntu/PAA/ --trace_decode 1"
-   $paring_ble="./chip-tool pairing ble-wifi node-id --wifi-ssid --wifi-passphrase --discriminator --passcode --paa-trust-store-path /home/ubuntu/PAA/ --trace_decode 1"
+   $paring_ble="./chip-tool pairing ble-wifi node-id --wifi-ssid --wifi-passphrase --passcode --discriminator --paa-trust-store-path /home/ubuntu/PAA/ --trace_decode 1"
    
    if ($pairsettings."--thread".length -gt 0){
     $paringcmd=$paring_thread
@@ -160,6 +160,11 @@ if ($global:testtype -eq 2){
         ButtonType = 'OK'
           }
     New-WPFMessageBox @InfoParams -Content "Please Reset Your DUT, then click ok"
+     #check if putty session exist
+     $sessionid= ($global:puttyset|Where-Object{$_.name -eq $puttyname}|Select-Object -Last 1).puttypid
+        if(!$sessionid -or !(get-process -id $sessionid -ErrorAction SilentlyContinue)){   
+           puttystart -puttyname $puttyname
+        }
     
     #start pairing with restest
     foreach($header in $headers){
@@ -172,10 +177,10 @@ if ($global:testtype -eq 2){
     $logpair="$tclogfd\$($datetime2)_$($caseid)_0pairing.log"    
     new-item -ItemType File -Path $logpair | Out-Null
         $k=$pairresult=0
-        putty_paste -cmdline "rm -rf /tmp/chip_*"
+        putty_paste -cmdline "rm -rf /tmp/chip_*" -puttyname $puttyname
         while (!$pairresult -and $k -lt $retesttime){
           $k++
-          $pairresult=putty_paste -cmdline "$paringcmd" -line1 -1 -checkline1 "pass"
+          $pairresult=putty_paste -cmdline "$paringcmd" -checkline1 "Device commissioning completed with success" -puttyname $puttyname
           add-content -path $logpair -Value (get-content -path C:\Matter_AI\logs\lastlog.log )
           write-host "round $k"
         }
@@ -186,12 +191,8 @@ if ($global:testtype -eq 2){
       $datetime2=get-date -Format yyyyMMdd_HHmmss
       $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid).log"
       new-item -ItemType File -Path $logtcstep | Out-Null
-     if($puttyname.length -gt 0){
-        $sessionid= ($global:puttyset|Where-Object{$_.name -eq $puttyname}|Select-Object -Last 1).puttypid
-        if(!$sessionid -or !($sessionid -and (get-process -id $sessionid -ErrorAction SilentlyContinue))){   
-           puttystart -puttyname $puttyname
-        }
-      }
+
+      
       $k=0
       foreach($pyline in $pylines){
         $getlastkey=0

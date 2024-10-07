@@ -37,12 +37,12 @@ if(!($chkmod)){
  
    if(test-path "$($PSfolder)\importexcel.psd1"){
     Get-ChildItem -path $PSfolder -Recurse|Unblock-File
-      Import-Module importexcel
+      Import-Module importexcel     
      
-     try{ 
-      Get-Command Import-Excel
-      } catch{
-     Write-Output "importexcel Package Tool install FAILED"
+      $checkcmd=Get-Command Import-Excel
+      if(!$checkcmd){
+        return 0
+        exit
         }
  
  
