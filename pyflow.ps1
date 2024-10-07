@@ -141,6 +141,7 @@ if ($global:testtype -eq 2){
     }
     $caseid = ($matches[0].replace(" ","")).trim()
     $pylines=($csv.cmd).split("`n")
+
     
     if($lastcaseid -ne $caseid){
         $lastcaseid=$caseid
@@ -160,12 +161,13 @@ if ($global:testtype -eq 2){
         ButtonType = 'OK'
           }
     New-WPFMessageBox @InfoParams -Content "Please Reset Your DUT, then click ok"
-     #check if putty session exist
+    
+   #check if putty session exist
      $sessionid= ($global:puttyset|Where-Object{$_.name -eq $puttyname}|Select-Object -Last 1).puttypid
         if(!$sessionid -or !(get-process -id $sessionid -ErrorAction SilentlyContinue)){   
            puttystart -puttyname $puttyname
         }
-    
+
     #start pairing with restest
     foreach($header in $headers){
       if ($paringcmd -match $hearder){
@@ -188,10 +190,16 @@ if ($global:testtype -eq 2){
     }
     #start step cmd if connected pass
     if ($pairresult){ #test
+
       $datetime2=get-date -Format yyyyMMdd_HHmmss
       $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid).log"
       new-item -ItemType File -Path $logtcstep | Out-Null
 
+      #check if putty session exist
+     $sessionid= ($global:puttyset|Where-Object{$_.name -eq $puttyname}|Select-Object -Last 1).puttypid
+        if(!$sessionid -or !(get-process -id $sessionid -ErrorAction SilentlyContinue)){   
+           puttystart -puttyname $puttyname
+        }
       
       $k=0
       foreach($pyline in $pylines){
