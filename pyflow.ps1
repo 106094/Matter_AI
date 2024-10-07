@@ -209,10 +209,11 @@ if ($global:testtype -eq 2){
           $specialset=$specialsets|Where-Object{$_.source -eq $excelfilename -and $_.TC -eq $caseid -and $_.step -eq $stepid -and $_.cmdline -eq $k}
           if ($specialset){
            foreach($special in $specialset){ 
-             $method=$specialset."method"
+             $method=$special."method"
+             $newputtyname=$special."diff_session"
                if($method -match "replace"){
-                 $keyword=$specialset."cmd_keyword"
-                 $replaceby=$specialset."repalce"
+                 $keyword=$special."cmd_keyword"
+                 $replaceby=$special."replace"
                  if($replaceby -match "var\:"){
                    $paraname=$replaceby.replace("var:","")
                    $replaceby=($varhash|Where-Object{$_.para_name -eq $paraname})."setvalue"
@@ -220,14 +221,14 @@ if ($global:testtype -eq 2){
                  $pyline = $pyline.replace($keyword, $replaceby)
                 }
                if($method -match "getlastlog"){
-                $getlastkey=$specialset."lastlog_keyword"
-                $paraname=$specialset."para_name"
+                $getlastkey=$special."lastlog_keyword"
+                $paraname=$special."para_name"
                 }
                 if($method -match "skip"){
                   $runflag=0
                 }
                 if($method -match "message"){
-                  $message=$specialset."message"
+                  $message=$special."message"
                   $InfoParams = @{
                     Title = "INFORMATION" 
                     TitleFontSize = 22
@@ -238,11 +239,11 @@ if ($global:testtype -eq 2){
                       }
                     New-WPFMessageBox @InfoParams -Content "Please Reset Your DUT, then click ok"
                 }
-                if($method -match "diff_session"){
-                  $puttyname=$specialset."diff_session"
+                if($newputtyname.length -gt 0){
+                  $puttyname=$newputtyname
                 }
                 if($method -match "add"){
-                  $addcmd=$specialset."add_cmd"
+                  $addcmd=$special."add_cmd"
                   $pycmd=putty_paste -cmdline "$addcmd" -puttyname $puttyname
                   $lastlogcontent=get-content -path C:\Matter_AI\logs\lastlog.log
                   add-content -path $logtcstep -Value $lastlogcontent
@@ -255,6 +256,7 @@ if ($global:testtype -eq 2){
           add-content -path $logtcstep -Value $lastlogcontent
           if ($getlastkey){
            $matchvalue= ([regex]::Match(($lastlogcontent -match $getlastkey), "$getlastkey(.*)").Groups[1].value).tostring().trim()
+           $matchvalue=($matchvalue.replace("[","")).replace("]","")
            #$matchvalue= (($lastlogcontent|Select-String -Pattern "($getlastkey).*" -AllMatches |  ForEach-Object {$_.matches.value}).split($getlastkey))[-1].trim()
            $varhash+=@([PSCustomObject]@{           
             para_name = $paraname
