@@ -194,12 +194,6 @@ if ($global:testtype -eq 2){
       $datetime2=get-date -Format yyyyMMdd_HHmmss
       $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid).log"
       new-item -ItemType File -Path $logtcstep | Out-Null
-
-      #check if putty session exist
-     $sessionid= ($global:puttyset|Where-Object{$_.name -eq $puttyname}|Select-Object -Last 1).puttypid
-        if(!$sessionid -or !(get-process -id $sessionid -ErrorAction SilentlyContinue)){   
-           puttystart -puttyname $puttyname
-        }
       
       $k=0
       foreach($pyline in $pylines){
@@ -244,13 +238,22 @@ if ($global:testtype -eq 2){
                 }
                 if($method -match "add"){
                   $addcmd=$special."add_cmd"
+                   #check if putty session exist
+                  $sessionid= ($global:puttyset|Where-Object{$_.name -eq $puttyname}|Select-Object -Last 1).puttypid
+                  if(!$sessionid -or !(get-process -id $sessionid -ErrorAction SilentlyContinue)){   
+                      puttystart -puttyname $puttyname
+                  }
                   $pycmd=putty_paste -cmdline "$addcmd" -puttyname $puttyname
                   $lastlogcontent=get-content -path C:\Matter_AI\logs\lastlog.log
                   add-content -path $logtcstep -Value $lastlogcontent
                 }
               }
           }
-          if($runflag -eq 1){  
+          if($runflag -eq 1){
+            $sessionid= ($global:puttyset|Where-Object{$_.name -eq $puttyname}|Select-Object -Last 1).puttypid
+            if(!$sessionid -or !(get-process -id $sessionid -ErrorAction SilentlyContinue)){   
+                puttystart -puttyname $puttyname
+            }
           $pycmd=putty_paste -cmdline "$pyline" -puttyname $puttyname
           $lastlogcontent=get-content -path C:\Matter_AI\logs\lastlog.log
           add-content -path $logtcstep -Value $lastlogcontent
