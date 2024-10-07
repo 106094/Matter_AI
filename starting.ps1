@@ -56,7 +56,7 @@ if(!$checkfile){
 }
 $global:selchek=. $selectionpsfile
 if(!$global:selchek){
-  [System.Windows.Forms.MessageBox]::Show("Fail to select the test case id, test will be stopped","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
+   [System.Windows.Forms.MessageBox]::Show("Fail to select the test case id","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
    exit
 }
 #create a log folder
@@ -68,10 +68,9 @@ if(!(test-path $logtc)){
 }
 if ($global:testtype -eq 2){
   $getcmdpsfile="C:\Matter_AI\cmdcollecting_tool\Matter_getchiptool.ps1"
-  $global:updatechiptool = [System.Windows.Forms.MessageBox]::Show("Need update UI-Manual database?", "Check", [System.Windows.Forms.MessageBoxButtons]::YesNo, [System.Windows.Forms.MessageBoxIcon]::Question, [System.Windows.Forms.MessageBoxDefaultButton]::Button2)
-  $getchiptool=. $getcmdpsfile
-  $global:csvfilename=$getchiptool
-  if ($global:updatechiptool -eq "Yes") {
+  $result = [System.Windows.Forms.MessageBox]::Show("Need update UI-Manual database?", "Check", [System.Windows.Forms.MessageBoxButtons]::YesNo)
+  
+  if ($result -eq "Yes") {
     $InfoParams = @{
       Title = "INFORMATION"
       TitleFontSize = 22
@@ -81,38 +80,45 @@ if ($global:testtype -eq 2){
       ButtonType = 'OK'
         }
     New-WPFMessageBox @InfoParams -Content "Need About 10+ minutes to update UI-Manual database"
-    $global:csvfilename=$getchiptool[-1]
-      }
-    if(!$global:excelfile){
-      [System.Windows.Forms.MessageBox]::Show("Fail to select the excel file","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
+      
+   $getchiptool=. $getcmdpsfile
+   $global:csvfilename=$getchiptool[-1]
+   if($global:excelfile -eq 0){
+    exit
+     }
+     if(!(test-path $global:csvfilename)){      
       exit
+     }
+    }
+    else{
+      $global:excelfile=. "C:\Matter_AI\cmdcollecting_tool\selections_xlsx.ps1"
+      if(!$global:excelfile){
+        [System.Windows.Forms.MessageBox]::Show("Fail to select the excel file","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
+        exit
       }
-     if(!(test-path $global:csvfilename)){
-      [System.Windows.Forms.MessageBox]::Show("Fail to get csv file","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
-       exit
-      }    
-
+      $global:csvfilename="C:\Matter_AI\settings\_manual\manualcmd_"+(get-childitem $global:excelfile).basename.replace("TestPlanVerificationSteps_Auto","")+".csv"
+    }
     $data=Import-Csv  $global:csvfilename
     $selchek=selection_manual -data $data -column1 "catg" -column2 "TestCaseID"
     if(!$selchek){
-      [System.Windows.Forms.MessageBox]::Show("Fail to select the test case id, test will be stopped","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
+      [System.Windows.Forms.MessageBox]::Show("Fail to select the test case id","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
       exit
     }
     #region download manual speacial settings
     $goo_link="https://docs.google.com/spreadsheets/d/19ZPA2Z6SYYtvIj9qXM0FuDASF0FaZP2xjx7jcebrJEQ/"
     $gid="1307777084"
-    $sv_range="A1:L1000"
+    $sv_range="A1:J1000"
     $savepath="C:\Matter_AI\settings\"
     $errormessage="matter manual set download failed"
     webdownload -goo_link $goo_link -gid $gid -sv_range $sv_range -savepath $savepath -errormessage $errormessage
     #endregion
     
-    #create a log folder
-    $datetime=get-date -Format yyyyMMdd_HHmmss
-    $logtc="C:\Matter_AI\logs\_manual\$($datetime)"
-    if(!(test-path $logtc)){
-      new-item -ItemType Directory -Path $logtc | Out-Null
-    }
+#create a log folder
+$datetime=get-date -Format yyyyMMdd_HHmmss
+$logtc="C:\Matter_AI\logs\_manual\$($datetime)"
+if(!(test-path $logtc)){
+  new-item -ItemType Directory -Path $logtc | Out-Null
+}
 }
 ###########################
 $starttime=get-date
@@ -132,8 +138,8 @@ if($continueq -eq "Yes"){
   if ($global:testtype -eq 2){
     $selchek=selection_manual -data $data -column1 "catg" -column2 "TestCaseID"
   }
-  if(!$selchek){
-   [System.Windows.Forms.MessageBox]::Show("Fail to select the test case id, test will be stopped","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
+  if($selchek){
+   [System.Windows.Forms.MessageBox]::Show("Fail to create test case id lists, test will be stopped","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
    }
    
   }
