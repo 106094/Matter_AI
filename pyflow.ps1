@@ -195,6 +195,7 @@ if ($global:testtype -eq 2){
       foreach($pyline in $pylines){
         $runflag=1
         $getlastkey=0
+        $addcmdall=@()
         $k++
         $puttyname=$puttyname0
           $specialset=$specialsets|Where-Object{$_.source -eq $excelfilename -and $_.TC -eq $caseid0 -and $_.step -eq $stepid -and $_.cmdline -eq $k}
@@ -229,7 +230,7 @@ if ($global:testtype -eq 2){
                     ContentTextForeground = 'Red'
                     ButtonType = 'OK'
                       }
-                    New-WPFMessageBox @InfoParams -Content "Please Reset Your DUT, then click ok"
+                    New-WPFMessageBox @InfoParams -Content $message
                 }
                 if($newputtyname.length -gt 0){
                   $puttyname=$newputtyname
@@ -241,14 +242,25 @@ if ($global:testtype -eq 2){
                   if(!$sessionid -or !(get-process -id $sessionid -ErrorAction SilentlyContinue)){   
                       puttystart -puttyname $puttyname
                   }
-                  $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid)-$($k)_Adding.log"
-                  if($puttyname.length -gt 0){
-                    $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid)-$($k)_Adding_$($puttyname).log"
-                  }    
-                  new-item -ItemType File -Path $logtcstep | Out-Null
-                  $pycmd=putty_paste -cmdline "$addcmd" -puttyname $puttyname
-                  $lastlogcontent=get-content -path C:\Matter_AI\logs\lastlog.log
-                  add-content -path $logtcstep -Value $lastlogcontent
+                  if($method -match "add_before"){
+                    $pycmd=putty_paste -cmdline "$addcmd" -puttyname $puttyname
+                    $lastlogcontent=get-content -path C:\Matter_AI\logs\lastlog.log
+                    $datetime2=get-date -Format yyyyMMdd_HHmmss
+                    $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid)-$($k)_$($method).log"
+                    new-item -ItemType File -Path $logtcstep | Out-Null
+                    if($puttyname.length -gt 0){
+                      $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid)-$($k)_$($method)_$($puttyname).log"
+                    }    
+                    add-content -path $logtcstep -Value $lastlogcontent
+                  }
+                  if($method -match "add_after"){
+                    $addcmdall+=@([PSCustomObject]@{
+                      addcmdaf = $addcmd
+                      puttysesstion = $puttyname
+                    })
+                  }
+
+
                 }
               }
           }
@@ -277,7 +289,35 @@ if ($global:testtype -eq 2){
             setvalue = $matchvalue
            })
           }
-        }
+
+         ## add after cmd
+         if($addcmdall){
+          $k=0
+           foreach ($addcmd in $addcmdall){
+            $k++
+            $addcmdaf=$addcmd.addcmdaf
+            $puttysesstion=$addcmd.puttysesstion
+            $pycmd=putty_paste -cmdline "$addcmdaf" -puttyname $puttysesstion
+            $lastlogcontent=get-content -path C:\Matter_AI\logs\lastlog.log
+            $datetime2=get-date -Format yyyyMMdd_HHmmss
+            $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid)-$($k)_$($method).log"
+            new-item -ItemType File -Path $logtcstep | Out-Null
+            if($puttyname.length -gt 0){
+              $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid)-$($k)_$($method)_$($puttyname).log"
+            }    
+            add-content -path $logtcstep -Value $lastlogcontent
+            if ($getlastkey){
+              $matchvalue= ([regex]::Match(($lastlogcontent -match $getlastkey), "$getlastkey(.*)").Groups[1].value).tostring().trim()
+              $matchvalue=($matchvalue.replace("[","")).replace("]","")
+              #$matchvalue= (($lastlogcontent|Select-String -Pattern "($getlastkey).*" -AllMatches |  ForEach-Object {$_.matches.value}).split($getlastkey))[-1].trim()
+              $varhash+=@([PSCustomObject]@{           
+               para_name = $paraname
+               setvalue = $matchvalue
+              })
+             }
+           }
+         }
+       }
    
     }
     }  #test
