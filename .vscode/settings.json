@@ -1,0 +1,14 @@
+{
+    "scm.autoReveal": false,
+    "scm.compactFolders": false,
+    "scm.countBadge": "off",
+    "scm.diffDecorations": "none",
+    "scm.diffDecorationsGutterAction": "none",
+    "scm.diffDecorationsGutterPattern": {
+        "modified": false
+    },
+    "scm.graph.pageOnScroll": false,
+    "scm.showActionButton": false,
+    "scm.showInputActionButton": false,
+    "scm.showHistoryGraph": false
+}
