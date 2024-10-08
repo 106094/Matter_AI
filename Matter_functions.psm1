@@ -140,6 +140,10 @@ start-sleep -s 2
 $wshell.SendKeys("{enter}")
 start-sleep -s 2
 #check log complete
+if($cmdline -match "interactive start" -or !($cmdline -like "*./chip-tool*")){
+    $wshell.SendKeys("{enter}")
+    start-sleep -s 2
+}
 
 if($check_sec -eq 0){$check_sec = 1}
 do{
