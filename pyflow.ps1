@@ -163,6 +163,7 @@ if ($global:testtype -eq 2){
     New-WPFMessageBox @InfoParams -Content "Please Reset Your DUT, then click ok"
     
    #check if putty session exist
+   $puttyname=$puttyname0
      $sessionid= ($global:puttyset|Where-Object{$_.name -eq $puttyname}|Select-Object -Last 1).puttypid
         if(!$sessionid -or !(get-process -id $sessionid -ErrorAction SilentlyContinue)){   
            puttystart -puttyname $puttyname

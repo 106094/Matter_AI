@@ -34,6 +34,9 @@ if (!(Test-Connection -ComputerName $sship -Count 1 -ErrorAction SilentlyContinu
 write-host "ssh ip $sship is connected"
 #endregion
 
+$ctcmds=import-csv C:\Matter_AI\settings\chiptoolcmds.csv
+$global:matchcmds=$ctcmds.name|Get-Unique
+
 $timestart=get-date
 Import-Module C:\Matter_AI\Matter_functions.psm1
 $global:puttyset = @()
