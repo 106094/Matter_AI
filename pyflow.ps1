@@ -200,7 +200,7 @@ if ($global:testtype -eq 2){
         $runflag=1
         $getlastkey=0
         $k++
-          $specialset=$specialsets|Where-Object{$_.source -eq $excelfilename -and $_.TC -eq $caseid -and $_.step -eq $stepid -and $_.cmdline -eq $k}
+          $specialset=$specialsets|Where-Object{$_.source -eq $excelfilename -and $_.TC -eq $caseid0 -and $_.step -eq $stepid -and $_.cmdline -eq $k}
           if ($specialset){
            foreach($special in $specialset){ 
              $method=$special."method"
