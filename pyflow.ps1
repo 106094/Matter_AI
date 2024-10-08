@@ -131,7 +131,7 @@ if ($global:testtype -eq 2){
   foreach($csv in $csvdata){
     $caseid0=$csv.TestCaseID
     $stepid=$csv.step
-    $puttyname=$csv.session
+    $puttyname0=$csv.session
     $pattern = 'TC-\w+-\d+\.\d+'
     $caseid = $null
     $check=$caseid0 -match $pattern
@@ -190,19 +190,17 @@ if ($global:testtype -eq 2){
     }
     #start step cmd if connected pass
     if ($pairresult){ #test
-
-      $datetime2=get-date -Format yyyyMMdd_HHmmss
-      $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid).log"
-      new-item -ItemType File -Path $logtcstep | Out-Null
       
       $k=0
       foreach($pyline in $pylines){
         $runflag=1
         $getlastkey=0
         $k++
+        $puttyname=$puttyname0
           $specialset=$specialsets|Where-Object{$_.source -eq $excelfilename -and $_.TC -eq $caseid0 -and $_.step -eq $stepid -and $_.cmdline -eq $k}
           if ($specialset){
            foreach($special in $specialset){ 
+             $puttyname=$puttyname0
              $method=$special."method"
              $newputtyname=$special."diff_session"
                if($method -match "replace"){
@@ -243,6 +241,11 @@ if ($global:testtype -eq 2){
                   if(!$sessionid -or !(get-process -id $sessionid -ErrorAction SilentlyContinue)){   
                       puttystart -puttyname $puttyname
                   }
+                  $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid)-$($k)_Adding.log"
+                  if($puttyname.length -gt 0){
+                    $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid)-$($k)_Adding_$($puttyname).log"
+                  }    
+                  new-item -ItemType File -Path $logtcstep | Out-Null
                   $pycmd=putty_paste -cmdline "$addcmd" -puttyname $puttyname
                   $lastlogcontent=get-content -path C:\Matter_AI\logs\lastlog.log
                   add-content -path $logtcstep -Value $lastlogcontent
@@ -256,7 +259,15 @@ if ($global:testtype -eq 2){
             }
           $pycmd=putty_paste -cmdline "$pyline" -puttyname $puttyname
           $lastlogcontent=get-content -path C:\Matter_AI\logs\lastlog.log
+          
+          $datetime2=get-date -Format yyyyMMdd_HHmmss
+          $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid)-$($k).log"
+          if($puttyname.length -gt 0){
+            $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid)-$($k)_$($puttyname).log"
+          }    
+          new-item -ItemType File -Path $logtcstep | Out-Null
           add-content -path $logtcstep -Value $lastlogcontent
+
           if ($getlastkey){
            $matchvalue= ([regex]::Match(($lastlogcontent -match $getlastkey), "$getlastkey(.*)").Groups[1].value).tostring().trim()
            $matchvalue=($matchvalue.replace("[","")).replace("]","")
