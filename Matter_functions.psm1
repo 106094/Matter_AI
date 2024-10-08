@@ -154,7 +154,7 @@ start-sleep -s 5
 (get-process notepad).CloseMainWindow()|Out-Null
 $checkend=((get-content $logfile)[-1]|Out-String).Trim()
 $lastword=$checkend[-1]
-}until($lastword -eq ":" -or $lastword -eq "$" -or $lastword -eq "#" -or $checkend -eq "logout" -or $checkend -eq ">")
+}until($lastword -eq ":" -or $lastword -eq "$" -or $lastword -eq "#" -or $checkend -eq "logout" -or $checkend -eq ">>>")
 
 $newlogline=(get-content $logfile).count -2
 $alllog=get-content $logfile
