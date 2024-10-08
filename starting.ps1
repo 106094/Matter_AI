@@ -108,7 +108,7 @@ if ($global:testtype -eq 2){
 
     $data=Import-Csv  $global:csvfilename
     $selchek=selection_manual -data $data -column1 "catg" -column2 "TestCaseID"
-    if($selchek[-1] -eq 0){
+    if($selchek[-1] -eq 0 -or $global:sels -match "xlsx"){
       [System.Windows.Forms.MessageBox]::Show("Fail to select the test case id, test will be stopped","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
       exit
     }
