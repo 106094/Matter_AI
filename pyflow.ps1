@@ -260,6 +260,8 @@ if ($global:testtype -eq 2){
                        para_name = $paraname
                        setvalue = $matchvalue
                       })
+                      Write-Output "add var before"
+                      $varhash
                      }
 
                   }
@@ -298,6 +300,8 @@ if ($global:testtype -eq 2){
             para_name = $paraname
             setvalue = $matchvalue
            })
+           Write-Output "add var"
+           $varhash
           }
 
          ## add after cmd
@@ -324,6 +328,8 @@ if ($global:testtype -eq 2){
                para_name = $paraname
                setvalue = $matchvalue
               })
+              Write-Output "add var after"
+              $varhash
              }
            }
          }
