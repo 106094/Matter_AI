@@ -109,7 +109,7 @@ if ($global:testtype -eq 2){
   $logtc=(get-childitem -path "C:\Matter_AI\logs\_manual" -directory | Sort-Object LastWriteTime -Descending | Select-Object -First 1).fullname
   $lastcaseid=$null
   $specialsets=import-csv -path C:\Matter_AI\settings\*manual_special.csv
-  $varhash=@()
+  $global:varhash=@()
   $caseids=$global:selchek
   $csvdata=import-csv $global:csvfilename | Where-Object {$_.TestCaseID -in $caseids -and $_.cmd.length -gt 0}
   #$sound = New-Object -TypeName System.Media.SoundPlayer
@@ -212,7 +212,7 @@ if ($global:testtype -eq 2){
                  $replaceby=$special."replace"
                  if($replaceby -match "var\:"){
                    $paraname=$replaceby.replace("var:","")
-                   $replaceby=($varhash|Where-Object{$_.para_name -eq $paraname})."setvalue"
+                   $replaceby=($global:varhash|Where-Object{$_.para_name -eq $paraname})."setvalue"
                  }
                  $pyline = $pyline.replace($keyword, $replaceby)
                 }                           
@@ -251,19 +251,11 @@ if ($global:testtype -eq 2){
                       $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid)-$($k)_$($method)_$($puttyname).log"
                     }    
                     add-content -path $logtcstep -Value $lastlogcontent
-                    if ($getlastkey){
-                      $getlastkey=$getlastkey.replace("[","\[").replace("]","\]")
-                      $matchvalue= ([regex]::Match(($lastlogcontent -match $getlastkey), "$getlastkey(.*)").Groups[1].value).tostring().trim()
-                      $matchvalue=($matchvalue.replace("[","")).replace("]","")
-                      #$matchvalue= (($lastlogcontent|Select-String -Pattern "($getlastkey).*" -AllMatches |  ForEach-Object {$_.matches.value}).split($getlastkey))[-1].trim()
-                      $varhash+=@([PSCustomObject]@{           
-                       para_name = $paraname
-                       setvalue = $matchvalue
-                      })
+                    if ($getlastkey.Length -gt 0){
+                      getparameter -getlastkey $getlastkey
                       Write-Output "add var before"
-                      $varhash
+                      $global:varhash
                      }
-
                   }
                   if($method -match "add_after"){
                     $addcmdall+=@([PSCustomObject]@{
@@ -292,16 +284,10 @@ if ($global:testtype -eq 2){
           new-item -ItemType File -Path $logtcstep | Out-Null
           add-content -path $logtcstep -Value $lastlogcontent
 
-          if ($getlastkey){
-           $matchvalue= ([regex]::Match(($lastlogcontent -match $getlastkey), "$getlastkey(.*)").Groups[1].value).tostring().trim()
-           $matchvalue=($matchvalue.replace("[","")).replace("]","")
-           #$matchvalue= (($lastlogcontent|Select-String -Pattern "($getlastkey).*" -AllMatches |  ForEach-Object {$_.matches.value}).split($getlastkey))[-1].trim()
-           $varhash+=@([PSCustomObject]@{           
-            para_name = $paraname
-            setvalue = $matchvalue
-           })
+          if ($getlastkey.Length -gt 0){
+           getparameter -getlastkey $getlastkey
            Write-Output "add var"
-           $varhash
+           $global:varhash
           }
 
          ## add after cmd
@@ -320,16 +306,10 @@ if ($global:testtype -eq 2){
               $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid)-$($k)_$($method)_$($puttyname).log"
             }    
             add-content -path $logtcstep -Value $lastlogcontent
-            if ($getlastkey){
-              $matchvalue= ([regex]::Match(($lastlogcontent -match $getlastkey), "$getlastkey(.*)").Groups[1].value).tostring().trim()
-              $matchvalue=($matchvalue.replace("[","")).replace("]","")
-              #$matchvalue= (($lastlogcontent|Select-String -Pattern "($getlastkey).*" -AllMatches |  ForEach-Object {$_.matches.value}).split($getlastkey))[-1].trim()
-              $varhash+=@([PSCustomObject]@{           
-               para_name = $paraname
-               setvalue = $matchvalue
-              })
+            if ($getlastkey.Length -gt 0){
+              getparameter -getlastkey $getlastkey
               Write-Output "add var after"
-              $varhash
+              $global:varhash
              }
            }
          }
