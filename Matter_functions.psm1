@@ -114,9 +114,10 @@ if(get-process putty){
     }
 
 $logfile=(Get-ChildItem $logputty|Sort-Object LastWriteTime|Select-Object -last 1).fullname
-start-process notepad $logfile -WindowStyle Minimized
-start-sleep -s 3
-(get-process notepad).CloseMainWindow()|Out-Null
+$checkend=((get-content $logfile)[-1]|Out-String).Trim()
+#start-process notepad $logfile -WindowStyle Minimized
+#start-sleep -s 3
+#(get-process notepad).CloseMainWindow()|Out-Null
 $lastlogline=(get-content $logfile).count -1
 
 [Microsoft.VisualBasic.interaction]::AppActivate($pidd)|out-null
@@ -135,6 +136,10 @@ $x1=[math]::Round(($WindowRect.Left + $WindowRect.Right)/2/$sacle,0)
 $y1=[math]::Round(($WindowRect.Top + $WindowRect.Bottom)/2/$sacle,0)
 [Clicker]::LeftClickAtPoint($x1, $y1)
 start-sleep -s 1
+if($checkend -eq ">>>" -and $cmdline -match "\./chip\-tool\s"){
+    $wshell.SendKeys("^c")
+    start-sleep -s 2
+}
 [Clicker]::RightClickAtPoint($x1, $y1)
 start-sleep -s 2
 $wshell.SendKeys("{enter}")
@@ -150,7 +155,7 @@ do{
 start-sleep -s $check_sec
 $logfile=(Get-ChildItem $logputty|Sort-Object LastWriteTime|Select-Object -last 1).fullname
 start-process notepad $logfile -WindowStyle Minimized
-start-sleep -s 5
+start-sleep -s 3
 (get-process notepad).CloseMainWindow()|Out-Null
 $checkend=((get-content $logfile)[-1]|Out-String).Trim()
 $lastword=$checkend[-1]
