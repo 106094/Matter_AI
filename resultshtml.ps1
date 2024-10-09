@@ -5,10 +5,12 @@ $htmlContent=$null
 # Import the CSV data
 $csvData = Import-Csv -Path $global:csvfilename|Where-Object{$_.TestCaseID -in $global:sels}
 $resultlog=(get-childitem "C:\Matter_AI\logs\_manual\" -directory | Sort-Object LastWriteTime -Descending | Select-Object -First 1).fullname
-
 $reportPath = "$resultlog\report.html"
-$resultpaths=Get-ChildItem $resultlog -directory|Sort-Object LastWriteTime
-
+$resultpaths=Get-ChildItem $resultlog -Directory
+#check if there is availble test case folder
+$checktcfolder=Get-ChildItem $resultlog -directory|Sort-Object LastWriteTime|Select-Object -First 1
+$checktcfile=Get-ChildItem $checktcfolder.FullName -File
+if($checktcfile){
 # Start building the HTML content
 # Start building the HTML content with enhanced CSS for text wrapping
 $htmlContent = @"
@@ -54,22 +56,20 @@ $htmlContent = @"
     </style>
 </head>
 <script>
-function textClicked() {
-  var coll = document.getElementsByClassName(`"collapsible`");
-  var i;
+  function toggleCollapsible(element) {
+    // Toggle active class for the clicked element
+    element.classList.toggle("active");
 
-  for (i = 0; i < coll.length; i++) {
-    coll[i].addEventListener(`"click`", function() {
-      this.classList.toggle(`"active`");
-      var content = this.nextElementSibling;
-      if (content.style.display === `"block`") {
-        content.style.display = `"none`";
-      } else {
-        content.style.display = `"block`";
-      }
-    });
-  };
-}
+    // Get the next sibling element (the collapsible content)
+    var content = element.nextElementSibling;
+
+    // Toggle the display of the content
+    if (content.style.display === "block") {
+      content.style.display = "none";
+    } else {
+      content.style.display = "block";
+    }
+  }
 </script>
 <body>
     <h2>$resultlog</h2>
@@ -78,12 +78,11 @@ function textClicked() {
 
 # Add column headers (using the first object in the CSV data)
 
-
 foreach($resultpath in $resultpaths){
   $fullpath=$resultpath.fullname
   $tcname=$resultpath.name
 $htmlContent += @"
-<a href="javascript:void(0)" onclick="textClicked()">$tcname</a>
+<a class="collapsible" href="javascript:void(0)" onclick="toggleCollapsible(this)">$tcname</a>
   <div class="content">
     <p>
       <table>
@@ -144,5 +143,6 @@ $htmlContent += @"
 # Output the HTML content to the file
 $htmlContent | Out-File -FilePath $reportPath -Encoding UTF8
 
+}
 # Open the HTML report (optional)
-Start-Process $reportPath
+# Start-Process $reportPath

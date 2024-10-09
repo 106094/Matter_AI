@@ -136,7 +136,7 @@ while ($continueq -eq "Yes"){
     . C:\Matter_AI\pyflow.ps1
   }
 
-<#create result html
+#create result html
 if ($global:testtype -eq 2){
   . C:\Matter_AI\resultshtml.ps1
 }
@@ -173,6 +173,11 @@ if($continueq -eq "Yes"){
 }
   
 #puttyexit
+if ($global:testtype -eq 2){
+$resultlog=(get-childitem "C:\Matter_AI\logs\_manual\" -directory | Sort-Object LastWriteTime -Descending | Select-Object -First 1).fullname
+$reportPath = "$resultlog\report.html"
+Start-Process $reportPath
+}
 
 $timepassed=New-TimeSpan -start $starttime -end $endtime
 $timegap="{0} Hours, {1} minutes, {2} seconds" -f $timepassed.Hours, $timepassed.Minutes, $timepassed.Seconds
