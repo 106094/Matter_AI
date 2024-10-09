@@ -205,6 +205,8 @@ if ($global:testtype -eq 2){
              $puttyname=$puttyname0
              $method=$special."method"
              $newputtyname=$special."diff_session"
+             $getlastkey=$special."lastlog_keyword"
+             $paraname=$special."para_name"
                if($method -match "replace"){
                  $keyword=$special."cmd_keyword"
                  $replaceby=$special."replace"
@@ -213,11 +215,7 @@ if ($global:testtype -eq 2){
                    $replaceby=($varhash|Where-Object{$_.para_name -eq $paraname})."setvalue"
                  }
                  $pyline = $pyline.replace($keyword, $replaceby)
-                }
-               if($method -match "getlastlog"){
-                $getlastkey=$special."lastlog_keyword"
-                $paraname=$special."para_name"
-                }
+                }                           
                 if($method -match "skip"){
                   $runflag=0
                 }
@@ -253,6 +251,17 @@ if ($global:testtype -eq 2){
                       $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid)-$($k)_$($method)_$($puttyname).log"
                     }    
                     add-content -path $logtcstep -Value $lastlogcontent
+                    if ($getlastkey){
+                      $getlastkey=$getlastkey.replace("[","\[").replace("]","\]")
+                      $matchvalue= ([regex]::Match(($lastlogcontent -match $getlastkey), "$getlastkey(.*)").Groups[1].value).tostring().trim()
+                      $matchvalue=($matchvalue.replace("[","")).replace("]","")
+                      #$matchvalue= (($lastlogcontent|Select-String -Pattern "($getlastkey).*" -AllMatches |  ForEach-Object {$_.matches.value}).split($getlastkey))[-1].trim()
+                      $varhash+=@([PSCustomObject]@{           
+                       para_name = $paraname
+                       setvalue = $matchvalue
+                      })
+                     }
+
                   }
                   if($method -match "add_after"){
                     $addcmdall+=@([PSCustomObject]@{

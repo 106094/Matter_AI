@@ -87,7 +87,6 @@ if ($global:testtype -eq 2){
 
       }
       $getchiptool=. $getcmdpsfile
-
       
     if(!$getchiptool){
       [System.Windows.Forms.MessageBox]::Show("Fail to create import-excel module","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
@@ -136,19 +135,40 @@ while ($continueq -eq "Yes"){
   if($selchek){
     . C:\Matter_AI\pyflow.ps1
   }
+
+<#create result html
+if ($global:testtype -eq 2){
+  . C:\Matter_AI\resultshtml.ps1
+}
+#>
+
 $endtime=get-date
 $continueq = [System.Windows.Forms.MessageBox]::Show("Need Retest?", "Check", [System.Windows.Forms.MessageBoxButtons]::YesNo)
 if($continueq -eq "Yes"){
   if ($global:testtype -eq 1){
+    $datetime=get-date -Format yyyyMMdd_HHmmss
+    $logtc="C:\Matter_AI\logs\_py\$($datetime)"
+    if(!(test-path $logtc)){
+      new-item -ItemType Directory -Path $logtc | Out-Null
+    }
     $selchek=. $selectionpsfile
+    if(!$selchek){
+      [System.Windows.Forms.MessageBox]::Show("Fail to select the test case id, test will be stopped","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
+      $continueq=0  
+    }
   }
   if ($global:testtype -eq 2){
+    $datetime=get-date -Format yyyyMMdd_HHmmss
+    $logtc="C:\Matter_AI\logs\_manual\$($datetime)"
+    if(!(test-path $logtc)){
+      new-item -ItemType Directory -Path $logtc | Out-Null
+    }
     $selchek=selection_manual -data $data -column1 "catg" -column2 "TestCaseID"
+    if($selchek[-1] -eq 0 -or $global:sels -match "xlsx"){
+      [System.Windows.Forms.MessageBox]::Show("Fail to select the test case id, test will be stopped","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
+      $continueq=0 
+    }
   }
-  if(!$selchek){
-   [System.Windows.Forms.MessageBox]::Show("Fail to select the test case id, test will be stopped","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
-   }
-   
   }
 }
   
