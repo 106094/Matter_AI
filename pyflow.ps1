@@ -115,8 +115,8 @@ if ($global:testtype -eq 2){
   #$sound = New-Object -TypeName System.Media.SoundPlayer
   #$sound.SoundLocation = "C:\Windows\Media\notify.wav"
    $paring_thread="TBD"
-   $paring_manual="./chip-tool pairing code-wifi node-id --wifi-ssid --wifi-passphrase --manual-code --paa-trust-store-path /home/ubuntu/PAA/ --trace_decode 1"
-   $paring_ble="./chip-tool pairing ble-wifi node-id --wifi-ssid --wifi-passphrase --passcode --discriminator --paa-trust-store-path /home/ubuntu/PAA/ --trace_decode 1"
+   $paring_manual="./chip-tool pairing code-wifi node-id --wifi-ssid --wifi-passphrase --manual-code --paa-trust-store-path paapath --trace_decode 1"
+   $paring_ble="./chip-tool pairing ble-wifi node-id --wifi-ssid --wifi-passphrase --passcode --discriminator --paa-trust-store-path paapath --trace_decode 1"
    
    if ($pairsettings."--thread".length -gt 0){
     $paringcmd=$paring_thread
