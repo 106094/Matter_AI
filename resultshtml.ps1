@@ -89,7 +89,7 @@ $htmlContent += @"
        <thead>
         <tr>
 "@
-      $headers=@("caseid","step","cmdstep","cmd","result","checks","referance")
+      $headers=@("caseid","step","cmdstep","cmd","logs","checks","example","result","referance")
       foreach ($header in $headers) {
       $htmlContent += "<th>$header</th>"
           }
@@ -111,6 +111,10 @@ $htmlContent += "</tr></thead><tbody>"
           $newline=(($_ -split "CHIP\:")[1]) + "<br>"
           $newline
              }
+             $example = $csv.example|foreach-object{
+              $newline=(($_ -split "CHIP\:")[1]) + "<br>"
+              $newline
+                 }
 
       $htmlContent += "<tr>"
       $htmlContent += "<td>$($tcname)</td>"
@@ -118,7 +122,9 @@ $htmlContent += "</tr></thead><tbody>"
       $htmlContent += "<td>$($k)</td>"      
       $htmlContent += "<td>$($csv.cmd)</td>" 
       $htmlContent += "<td>$($logdata)</td>"
-      $htmlContent += "<td></td>"     
+      $htmlContent += "<td>$($csv.verify)</td>"
+      $htmlContent += "<td>$($example)</td>"
+      $htmlContent += "<td></td>"      
       $htmlContent += "<td>$($refdata)</td>"
       $htmlContent += "</tr>"
     }    

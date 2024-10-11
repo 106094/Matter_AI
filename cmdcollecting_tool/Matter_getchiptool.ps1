@@ -16,39 +16,6 @@ if($PSScriptRoot.length -eq 0){
   }
 
 #$spath="C:\Matter_AI"
-#reg insatll importexcel
-$chkmod=Get-Module -name importexcel
-if(!($chkmod)){
-  write-host "need install importexcel"
-  $PSfolder=(($env:PSModulePath).split(";")|Where-Object{$_ -match "user" -and $_ -match "WindowsPowerShell"})+"\"+"importexcel"
-  $checkPSfolder=Get-ChildItem $PSfolder  -Recurse -file -Filter ImportExcel.psd1 -ErrorAction SilentlyContinue
- 
- if(!($checkPSfolder)){
-  New-Item -ItemType directory $PSfolder -ea SilentlyContinue|out-null
-  $A1=(Get-ChildItem "$scriptRoot\cmdcollecting_tool\tool\importexcel*.zip").fullname
-  $shell.NameSpace($PSfolder).copyhere($shell.NameSpace($A1).Items(),4)
-  }
- 
-  $checkPSfolder=Get-ChildItem $PSfolder -Recurse -file -Filter ImportExcel.psd1
- 
-   if(!$checkPSfolder){
-   Write-Output "importexcel Package Tool unzip FAILED"
-     }
- 
-   if(test-path "$($PSfolder)\importexcel.psd1"){
-    Get-ChildItem -path $PSfolder -Recurse|Unblock-File
-      Import-Module importexcel     
-     
-      $checkcmd=Get-Command Import-Excel
-      if(!$checkcmd){
-        return 0
-        exit
-        }
- 
- 
-   }
-}
- #endregion
 
 #region read PICS excusion
 $pictxt="C:\Matter_AI\settings\ci-pics-values*.txt"
@@ -90,6 +57,39 @@ $a[-1]|export-csv C:\Matter_AI\settings\_manual\settings.csv -NoTypeInformation 
 
 #filter manual and as client and UI-Manual
 if ($global:updatechiptool -eq "Yes"){
+#region insatll importexcel
+$chkmod=Get-Module -name importexcel
+if(!($chkmod)){
+  write-host "need install importexcel"
+  $PSfolder=(($env:PSModulePath).split(";")|Where-Object{$_ -match "user" -and $_ -match "WindowsPowerShell"})+"\"+"importexcel"
+  $checkPSfolder=Get-ChildItem $PSfolder  -Recurse -file -Filter ImportExcel.psd1 -ErrorAction SilentlyContinue
+ 
+ if(!($checkPSfolder)){
+  New-Item -ItemType directory $PSfolder -ea SilentlyContinue|out-null
+  $A1=(Get-ChildItem "$scriptRoot\cmdcollecting_tool\tool\importexcel*.zip").fullname
+  $shell.NameSpace($PSfolder).copyhere($shell.NameSpace($A1).Items(),4)
+  }
+ 
+  $checkPSfolder=Get-ChildItem $PSfolder -Recurse -file -Filter ImportExcel.psd1
+ 
+   if(!$checkPSfolder){
+   Write-Output "importexcel Package Tool unzip FAILED"
+     }
+ 
+   if(test-path "$($PSfolder)\importexcel.psd1"){
+    Get-ChildItem -path $PSfolder -Recurse|Unblock-File
+      Import-Module importexcel
+      $checkcmd=Get-Command Import-Excel
+      if(!$checkcmd){
+        return 0
+        exit
+        }
+ 
+ 
+   }
+}
+ #endregion
+
   #region get chiptool related command
   $ctcmds=import-csv C:\Matter_AI\settings\chiptoolcmds.csv
   $matchcmds=$ctcmds.name|Get-Unique
@@ -98,6 +98,8 @@ if ($global:updatechiptool -eq "Yes"){
 $columncor=(import-csv "C:\Matter_AI\settings\filesettings.csv"|Where-Object{$_.filename -eq ($excelfile).name}|Select-Object -Property column_title).column_title
 $worksheetNames = (Get-ExcelSheetInfo -Path $excelfull).Name
 $sumsheetname=$worksheetNames|Where-Object{$_ -match "cert_repo"}
+
+$excelPackage = [OfficeOpenXml.ExcelPackage]::new((Get-Item $excelfull))
 $worksheetsum=Import-Excel $excelfull -WorksheetName $sumsheetname
 $filteredtcs = ($worksheetsum |Where-Object{$_."Test Case ID".length -gt 0}|  Where-Object {$_."$columncor" -eq "UI-Manual" `
  -and $_."Test Case Name" -notlike "*as client*"})."Test Case ID"
@@ -117,14 +119,16 @@ for($i=$Indexfirst;$i -le $Indexlast;$i++){
  #$sheetname
  if($thisneed){
  #$sheetname
+ 
+ $sheetpackage = $excelPackage.Workbook.Worksheets[$sheetname]
  $sheetdate= Import-Excel $excelfull -WorksheetName $sheetname -NoHeader
- $worksheet = (Open-ExcelPackage -path $excelfull).Workbook.WorkSheets[$sheetname]
+ #$worksheet = (Open-ExcelPackage -path $excelfull).Workbook.WorkSheets[$sheetname]
  $colproperty = ($sheetdate[0] | Get-Member -MemberType NoteProperty).name
  $tcline=$null
  $numbercol=$null
  $precol=$null
  $toolcmd=$null
- $row=0
+ $row=1
  $TH2=0
   foreach($content in $sheetdate){
    
@@ -144,6 +148,7 @@ for($i=$Indexfirst;$i -le $Indexlast;$i++){
       $precon=$null
       $mergerow=$null
       $preconall=@()
+      $TH2=0
      }
     
     if($extractedText -in $filteredtcs){
@@ -250,7 +255,14 @@ for($i=$Indexfirst;$i -le $Indexlast;$i++){
     if($content.$numbercol -ne "#" -and ($content.$cmdcol.Length -gt 0)){
       $pics=$content.$picscol
       $tcstep=$content.$numbercol
-      $picsmerge=($worksheet.Cells[$row, $picscol2]).merge      
+      try{
+        $picsmerge=($sheetpackage.Cells[$row, $picscol2]).merge  
+      }
+      catch{
+        Write-Output "check 261"
+         start-sleep -s 300
+      }
+      $picsmerge=($sheetpackage.Cells[$row, $picscol2]).merge  
       #$stepmerge=($worksheet.Cells[$row, $numbercol2]).merge
       $results=$null
       if($pics.length -ne 0){
@@ -295,15 +307,18 @@ for($i=$Indexfirst;$i -le $Indexlast;$i++){
       }
 
       <# Action to perform if the condition is true #>
-       $tccmd=$content.$cmdcol
-         # line by line check
+       $tccmd=($content.$cmdcol|out-string).trim()
+       $checklines=(($sheetpackage.Cells[$row,[int32]($cmdcol.replace("P",""))].RichText|Where-Object{$_.Color.R -ne 0}).text|out-string).trim()
+        # line by line check
         if($tcline -and $tccmd){
             $outputcsv+=[PSCustomObject]@{
             catg= $sheetname
             TestCaseID=$tcline
             step=$tcstep
-            flow=($tccmd|out-string).trim()
             cmd=$toolcmd
+            verify=$null
+            example=$checklines
+            flow=$tccmd
             results=$results
             session=$null
             }
@@ -372,6 +387,25 @@ foreach($line in $csvcontent){
    }
    if($cmd){
       $line.cmd=($cmd|Out-String).trim()
+      $p=0
+      $verifying=$null
+      $verifying=$line.flow.split("`n")|ForEach-Object{
+       if($_ -like "*verify*"){
+            $p=9999
+        }
+        $p++
+        if($p -gt 9999 -and $_.length -gt 0 -and $_ -notlike "*CHIP:*"){
+          foreach($cmd1 in $cmd){
+            $cmd3=$cmd1.replace("[","*").replace("]","*")
+            if(!($_ -like "*$cmd3*")){
+             $_
+            }
+          }
+       }
+     }
+     if($verifying){
+      $line.verify=($verifying|Out-String).trim()
+    }
    }
   }
 }
