@@ -195,7 +195,7 @@ if ($global:testtype -eq 2){
       $k=0
       foreach($pyline in $pylines){
         $runflag=1
-        $getlastkey=0
+        $getlastkey=$null
         $addcmdall=@()
         $k++
         $puttyname=$puttyname0
