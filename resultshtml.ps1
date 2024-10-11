@@ -85,11 +85,11 @@ $htmlContent += @"
 <a class="collapsible" href="javascript:void(0)" onclick="toggleCollapsible(this)">$tcname</a>
   <div class="content">
     <p>
-      <table>
+      <table width="100%">
        <thead>
         <tr>
 "@
-      $headers=@("caseid","step","cmdstep","cmd","logs","checks","example","result","referance")
+      $headers=@("caseid","step","cmdstep","cmd","logs","varify","checks (green words)","result","referance")
       foreach ($header in $headers) {
       $htmlContent += "<th>$header</th>"
           }
@@ -107,25 +107,37 @@ $htmlContent += "</tr></thead><tbody>"
        $newline=(($_ -split "CHIP\:")[1]) + "<br>"
        $newline
           }
-        $refdata = $csv.flow|foreach-object{
+        
+        <#
+          $refdata = $csv.flow|foreach-object{
           $newline=(($_ -split "CHIP\:")[1]) + "<br>"
           $newline
              }
-             $example = $csv.example|foreach-object{
-              $newline=(($_ -split "CHIP\:")[1]) + "<br>"
+             #>
+             $varify = $csv.verify.split("`n")|foreach-object{
+              $newline=$_  + "<br>"
               $newline
-                 }
+             }
+             $example = $csv.example.split("`n")|foreach-object{
+              $newline=$_
+              if ($_ -match "CHIP\:"){
+                $newline=(($_ -split "CHIP\:")[1]) + "<br>"
+              }
+              $newline=$_ + "<br>"
+              $newline
+             }
+                
 
       $htmlContent += "<tr>"
-      $htmlContent += "<td>$($tcname)</td>"
-      $htmlContent += "<td>$($csv.step)</td>"
-      $htmlContent += "<td>$($k)</td>"      
-      $htmlContent += "<td>$($csv.cmd)</td>" 
-      $htmlContent += "<td>$($logdata)</td>"
-      $htmlContent += "<td>$($csv.verify)</td>"
-      $htmlContent += "<td>$($example)</td>"
-      $htmlContent += "<td></td>"      
-      $htmlContent += "<td>$($refdata)</td>"
+      $htmlContent += "<td style='width: 6%;'>$($tcname)</td>"
+      $htmlContent += "<td style='width: 2%;'>$($csv.step)</td>"
+      $htmlContent += "<td style='width: 1%;'>$($k)</td>"      
+      $htmlContent += "<td style='width: 10%;'>$($csv.cmd)</td>" 
+      $htmlContent += "<td style='width: 25%;'>$($logdata)</td>"
+      $htmlContent += "<td style='width: 25%;'>$($varify)</td>"
+      $htmlContent += "<td style='width: 25%;'>$($example)</td>"
+      $htmlContent += "<td style='width: 3%;'></td>"      
+      $htmlContent += "<td style='width: 3%;'></td>"
       $htmlContent += "</tr>"
     }    
   }
