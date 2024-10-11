@@ -253,8 +253,7 @@ if ($global:testtype -eq 2){
                     add-content -path $logtcstep -Value $lastlogcontent
                     if ($getlastkey.Length -gt 0){
                       getparameter -getlastkey $getlastkey
-                      Write-Output "add var before"
-                      $global:varhash
+                      Write-Output "add var before"                     
                      }
                   }
                   if($method -match "add_after"){
@@ -287,7 +286,6 @@ if ($global:testtype -eq 2){
           if ($getlastkey.Length -gt 0){
            getparameter -getlastkey $getlastkey
            Write-Output "add var"
-           $global:varhash
           }
 
          ## add after cmd
@@ -309,7 +307,6 @@ if ($global:testtype -eq 2){
             if ($getlastkey.Length -gt 0){
               getparameter -getlastkey $getlastkey
               Write-Output "add var after"
-              $global:varhash
              }
            }
          }
