@@ -308,7 +308,17 @@ for($i=$Indexfirst;$i -le $Indexlast;$i++){
 
       <# Action to perform if the condition is true #>
        $tccmd=($content.$cmdcol|out-string).trim()
-       $checklines=(($sheetpackage.Cells[$row,[int32]($cmdcol.replace("P",""))].RichText|Where-Object{$_.Color.R -ne 0}).text|out-string).trim()
+       $checklines=($sheetpackage.Cells[$row,[int32]($cmdcol.replace("P",""))].RichText|Where-Object{$_.Color.R -ne 0}).Text
+       $example=$null
+       if($checklines){
+       $example=($checklines.split("`n")|ForEach-Object{
+        $newline=$_
+        if($_ -like "*CHIP:*"){
+            $newline=($_ -split "CHIP\:")[1]
+          }
+          $newline
+        }  | out-string).trim()
+      }
         # line by line check
         if($tcline -and $tccmd){
             $outputcsv+=[PSCustomObject]@{
@@ -317,7 +327,7 @@ for($i=$Indexfirst;$i -le $Indexlast;$i++){
             step=$tcstep
             cmd=$toolcmd
             verify=$null
-            example=$checklines
+            example=$example
             flow=$tccmd
             results=$results
             session=$null

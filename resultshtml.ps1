@@ -123,12 +123,8 @@ $htmlContent += "</tr></thead><tbody>"
               $newline
              }
              $example = $csv.example.split("`n")|foreach-object{
-              $newline=$_
-              if ($_ -match "CHIP\:"){
-                $newline=(($_ -split "CHIP\:")[1]) + "<br>"
-              }
-              $newline=$_ + "<br>"
-              $newline
+             $newline=$_ + "<br>"
+             $newline
              }
                 
 
