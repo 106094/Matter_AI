@@ -28,6 +28,10 @@ $htmlContent = @"
             word-wrap: break-word;     /* Allow wrapping within words if necessary */
             white-space: normal;       /* Allow normal wrapping */
             word-break: break-all;     /* Break long words if necessary */
+            top-align { vertical-align: top; }
+        }
+        .top-align {
+          vertical-align: top;
         }
         th { background-color: #f2f2f2; }
         tr:nth-child(even) { background-color: #f9f9f9; }
@@ -89,7 +93,7 @@ $htmlContent += @"
        <thead>
         <tr>
 "@
-      $headers=@("caseid","step","cmdstep","cmd","logs","varify","checks (green words)","result","referance")
+      $headers=@("caseid","step","#","cmd","logs","varify","checks (green words)","result","ref")
       foreach ($header in $headers) {
       $htmlContent += "<th>$header</th>"
           }
@@ -129,15 +133,15 @@ $htmlContent += "</tr></thead><tbody>"
                 
 
       $htmlContent += "<tr>"
-      $htmlContent += "<td style='width: 6%;'>$($tcname)</td>"
-      $htmlContent += "<td style='width: 2%;'>$($csv.step)</td>"
-      $htmlContent += "<td style='width: 1%;'>$($k)</td>"      
-      $htmlContent += "<td style='width: 10%;'>$($csv.cmd)</td>" 
-      $htmlContent += "<td style='width: 25%;'>$($logdata)</td>"
-      $htmlContent += "<td style='width: 25%;'>$($varify)</td>"
-      $htmlContent += "<td style='width: 25%;'>$($example)</td>"
-      $htmlContent += "<td style='width: 3%;'></td>"      
-      $htmlContent += "<td style='width: 3%;'></td>"
+      $htmlContent += "<td class='top-align' style='width: 5%;'>$($tcname)</td>"
+      $htmlContent += "<td class='top-align' style='width: 4%;'>$($csv.step)</td>"
+      $htmlContent += "<td class='top-align' style='width: 1%;'>$($k)</td>"      
+      $htmlContent += "<td class='top-align' style='width: 10%;'>$($csv.cmd)</td>" 
+      $htmlContent += "<td class='top-align' style='width: 24%;'>$($logdata)</td>"
+      $htmlContent += "<td class='top-align' style='width: 24%;'>$($varify)</td>"
+      $htmlContent += "<td class='top-align' style='width: 24%;'>$($example)</td>"
+      $htmlContent += "<td class='top-align' style='width: 4%;'></td>"      
+      $htmlContent += "<td class='top-align' style='width: 4%;'></td>"
       $htmlContent += "</tr>"
     }    
   }
