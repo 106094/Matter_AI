@@ -255,13 +255,6 @@ for($i=$Indexfirst;$i -le $Indexlast;$i++){
     if($content.$numbercol -ne "#" -and ($content.$cmdcol.Length -gt 0)){
       $pics=$content.$picscol
       $tcstep=$content.$numbercol
-      try{
-        $picsmerge=($sheetpackage.Cells[$row, $picscol2]).merge  
-      }
-      catch{
-        Write-Output "check 261"
-         start-sleep -s 300
-      }
       $picsmerge=($sheetpackage.Cells[$row, $picscol2]).merge  
       #$stepmerge=($worksheet.Cells[$row, $numbercol2]).merge
       $results=$null
@@ -355,8 +348,8 @@ foreach($line in $csvcontent){
    if($sessioncheck){
    $line.session=$matches[0].trim()
    }
- 
-   $splitcontent=$line.flow.split("`n")|Where-Object{$_.length -gt 0}
+    $splitcontent=$line.flow.split("`n")|Where-Object{$_.length -gt 0}
+
     ForEach($splitct in $splitcontent){
       if(!($splitct -match "\sTH_CR\d+") -and !($splitct -match "\sobtained\sfrom\s") -and !($splitct -match "\son\sTH1")){
       $toolcmd=0
@@ -368,21 +361,25 @@ foreach($line in $csvcontent){
       if($splitct.trim().length -gt 0 -and $splitct -match "$matchcmd\s"){
        $newmathcmds=$ctcmds|Where-Object{$_."name" -eq $matchcmd}|ForEach-Object{$_."name",$_."command" -ne "" -join "\s"}
        foreach($newmathcmd in $newmathcmds){
-          if ($splitct -match "$newmathcmd\s"){
+        $matchword="$newmathcmd\s"
+        if ($matchcmd -match "avahi\-browse"){
+          $matchword=$newmathcmd.replace("-","\-").replace(".","\.")
+        }
+          if ($splitct -match "$matchword"){
               $newcmd=@($splitct.trim())
-            if (!($splitct -match "^$newmathcmd\s")){
+              if (!($splitct -match "^$matchword")){
               $pattern = "$newmathcmd(.*)"
               $match = [regex]::Match($splitct, $pattern)
               $newcmd=@($match.Value.trim())
                }
-               $apostrophecheck=( $newcmd  | Select-String -Pattern "'" -AllMatches).Matches.Count
+              $apostrophecheck=( $newcmd  | Select-String -Pattern "'" -AllMatches).Matches.Count
                if($apostrophecheck -eq 1){
                   $newcmd=$newcmd.replace("'","")
                }
                if($newcmd -match "\("){
                   $newcmd=($newcmd.split("("))[0].trim()
                }
-             $cmd+=@($newcmd)
+             $cmd+=@($newcmd)             
            $toolcmd=1 
           break
           }
