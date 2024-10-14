@@ -111,15 +111,22 @@ $htmlContent += "</tr></thead><tbody>"
     $k=0
     foreach($log in $logcontent){
       $k++
-      $logdata=get-content $log | Select-Object -skip 2
+      $logdata=get-content $log |Where-Object{$_.length -gt 0}| Select-Object -skip 2
       if($logdata.length -le 200){
-        $tdlog=$logdata| Select-Object -skip 2|foreach-object{
+        $tdlog=$logdata|foreach-object{
           $newline=(($_ -split "CHIP\:")[1]) + "<br>"
           $newline
              }
       }else{
+        $tdlog=$logdata| foreach-object{
+          $newline=$_
+          if($_ -like "*CHIP:*"){
+            $newline=(($_ -split "CHIP\:")[1]) 
+          }
+         $newline
+        }
         $htmllog=$reportPathlog+"\"+(get-childitem $log).name
-        set-content $htmllog -Value $logdata -Force
+        set-content $htmllog -Value $tdlog -Force
         $linkfile=(get-childitem $log).name
         $tdlog= "<a href='html/$linkfile' target='_blank'>checklog</a>"
       }
