@@ -1522,3 +1522,5 @@ subscriptions,shutdown-all-for-node
 interactive,start
 interactive,server
 storage,clear-all
+avahi-browse,-rt _matter._tcp,
+avahi-browse,-rt _matterc._udp,
