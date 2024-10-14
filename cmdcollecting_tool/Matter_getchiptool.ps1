@@ -405,11 +405,15 @@ foreach($line in $csvcontent){
         }
         $p++
         if($p -gt 9999 -and $_.length -gt 0 -and $_ -notlike "*CHIP:*"){
+          $recordflag=$true
           foreach($cmd1 in $cmd){
             $cmd3=$cmd1.replace("[","*").replace("]","*")
-            if(!($_ -like "*$cmd3*")){
-             $_
+            if($_ -like "*$cmd3*"){
+             $recordflag=$false
             }
+          }
+          if($recordflag){
+            $_
           }
        }
      }

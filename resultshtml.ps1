@@ -6,7 +6,11 @@ $htmlContent=$null
 $csvData = Import-Csv -Path $global:csvfilename|Where-Object{$_.TestCaseID -in $global:sels}
 $resultlog=(get-childitem "C:\Matter_AI\logs\_manual\" -directory | Sort-Object LastWriteTime -Descending | Select-Object -First 1).fullname
 $reportPath = "$resultlog\report.html"
-$resultpaths=Get-ChildItem $resultlog -Directory
+$reportPathlog = "$resultlog\html"
+if(!(Test-Path $reportPathlog)){
+  New-Item -Path $reportPathlog -ItemType Directory|out-null
+}
+$resultpaths=Get-ChildItem $resultlog -Directory |Where-Object{$_.name -ne "html"}
 #check if there is availble test case folder
 $checktcfolder=Get-ChildItem $resultlog -directory|Sort-Object LastWriteTime|Select-Object -First 1
 $checktcfile=Get-ChildItem $checktcfolder.FullName -File
@@ -103,37 +107,51 @@ $htmlContent += "</tr></thead><tbody>"
   $csvfilter=$csvData|Where-Object{$_.TestCaseID -like "*$tcname*"}
   foreach($csv in $csvfilter){
     $tcstep=$csv.step
-    $logcontent=(get-childitem $fullpath -Recurse -file |Where-Object{!($_.Name -like "*0pairing*") -and  $_.name -like "*_$($tcstep)*.log"}|Sort-Object LastWriteTime).FullName
+    $logcontent=(get-childitem $fullpath -Recurse -file |Where-Object{!($_.Name -like "*0pairing*") -and  $_.name -like "*_$($tcstep)-*.log"}|Sort-Object LastWriteTime).FullName
     $k=0
     foreach($log in $logcontent){
       $k++
-      $logdata=get-content $log | Select-Object -skip 2|foreach-object{
-       $newline=(($_ -split "CHIP\:")[1]) + "<br>"
-       $newline
-          }
-        
+      $logdata=get-content $log | Select-Object -skip 2
+      if($logdata.length -le 200){
+        $tdlog=$logdata| Select-Object -skip 2|foreach-object{
+          $newline=(($_ -split "CHIP\:")[1]) + "<br>"
+          $newline
+             }
+      }else{
+        $htmllog=$reportPathlog+"\"+(get-childitem $log).name
+        set-content $htmllog -Value $logdata -Force
+        $linkfile=(get-childitem $log).name
+        $tdlog= "<a href='html/$linkfile' target='_blank'>checklog</a>"
+      }
+          
+
         <#
           $refdata = $csv.flow|foreach-object{
           $newline=(($_ -split "CHIP\:")[1]) + "<br>"
           $newline
              }
              #>
-             $varify = $csv.verify.split("`n")|foreach-object{
-              $newline=$_  + "<br>"
-              $newline
-             }
-             $example = $csv.example.split("`n")|foreach-object{
-             $newline=$_ + "<br>"
-             $newline
-             }
-                
+        $varify = $csv.verify.split("`n")|foreach-object{
+        $newline=$_  + "<br>"
+        $newline
+        }
+        $example = $csv.example.split("`n")|foreach-object{
+        $newline=$_ + "<br>"
+        $newline
+        }
+
+        $cmd=($($csv.cmd) -split "`n")[$k-1]
+    
+        if($k -gt 1){
+          $varify=$example="Å™"
+        }
 
       $htmlContent += "<tr>"
       $htmlContent += "<td class='top-align' style='width: 5%;'>$($tcname)</td>"
       $htmlContent += "<td class='top-align' style='width: 4%;'>$($csv.step)</td>"
       $htmlContent += "<td class='top-align' style='width: 1%;'>$($k)</td>"      
-      $htmlContent += "<td class='top-align' style='width: 10%;'>$($csv.cmd)</td>" 
-      $htmlContent += "<td class='top-align' style='width: 24%;'>$($logdata)</td>"
+      $htmlContent += "<td class='top-align' style='width: 10%;'>$($cmd)</td>"
+      $htmlContent += "<td class='top-align' style='width: 24%;'>$($tdlog)</td>"
       $htmlContent += "<td class='top-align' style='width: 24%;'>$($varify)</td>"
       $htmlContent += "<td class='top-align' style='width: 24%;'>$($example)</td>"
       $htmlContent += "<td class='top-align' style='width: 4%;'></td>"      
