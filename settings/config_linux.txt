@@ -3,4 +3,5 @@ sshname:ubuntu
 sshpasswd:raspberrypi
 retest:3
 nodeid:1
-endpoint:1
+endpoint0:0
+endpoint1:1
