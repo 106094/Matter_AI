@@ -135,11 +135,12 @@ for($i=$Indexfirst;$i -le $Indexlast;$i++){
     if($content -match "TH2"){
       $TH2=1
     }
-     if($content -match "\[TC\-"){
+    if($content -match "\[TC\-"){
     $pattern = "\[(.*?)\]"
     $match = $content | Select-String -Pattern $pattern
-    $extractedText = ($match.Matches[0].Groups[1].Value).replace(" ","")
-    if($extractedText -match "TC\-"){
+    $extractedTextg=($match.Matches[0].Groups[1].Value)
+    $extractedText = $extractedTextg.replace(" ","")
+     if($extractedText -match "TC\-"){
       $tcline =$null
       $tcstep=$null
       $numbercol=$null
@@ -149,12 +150,13 @@ for($i=$Indexfirst;$i -le $Indexlast;$i++){
       $mergerow=$null
       $preconall=@()
       $TH2=0
-     }
+      }
     
     if($extractedText -in $filteredtcs){
      ForEach($col in $colproperty){
       if(($content.$col).length -gt 0 -and ($content.$col) -match "TC\-" ){
         $tcline=($content.$col).trim()
+        $tcline=$tcline.replace($extractedTextg,$extractedText)
         #$tcline        
         break
         }
