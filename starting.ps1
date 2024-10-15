@@ -62,12 +62,6 @@ if(!$global:selchek){
   [System.Windows.Forms.MessageBox]::Show("Fail to select the test case id, test will be stopped","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
    exit
 }
-#create a log folder
-$datetime=get-date -Format yyyyMMdd_HHmmss
-$logtc="C:\Matter_AI\logs\_py\$($datetime)"
-if(!(test-path $logtc)){
-  new-item -ItemType Directory -Path $logtc | Out-Null
-}
 $starttime=get-date
 puttystart
 }
@@ -105,12 +99,6 @@ if ($global:testtype -eq 2){
       exit
     }    
 
-    $data=Import-Csv  $global:csvfilename
-    $selchek=selection_manual -data $data -column1 "catg" -column2 "TestCaseID"
-    if($selchek[-1] -eq 0 -or $global:sels -match "xlsx"){
-      [System.Windows.Forms.MessageBox]::Show("Fail to select the test case id, test will be stopped","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
-      exit
-    }
     #region download manual speacial settings
     $goo_link="https://docs.google.com/spreadsheets/d/19ZPA2Z6SYYtvIj9qXM0FuDASF0FaZP2xjx7jcebrJEQ/"
     $gid="1307777084"
@@ -120,56 +108,54 @@ if ($global:testtype -eq 2){
     webdownload -goo_link $goo_link -gid $gid -sv_range $sv_range -savepath $savepath -errormessage $errormessage
     #endregion
     
-    #create a log folder
-    $datetime=get-date -Format yyyyMMdd_HHmmss
-    $logtc="C:\Matter_AI\logs\_manual\$($datetime)"
-    if(!(test-path $logtc)){
-      new-item -ItemType Directory -Path $logtc | Out-Null
-    }
     $starttime=get-date
 }
 ###########################
 
 $continueq="Yes"
 while ($continueq -eq "Yes"){
-  if($selchek){
-    . C:\Matter_AI\pyflow.ps1
-  }
-
-#create result html
-if ($global:testtype -eq 2){
-  . C:\Matter_AI\resultshtml.ps1
-}
-#>
-
-$endtime=get-date
-$continueq = [System.Windows.Forms.MessageBox]::Show("Need Retest?", "Check", [System.Windows.Forms.MessageBoxButtons]::YesNo)
-if($continueq -eq "Yes"){
   if ($global:testtype -eq 1){
-    $datetime=get-date -Format yyyyMMdd_HHmmss
-    $logtc="C:\Matter_AI\logs\_py\$($datetime)"
-    if(!(test-path $logtc)){
-      new-item -ItemType Directory -Path $logtc | Out-Null
-    }
     $selchek=. $selectionpsfile
     if(!$selchek){
       [System.Windows.Forms.MessageBox]::Show("Fail to select the test case id, test will be stopped","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
       $continueq=0  
+    }else{
+      #create a log folder
+      $datetime=get-date -Format yyyyMMdd_HHmmss
+      $logtc="C:\Matter_AI\logs\_py\$($datetime)"
+      if(!(test-path $logtc)){
+        new-item -ItemType Directory -Path $logtc | Out-Null
+      }
     }
+
   }
-  if ($global:testtype -eq 2){
-    $datetime=get-date -Format yyyyMMdd_HHmmss
-    $logtc="C:\Matter_AI\logs\_manual\$($datetime)"
-    if(!(test-path $logtc)){
-      new-item -ItemType Directory -Path $logtc | Out-Null
-    }
+  if($global:testtype -eq 2){
+    $data=Import-Csv  $global:csvfilename
     $selchek=selection_manual -data $data -column1 "catg" -column2 "TestCaseID"
     if($selchek[-1] -eq 0 -or $global:sels -match "xlsx"){
       [System.Windows.Forms.MessageBox]::Show("Fail to select the test case id, test will be stopped","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
       $continueq=0 
     }
+    else{
+      #create a log folder
+      $datetime=get-date -Format yyyyMMdd_HHmmss
+      $logtc="C:\Matter_AI\logs\_manual\$($datetime)"
+      if(!(test-path $logtc)){
+        new-item -ItemType Directory -Path $logtc | Out-Null
+      }
+    }
   }
-  }
+  if($continueq){
+    . C:\Matter_AI\pyflow.ps1 
+   #create result html
+    if ($global:testtype -eq 2){
+      . C:\Matter_AI\resultshtml.ps1
+    }
+#>
+}
+
+$endtime=get-date
+$continueq = [System.Windows.Forms.MessageBox]::Show("Need Retest?", "Check", [System.Windows.Forms.MessageBoxButtons]::YesNo)
 }
   
 #puttyexit
