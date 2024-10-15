@@ -5,16 +5,15 @@ $htmlContent=$null
 # Import the CSV data
 $csvData = Import-Csv -Path $global:csvfilename|Where-Object{$_.TestCaseID -in $global:sels}
 $resultlog=(get-childitem "C:\Matter_AI\logs\_manual\" -directory | Sort-Object LastWriteTime -Descending | Select-Object -First 1).fullname
-$reportPath = "$resultlog\report.html"
+$resultpaths=Get-ChildItem $resultlog -Directory |Where-Object{$_.name -ne "html"}
 $reportPathlog = "$resultlog\html"
 if(!(Test-Path $reportPathlog)){
   New-Item -Path $reportPathlog -ItemType Directory|out-null
 }
-$resultpaths=Get-ChildItem $resultlog -Directory |Where-Object{$_.name -ne "html"}
+$reportPath = "$resultlog\report.html"
 #check if there is availble test case folder
-$checktcfolder=Get-ChildItem $resultlog -directory|Sort-Object LastWriteTime|Select-Object -First 1
-$checktcfile=Get-ChildItem $checktcfolder.FullName -File
-if($checktcfile){
+$checktcfile=Get-ChildItem $resultlog -File -Recurse|where-object{$_.name -like "*.log" -and !($_.name -like "*pairing*.log") -and !($_.fullname -like "*html*")}
+if($checktcfile.count -gt 0){
 # Start building the HTML content
 # Start building the HTML content with enhanced CSS for text wrapping
 $htmlContent = @"

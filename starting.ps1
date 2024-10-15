@@ -161,8 +161,8 @@ $continueq = [System.Windows.Forms.MessageBox]::Show("Need Retest?", "Check", [S
 #puttyexit
 if ($global:testtype -eq 2){
 $resultlog=(get-childitem "C:\Matter_AI\logs\_manual\" -directory | Sort-Object LastWriteTime -Descending | Select-Object -First 1).fullname
-$reportPath = "$resultlog\report.html"
-Start-Process $reportPath
+$reportPath = join-path $resultlog "report.html"
+Start-Process $reportPath -ErrorAction SilentlyContinue
 }
 
 $timepassed=New-TimeSpan -start $starttime -end $endtime
