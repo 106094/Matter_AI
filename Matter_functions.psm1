@@ -934,21 +934,26 @@ function puttystart ([string]$puttyname) {
 
        
        if($global:testtype -eq 1){
-       putty_paste -cmdline "sudo -s"
-       putty_paste -cmdline $pskey  
-       putty_paste -cmdline "docker ps -a"
-       $idlogin=get-content "C:\Matter_AI\logs\lastlog.log"
-       $checkmatch=$idlogin -match "\/bin\/bash"
-       if($checkmatch){
-         $ctnid= (($idlogin -match "\/bin\/bash").split(" "))[0]
-       }
-       else{
-         puttyexit
-       }
+        $gloal:failmsg=$null
+        putty_paste -cmdline "sudo -s"
+        putty_paste -cmdline $pskey  
+        putty_paste -cmdline "docker ps -a"
+        $idlogin=get-content "C:\Matter_AI\logs\lastlog.log"
+        $checkmatch=$idlogin -match "\/bin\/bash"
+        if($checkmatch){
+            $ctnid= (($idlogin -match "\/bin\/bash").split(" "))[0]
+        }
+        else{
+            #puttyexit
+            $gloal:failmsg="No found /bin/bash path"
+            Write-Output $gloal:failmsg
+        }
        #putty_paste -cmdline "docker start $ctnid"
        #putty_paste -cmdline "docker exec -it $ctnid /bin/bash"
        #putty_paste -cmdline "cd $sshpath"
-       putty_paste -cmdline "docker start $ctnid; docker exec -it $ctnid /bin/bash; cd $sshpath"
+        if(!$gloal:failmsg){
+        putty_paste -cmdline "docker start $ctnid; docker exec -it $ctnid /bin/bash; cd $sshpath"
+        }
        }
        if($global:testtype -eq 2){
        putty_paste -cmdline "sudo -s" -puttyname $puttyname
