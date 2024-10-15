@@ -120,11 +120,9 @@ if(get-process putty){
         $eplists=import-csv "C:\Matter_AI\settings\chip-tool_clustercmd - endpoint_list.csv"
         $splitcmd=($cmdline.replace("./chip-tool ","")).split(" ")|where-object{$_.Length -gt 0}
         $endpiont=($eplists|Where-Object{$_.name -eq $splitcmd[0] -and $_.command -eq $splitcmd[1] -and $_.attribute -eq $splitcmd[2]}).endpoint
-        $laststring=$splitcmd[2]
-        if(!$endpiont){
+         if(!$endpiont){
           $endpiont=($eplists|Where-Object{$_.name -eq $splitcmd[0] -and $_.command -eq $splitcmd[1]}).endpoint
-          $laststring=$splitcmd[1]
-        }
+           }
        if($endpiont){
         $endpiont=$endpiont-1
         $matches = [regex]::Matches($cmdline, '\d+')
@@ -136,7 +134,7 @@ if(get-process putty){
              $cmdline = $cmdline.Substring(0, $numberIndex) + $endpid0 + $cmdline.Substring($numberIndex + $numberLength)   
             }          
             if($endpid1 -ne 0 -and $matched -eq 1){
-                $cmdline = $cmdline.Substring(0, $numberIndex) + $endpid1 + $cmdline.Substring($numberIndex + $numberLength)   
+             $cmdline = $cmdline.Substring(0, $numberIndex) + $endpid1 + $cmdline.Substring($numberIndex + $numberLength)   
             } 
          }
         }
