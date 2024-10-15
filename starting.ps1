@@ -62,8 +62,8 @@ if(!$global:selchek){
   [System.Windows.Forms.MessageBox]::Show("Fail to select the test case id, test will be stopped","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
    exit
 }
+$puttystart=1
 $starttime=get-date
-puttystart
 }
 if ($global:testtype -eq 2){
   $getcmdpsfile="C:\Matter_AI\cmdcollecting_tool\Matter_getchiptool.ps1"
@@ -127,7 +127,10 @@ while ($continueq -eq "Yes"){
         new-item -ItemType Directory -Path $logtc | Out-Null
       }
     }
-
+    if($puttystart){
+    $puttystart=0
+    puttystart
+    }
   }
   if($global:testtype -eq 2){
     $data=Import-Csv  $global:csvfilename
