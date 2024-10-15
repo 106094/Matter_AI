@@ -100,7 +100,7 @@ Add-Type @"
 #endregion
 
 #region putty cmd and check    
-function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int64]$line1,[string]$checkline1,[int64]$line2,[string]$checkline2){
+function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int64]$line1,[string]$checkline1,[int64]$line2,[string]$checkline2,[switch]$manual){
 
 if(get-process putty){
     
@@ -112,6 +112,26 @@ if(get-process putty){
     else{
         $logputty="C:\Matter_AI\logs\*putty_$($puttyname).log"
     }
+
+    if ($manual){
+        $endpid=((get-content C:\Matter_AI\settings\config_linux.txt | Select-String "endpoint"|out-string).split(":"))[-1].trim()
+        $eplists=import-csv "C:\Matter_AI\settings\chip-tool_clustercmd - endpoint_list.csv"
+        $splitcmd=($cmdline.replace("./chip-tool ","")).split(" ")
+        $endpiont=($eplists|Where-Object{$_.name -eq $splitcmd[0] -and $_.command -eq $splitcmd[1] -and $_.attribute -eq $splitcmd[2]}).endpoint
+        $laststring=$splitcmd[2]
+        if(!$endpiont){
+          $endpiont=($eplists|Where-Object{$_.name -eq $splitcmd[0] -and $_.command -eq $splitcmd[1]}).endpoint
+          $laststring=$splitcmd[1]
+        }
+       
+        $matches = [regex]::Matches($cmdline, '\d+')
+        if ($matches.Count -ge $endpiont) {
+            $secondNumberIndex = $matches[1].Index
+            $secondNumberLength = $matches[1].Length            
+            $cmdline = $cmdline.Substring(0, $secondNumberIndex) + $endpid + $cmdline.Substring($secondNumberIndex + $secondNumberLength)           
+        } 
+    }   
+
 
 $logfile=(Get-ChildItem $logputty|Sort-Object LastWriteTime|Select-Object -last 1).fullname
 $checkend=((get-content $logfile)[-1]|Out-String).Trim()
@@ -988,7 +1008,7 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
     Start-Process msedge $link_save
     
     do{
-    Start-Sleep -s 1
+    Start-Sleep -s 2
     $lsnewc=(Get-ChildItem -path "$ENV:UserProfile\Downloads\*.csv" -file).count
     $timepassed=(new-timespan -start $starttime -end (get-date)).TotalSeconds
     }until($lsnewc -eq 1 -or $timepassed -gt 60)
