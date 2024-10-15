@@ -57,11 +57,7 @@ if(!$checkfile){
     [System.Windows.Forms.MessageBox]::Show("Fail to get (update) cmd csv","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
     exit
 }
-$global:selchek=. $selectionpsfile
-if(!$global:selchek){
-  [System.Windows.Forms.MessageBox]::Show("Fail to select the test case id, test will be stopped","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
-   exit
-}
+
 $puttystart=1
 $starttime=get-date
 }
@@ -115,10 +111,11 @@ if ($global:testtype -eq 2){
 $continueq="Yes"
 while ($continueq -eq "Yes"){
   if ($global:testtype -eq 1){
-    $selchek=. $selectionpsfile
-    if(!$selchek){
+
+    $global:selchek=. $selectionpsfile
+    if(!$global:selchek){
       [System.Windows.Forms.MessageBox]::Show("Fail to select the test case id, test will be stopped","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
-      $continueq=0  
+      $continueq=0
     }else{
       #create a log folder
       $datetime=get-date -Format yyyyMMdd_HHmmss
