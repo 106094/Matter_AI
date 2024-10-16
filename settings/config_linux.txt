@@ -5,3 +5,4 @@ retest:3
 nodeid:1
 endpoint0:0
 endpoint1:1
+endpoint2:2
