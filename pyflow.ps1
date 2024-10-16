@@ -202,6 +202,7 @@ if ($global:testtype -eq 2){
         $addcmdall=@()
         $k++
         $puttyname=$puttyname0
+          $waittime= $specialset=($specialsets|Where-Object{$_.source -eq $excelfilename -and $_.TC -eq $caseid0 -and $_.step -eq $stepid -and $_.cmdline -eq $k}).waittime
           $specialset=$specialsets|Where-Object{$_.source -eq $excelfilename -and $_.TC -eq $caseid0 -and $_.step -eq $stepid -and $_.cmdline -eq $k}
           if ($specialset){
            foreach($special in $specialset){ 
@@ -245,7 +246,8 @@ if ($global:testtype -eq 2){
                       puttystart -puttyname $puttyname
                   }
                   if($method -match "add_before"){
-                    $pycmd=putty_paste -cmdline "$addcmd" -puttyname $puttyname -manual
+                    $waittime=$special."waittime"
+                    $pycmd=putty_paste -cmdline "$addcmd" -puttyname $puttyname -checksec $waittime -manual 
                     $lastlogcontent=get-content -path C:\Matter_AI\logs\lastlog.log
                     $datetime2=get-date -Format yyyyMMdd_HHmmss
                     $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid)-$($k)_$($method).log"
@@ -263,6 +265,7 @@ if ($global:testtype -eq 2){
                     $addcmdall+=@([PSCustomObject]@{
                       addcmdaf = $addcmd
                       puttysesstion = $puttyname
+                      waittime =  $waittime
                     })
                   }
 
@@ -275,7 +278,7 @@ if ($global:testtype -eq 2){
             if(!$sessionid -or !(get-process -id $sessionid -ErrorAction SilentlyContinue)){   
                 puttystart -puttyname $puttyname
             }
-          $pycmd=putty_paste -cmdline "$pyline" -puttyname $puttyname -manual
+          $pycmd=putty_paste -cmdline "$pyline" -puttyname $puttyname -checksec $waittime -manual 
           $lastlogcontent=get-content -path C:\Matter_AI\logs\lastlog.log
           
           $datetime2=get-date -Format yyyyMMdd_HHmmss
@@ -298,7 +301,8 @@ if ($global:testtype -eq 2){
             $k++
             $addcmdaf=$addcmd.addcmdaf
             $puttysesstion=$addcmd.puttysesstion
-            $pycmd=putty_paste -cmdline "$addcmdaf" -puttyname $puttysesstion -manual
+            $waittime=$addcmd.waittime
+            $pycmd=putty_paste -cmdline "$addcmdaf" -puttyname $puttysesstion -checksec $waittime -manual
             $lastlogcontent=get-content -path C:\Matter_AI\logs\lastlog.log
             $datetime2=get-date -Format yyyyMMdd_HHmmss
             $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid)-$($k)_$($method).log"

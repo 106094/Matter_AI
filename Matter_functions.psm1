@@ -146,6 +146,9 @@ if(get-process putty){
         $cmdline
         return
     }
+    
+if($check_sec -eq 0){$check_sec = 1}
+
 $logfile=(Get-ChildItem $logputty|Sort-Object LastWriteTime|Select-Object -last 1).fullname
 $checkend=((get-content $logfile)[-1]|Out-String).Trim()
 #start-process notepad $logfile -WindowStyle Minimized
@@ -183,9 +186,10 @@ if($cmdline -match "interactive start" -or ($cmdline.split(" "))[0] -in $global:
     start-sleep -s 2
 }
 
-if($check_sec -eq 0){$check_sec = 1}
+Start-Sleep -s $check_sec
+
 do{
-start-sleep -s $check_sec
+start-sleep -s 1
 $logfile=(Get-ChildItem $logputty|Sort-Object LastWriteTime|Select-Object -last 1).fullname
 start-process notepad $logfile -WindowStyle Minimized
 start-sleep -s 3
