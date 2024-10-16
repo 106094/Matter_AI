@@ -190,7 +190,7 @@ if ($global:testtype -eq 2){
 
     }
     if($global:testing -eq 1){
-      $pairresult = 1
+      [int32]$pairresult=1
     }
     #start step cmd if connected pass
     if ($pairresult){ #test

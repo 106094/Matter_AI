@@ -143,7 +143,7 @@ if(get-process putty){
 
 
     if($global:testing){
-        $cmdline
+        add-content C:\Matter_AI\logs\testing.log -value $cmdline 
         return
     }
     

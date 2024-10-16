@@ -4,7 +4,8 @@ param (
 )
 
 if($testing){
-  $global:testing = 1
+  [int32]$global:testing=1
+  new-item -path C:\Matter_AI\logs\testing.log -Force|Out-Null
 }
 Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Bypass -Force;
 Add-Type -AssemblyName Microsoft.VisualBasic,System.Windows.Forms,System.Drawing
