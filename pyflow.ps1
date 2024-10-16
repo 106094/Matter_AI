@@ -202,7 +202,7 @@ if ($global:testtype -eq 2){
         $addcmdall=@()
         $k++
         $puttyname=$puttyname0
-          $waittime= $specialset=($specialsets|Where-Object{$_.source -eq $excelfilename -and $_.TC -eq $caseid0 -and $_.step -eq $stepid -and $_.cmdline -eq $k}).waittime
+          $waittime= [int64]($specialsets|Where-Object{$_.source -eq $excelfilename -and $_.TC -eq $caseid0 -and $_.step -eq $stepid -and $_.cmdline -eq $k -and $_.method -eq "waittime"}).waittime
           $specialset=$specialsets|Where-Object{$_.source -eq $excelfilename -and $_.TC -eq $caseid0 -and $_.step -eq $stepid -and $_.cmdline -eq $k}
           if ($specialset){
            foreach($special in $specialset){ 
@@ -246,7 +246,7 @@ if ($global:testtype -eq 2){
                       puttystart -puttyname $puttyname
                   }
                   if($method -match "add_before"){
-                    $waittime=$special."waittime"
+                    $waittime=[int64]$special."waittime"
                     $pycmd=putty_paste -cmdline "$addcmd" -puttyname $puttyname -check_sec $waittime -manual 
                     $lastlogcontent=get-content -path C:\Matter_AI\logs\lastlog.log
                     $datetime2=get-date -Format yyyyMMdd_HHmmss
@@ -301,7 +301,7 @@ if ($global:testtype -eq 2){
             $k++
             $addcmdaf=$addcmd.addcmdaf
             $puttysesstion=$addcmd.puttysesstion
-            $waittime=$addcmd.waittime
+            $waittime=[int64]$addcmd.waittime
             $pycmd=putty_paste -cmdline "$addcmdaf" -puttyname $puttysesstion -check_sec $waittime -manual
             $lastlogcontent=get-content -path C:\Matter_AI\logs\lastlog.log
             $datetime2=get-date -Format yyyyMMdd_HHmmss
