@@ -5,13 +5,12 @@ param (
 
 if($testing){
   [int32]$global:testing=1
-  new-item -path C:\Matter_AI\logs\testing.log -Force|Out-Null
 }
 Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Bypass -Force;
 Add-Type -AssemblyName Microsoft.VisualBasic,System.Windows.Forms,System.Drawing
 $shell=New-Object -ComObject shell.application
 $wshell=New-Object -ComObject wscript.shell
-
+new-item -path C:\Matter_AI\logs\testing.log -Force|Out-Null
 #region check test type
 while(!$global:testtype -or ($global:testtype -ne 1 -and $global:testtype -ne 2)){
   $global:testtype=read-host "Which kind of testing? 1. Python 2. Manual (input 1 or 2) (q for quit)"

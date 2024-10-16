@@ -141,9 +141,8 @@ if(get-process putty){
        }
     }   
 
-
-    if($global:testing){
-        add-content C:\Matter_AI\logs\testing.log -value $cmdline 
+    add-content C:\Matter_AI\logs\testing.log -value $cmdline 
+    if($global:testing){        
         return
     }
     
