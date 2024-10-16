@@ -247,7 +247,7 @@ if ($global:testtype -eq 2){
                   }
                   if($method -match "add_before"){
                     $waittime=$special."waittime"
-                    $pycmd=putty_paste -cmdline "$addcmd" -puttyname $puttyname -checksec $waittime -manual 
+                    $pycmd=putty_paste -cmdline "$addcmd" -puttyname $puttyname -check_sec $waittime -manual 
                     $lastlogcontent=get-content -path C:\Matter_AI\logs\lastlog.log
                     $datetime2=get-date -Format yyyyMMdd_HHmmss
                     $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid)-$($k)_$($method).log"
@@ -278,7 +278,7 @@ if ($global:testtype -eq 2){
             if(!$sessionid -or !(get-process -id $sessionid -ErrorAction SilentlyContinue)){   
                 puttystart -puttyname $puttyname
             }
-          $pycmd=putty_paste -cmdline "$pyline" -puttyname $puttyname -checksec $waittime -manual 
+          $pycmd=putty_paste -cmdline "$pyline" -puttyname $puttyname -check_sec $waittime -manual 
           $lastlogcontent=get-content -path C:\Matter_AI\logs\lastlog.log
           
           $datetime2=get-date -Format yyyyMMdd_HHmmss
@@ -302,7 +302,7 @@ if ($global:testtype -eq 2){
             $addcmdaf=$addcmd.addcmdaf
             $puttysesstion=$addcmd.puttysesstion
             $waittime=$addcmd.waittime
-            $pycmd=putty_paste -cmdline "$addcmdaf" -puttyname $puttysesstion -checksec $waittime -manual
+            $pycmd=putty_paste -cmdline "$addcmdaf" -puttyname $puttysesstion -check_sec $waittime -manual
             $lastlogcontent=get-content -path C:\Matter_AI\logs\lastlog.log
             $datetime2=get-date -Format yyyyMMdd_HHmmss
             $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid)-$($k)_$($method).log"
