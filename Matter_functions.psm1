@@ -142,6 +142,10 @@ if(get-process putty){
     }   
 
 
+    if($global:testing){
+        $cmdline
+        return
+    }
 $logfile=(Get-ChildItem $logputty|Sort-Object LastWriteTime|Select-Object -last 1).fullname
 $checkend=((get-content $logfile)[-1]|Out-String).Trim()
 #start-process notepad $logfile -WindowStyle Minimized
