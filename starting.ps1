@@ -1,4 +1,12 @@
-﻿Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Bypass -Force;
+﻿
+param (
+    [switch]$testing               
+)
+
+if($testing){
+  $global:testing = 1
+}
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Bypass -Force;
 Add-Type -AssemblyName Microsoft.VisualBasic,System.Windows.Forms,System.Drawing
 $shell=New-Object -ComObject shell.application
 $wshell=New-Object -ComObject wscript.shell
