@@ -8,7 +8,7 @@ else{
 
 if ($global:testtype -eq 1){
 
-$caseids=$global:selchek
+$caseids=$global:sels
 $csvdata=import-csv C:\Matter_AI\settings\_py\py.csv | Where-Object {$_.TestCaseID -in $caseids -and $_.command.length -gt 0}
 $settigns=import-csv C:\Matter_AI\settings\_py\settings.csv 
 $headers=$settigns[0].PSObject.Properties.Name
@@ -110,7 +110,7 @@ if ($global:testtype -eq 2){
   $lastcaseid=$null
   $specialsets=import-csv -path C:\Matter_AI\settings\*manual_special.csv
   $global:varhash=@()
-  $caseids=$global:selchek
+  $caseids=$global:sels
   $csvdata=import-csv $global:csvfilename | Where-Object {$_.TestCaseID -in $caseids -and $_.cmd.length -gt 0}
   #$sound = New-Object -TypeName System.Media.SoundPlayer
   #$sound.SoundLocation = "C:\Windows\Media\notify.wav"

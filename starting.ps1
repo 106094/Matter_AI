@@ -132,8 +132,8 @@ $continueq="Yes"
 while ($continueq -eq "Yes"){
   if ($global:testtype -eq 1){
 
-    $global:selchek=. $selectionpsfile
-    if(!$global:selchek){
+    $selchek=. $selectionpsfile
+    if(!$selchek){
       [System.Windows.Forms.MessageBox]::Show("Fail to select the test case id, test will be stopped","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
       $continueq=0
     }else{
