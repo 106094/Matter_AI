@@ -361,7 +361,7 @@ foreach($line in $csvcontent){
      foreach($matchcmd in $matchcmds){
       if(!$toolcmd){
       if($splitct.trim().length -gt 0 -and $splitct -match "$matchcmd\s"){
-       $newmathcmds=$ctcmds|Where-Object{$_."name" -eq $matchcmd}|ForEach-Object{$_."name",$_."command" -ne "" -join "\s"}
+       $newmathcmds=$ctcmds|Where-Object{$_."name" -eq $matchcmd}|ForEach-Object{$_."name",$_."command" -ne "" -join "\s+"}
        foreach($newmathcmd in $newmathcmds){
         $matchword="$newmathcmd\s"
         if ($matchcmd -match "avahi\-browse"){
