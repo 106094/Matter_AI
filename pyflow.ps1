@@ -218,6 +218,10 @@ if ($global:testtype -eq 2){
                    $paraname=$replaceby.replace("var:","")
                    $replaceby=($global:varhash|Where-Object{$_.para_name -eq $paraname})."setvalue"
                  }
+                 if($replaceby -match "py\:"){
+                  $paraname=$replaceby.replace("py:","")
+                  $replaceby=$pairsettings."$paraname"
+                }
                  $pyline = $pyline.replace($keyword, $replaceby)
                 }                           
                 if($method -match "skip"){
