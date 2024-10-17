@@ -125,12 +125,30 @@ if(get-process putty){
           $endpiont=($eplists|Where-Object{$_.name -eq $splitcmd[0] -and $_.command -eq $splitcmd[1]}).endpoint
            }
        if($endpiont){
-        $endpiont=$endpiont-1
-        $matches = [regex]::Matches($cmdline, '\d+')
-        if ($matches.Count -ge $endpiont) {
-            $matched= $matches[$endpiont].Value
-            $numberIndex = $matches[$endpiont].Index
-            $numberLength = $matches[$endpiont].Length
+        
+        $patterns =  @('(?<!0x\d+)\b\d+\b', '0x\d+')
+            $matchData = @()  # Array to store match information
+
+            foreach ($pattern in $patterns) {
+                $matches = [regex]::Matches($cmdline, $pattern)
+                if ($matches.Count -gt 0) {
+                    foreach ($match in $matches) {
+                        $matchInfo = [PSCustomObject]@{
+                            Pattern     = $pattern
+                            Value       = $match.Value
+                            Index       = $match.Index
+                            Length      = $match.Length
+                        }
+                        $matchData += $matchInfo
+                    }
+                }
+            }
+        $matchData=$matchData|Sort-Object index
+        $endpiont=$endpiont-1        
+        if ($matchData.Count -ge $endpiont) {
+            $matched= $matchData[$endpiont].Value
+            $numberIndex = $matchData[$endpiont].Index
+            $numberLength = $matchData[$endpiont].Length
             if($endpid0 -and $endpid0 -ne 0 -and $matched -eq 0){
              $cmdline = $cmdline.Substring(0, $numberIndex) + $endpid0 + $cmdline.Substring($numberIndex + $numberLength)   
             }          
