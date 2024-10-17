@@ -174,9 +174,9 @@ for($i=$Indexfirst;$i -le $Indexlast;$i++){
         }
         $TH2=0
       }
-      if(($content -match "precondition" -or $content -match "Pre-condition") -and $tcline -and !($numbercol) -and !($precol)){
+      if(($content -match "precondition" -or $content -match "Pre-condition" -or $content -match "Pre\scondition") -and $tcline -and !($numbercol) -and !($precol)){
         ForEach($col in $colproperty){
-          if(($content.$col) -match "precondition" -or ($content.$col) -match "Pre-condition"){
+          if(($content.$col) -match "precondition" -or ($content.$col) -match "Pre-condition" -or ($content.$col) -match "Pre\scondition"){
             $precol=$col
             break     
           }
