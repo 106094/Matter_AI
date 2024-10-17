@@ -117,7 +117,7 @@ if(get-process putty){
         $endpid0=((get-content C:\Matter_AI\settings\config_linux.txt | Select-String "endpoint0"|out-string).split(":"))[-1].trim()
         $endpid1=((get-content C:\Matter_AI\settings\config_linux.txt | Select-String "endpoint1"|out-string).split(":"))[-1].trim()
         $endpid2=((get-content C:\Matter_AI\settings\config_linux.txt | Select-String "endpoint2"|out-string).split(":"))[-1].trim()
-        if($endpid0 -ne 0 -or $endpid1 -ne 1 -or $endpid2 -ne 2){      
+        if(($endpid0 -ne 0 -or $endpid1 -ne 1 -or $endpid2 -ne 2){      
         $eplists=import-csv "C:\Matter_AI\settings\chip-tool_clustercmd - endpoint_list.csv"
         $splitcmd=($cmdline.replace("./chip-tool ","")).split(" ")|where-object{$_.Length -gt 0}
         $endpiont=($eplists|Where-Object{$_.name -eq $splitcmd[0] -and $_.command -eq $splitcmd[1] -and $_.attribute -eq $splitcmd[2]}).endpoint
@@ -131,13 +131,13 @@ if(get-process putty){
             $matched= $matches[$endpiont].Value
             $numberIndex = $matches[$endpiont].Index
             $numberLength = $matches[$endpiont].Length
-            if($endpid0 -ne 0 -and $matched -eq 0){
+            if($endpid0 -and $endpid0 -ne 0 -and $matched -eq 0){
              $cmdline = $cmdline.Substring(0, $numberIndex) + $endpid0 + $cmdline.Substring($numberIndex + $numberLength)   
             }          
-            if($endpid1 -ne 1 -and $matched -eq 1){
+            if($endpid1 -and $endpid1 -ne 1 -and $matched -eq 1){
              $cmdline = $cmdline.Substring(0, $numberIndex) + $endpid1 + $cmdline.Substring($numberIndex + $numberLength)   
             } 
-            if($endpid2 -ne 2 -and $matched -eq 2){
+            if($endpid2 -and $endpid2 -ne 2 -and $matched -eq 2){
                 $cmdline = $cmdline.Substring(0, $numberIndex) + $endpid2 + $cmdline.Substring($numberIndex + $numberLength)   
                } 
          }
