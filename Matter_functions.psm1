@@ -197,6 +197,12 @@ if($checkend -eq ">>>" -and $cmdline -match "\./chip\-tool\s"){
     $wshell.SendKeys("^c")
     start-sleep -s 2
 }
+
+#interactive mode abnormal output prevention
+if( !($cmdline -match "\./chip\-tool\s")){
+    $wshell.SendKeys("{enter}")
+    start-sleep -s 1
+}
 [Clicker]::RightClickAtPoint($x1, $y1)
 start-sleep -s 2
 $wshell.SendKeys("{enter}")
@@ -211,6 +217,11 @@ Start-Sleep -s $check_sec
 
 do{
 start-sleep -s 1
+#interactive mode abnormal output prevention
+if( !($cmdline -match "\./chip\-tool\s")){
+    $wshell.SendKeys("{enter}")
+    start-sleep -s 1
+}
 $logfile=(Get-ChildItem $logputty|Sort-Object LastWriteTime|Select-Object -last 1).fullname
 start-process notepad $logfile -WindowStyle Minimized
 start-sleep -s 3
