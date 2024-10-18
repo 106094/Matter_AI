@@ -1087,7 +1087,7 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
         $lastlogcontent=get-content -path C:\Matter_AI\logs\lastlog.log|Select-Object -skip 2
         $getlastkey=$getlastkey.replace("[","\[").replace("]","\]")
         $matchvalue= ([regex]::Match(($lastlogcontent -match $getlastkey), "$getlastkey(.*)").Groups[1].value).tostring().trim()
-        $matchvalue=($matchvalue.replace("[","")).replace("]","")
+        $matchvalue=(($matchvalue.replace("[","")).replace("]","")).replace(",","")
         #$matchvalue= (($lastlogcontent|Select-String -Pattern "($getlastkey).*" -AllMatches |  ForEach-Object {$_.matches.value}).split($getlastkey))[-1].trim()
         $global:varhash+=@([PSCustomObject]@{           
          para_name = $paraname
