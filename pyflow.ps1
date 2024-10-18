@@ -202,8 +202,8 @@ if ($global:testtype -eq 2){
         $addcmdall=@()
         $k++
         $puttyname=$puttyname0
-          $waittime= [int64]($specialsets|Where-Object{$_.source -eq $excelfilename -and $_.TC -eq $caseid0 -and $_.step -eq $stepid -and $_.cmdline -eq $k -and $_.method -eq "waittime"}).waittime
-          $specialset=$specialsets|Where-Object{$_.source -eq $excelfilename -and $_.TC -eq $caseid0 -and $_.step -eq $stepid -and $_.cmdline -eq $k}
+          $waittime= [int64]($specialsets|Where-Object{$_.source -eq $excelfilename -and $_.TC -eq $caseid0 -and $_.step.trim() -eq $stepid -and $_.cmdline -eq $k -and $_.method -eq "waittime"}).waittime
+          $specialset=$specialsets|Where-Object{$_.source -eq $excelfilename -and $_.TC -eq $caseid0 -and $_.step.trim() -eq $stepid -and $_.cmdline -eq $k}
           if ($specialset){
            foreach($special in $specialset){ 
              $puttyname=$puttyname0
