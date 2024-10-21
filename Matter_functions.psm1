@@ -167,7 +167,17 @@ if(get-process putty){
     if($global:testing){        
         return
     }
-    
+
+#replace hardcode
+if($cmdline -like "*pairing*" -and $cmdline -like "*gamma*"){
+    $cmdline=$cmdline.replace("gamma","gamma --paa-trust-store-path /home/ubuntu/PAA/ --trace_decode 1")
+}
+
+#replace hardcode
+if($cmdline -like "*pairing*" -and $cmdline -like "*beta*"){
+    $cmdline=$cmdline.replace("beta","beta --paa-trust-store-path /home/ubuntu/PAA/ --trace_decode 1")
+}
+
 if($check_sec -eq 0){$check_sec = 1}
 
 $logfile=(Get-ChildItem $logputty|Sort-Object LastWriteTime|Select-Object -last 1).fullname
