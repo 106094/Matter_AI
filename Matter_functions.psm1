@@ -171,14 +171,14 @@ if(get-process putty){
 #replace hardcode
 if($cmdline -like "*pairing*" -and $cmdline -like "*gamma*"){
     $pairsettings=import-csv C:\Matter_AI\settings\_manual\settings.csv
-    $storepath=$pairsettings."--paa-trust-store-path"
+    $storepath=$pairsettings."paapath"
     $cmdline=$cmdline.replace("gamma","gamma --paa-trust-store-path $storepath --trace_decode 1")
 }
 
 #replace hardcode
 if($cmdline -like "*pairing*" -and $cmdline -like "*beta*"){
     $pairsettings=import-csv C:\Matter_AI\settings\_manual\settings.csv
-    $storepath=$pairsettings."--paa-trust-store-path"
+    $storepath=$pairsettings."paapath"
     $cmdline=$cmdline.replace("beta","beta --paa-trust-store-path $storepath --trace_decode 1")
 }
 
