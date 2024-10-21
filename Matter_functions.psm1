@@ -170,12 +170,16 @@ if(get-process putty){
 
 #replace hardcode
 if($cmdline -like "*pairing*" -and $cmdline -like "*gamma*"){
-    $cmdline=$cmdline.replace("gamma","gamma --paa-trust-store-path /home/ubuntu/PAA/ --trace_decode 1")
+    $pairsettings=import-csv C:\Matter_AI\settings\_manual\settings.csv
+    $storepath=$pairsettings."--paa-trust-store-path"
+    $cmdline=$cmdline.replace("gamma","gamma --paa-trust-store-path $storepath --trace_decode 1")
 }
 
 #replace hardcode
 if($cmdline -like "*pairing*" -and $cmdline -like "*beta*"){
-    $cmdline=$cmdline.replace("beta","beta --paa-trust-store-path /home/ubuntu/PAA/ --trace_decode 1")
+    $pairsettings=import-csv C:\Matter_AI\settings\_manual\settings.csv
+    $storepath=$pairsettings."--paa-trust-store-path"
+    $cmdline=$cmdline.replace("beta","beta --paa-trust-store-path $storepath --trace_decode 1")
 }
 
 if($check_sec -eq 0){$check_sec = 1}
