@@ -162,15 +162,8 @@ if(get-process putty){
 
     }   
 
-    if($puttyname.length -eq 0){
-        #$pidd=(get-process putty|Sort-Object StartTime|Select-Object -Last 1).Id
-        $logputty="C:\Matter_AI\logs\*putty.log"      
-    }
-    else{
-        $logputty="C:\Matter_AI\logs\*putty_$($puttyname).log"
-    }
+
  
-    puttystart -puttyname $puttyname
  
 #replace hardcode
 if($cmdline -like "*pairing*" -and $cmdline -like "*gamma*"){
@@ -186,7 +179,15 @@ if($cmdline -like "*pairing*" -and $cmdline -like "*beta*"){
     $cmdline=$cmdline.replace("beta","beta --paa-trust-store-path $storepath --trace_decode 1")
 }
 
-
+puttystart -puttyname $puttyname
+    if($puttyname.length -eq 0){
+        #$pidd=(get-process putty|Sort-Object StartTime|Select-Object -Last 1).Id
+        $logputty="C:\Matter_AI\logs\*putty.log"      
+    }
+    else{
+        $logputty="C:\Matter_AI\logs\*putty_$($puttyname).log"
+    }
+    
 add-content C:\Matter_AI\logs\testing.log -value $cmdline
 if($global:testing){        
 return
@@ -200,7 +201,7 @@ $checkend=((get-content $logfile)[-1]|Out-String).Trim()
 #start-sleep -s 3
 #(get-process notepad).CloseMainWindow()|Out-Null
 $lastlogline=(get-content $logfile).count -1
-
+$pidd=($global:puttyset|Where-Object{$_.name -eq $puttyname}|Select-Object -last 1).puttypid
 [Microsoft.VisualBasic.interaction]::AppActivate($pidd)|out-null
 Set-Clipboard -Value $cmdline
 start-sleep -s 3
