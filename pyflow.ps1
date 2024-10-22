@@ -210,7 +210,8 @@ if ($global:testtype -eq 2){
              $method=$special."method"
              $newputtyname=$special."diff_session"
              $getlastkey=$special."lastlog_keyword"
-             $paraname=$special."para_name"
+             $paraname=$special."para_name"             
+             $newwaittime=$special."waittime"
                if($method -match "replace"){
                  $keyword=$special."cmd_keyword"
                  $replaceby=$special."replace"
@@ -241,6 +242,9 @@ if ($global:testtype -eq 2){
                 }
                 if($newputtyname.length -gt 0){
                   $puttyname=$newputtyname
+                }
+                if($newwaittime.length -gt 0){
+                  $waittime=$newwaittime
                 }
                 if($method -match "add"){
                   $addcmd=$special."add_cmd"
