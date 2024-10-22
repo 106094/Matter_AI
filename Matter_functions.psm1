@@ -103,29 +103,23 @@ Add-Type @"
 function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int64]$line1,[string]$checkline1,[int64]$line2,[string]$checkline2,[switch]$manual){
 
 if(get-process putty){
-    
-    $pidd=($global:puttyset|Where-Object{$_.name -eq $puttyname}|Select-Object -last 1).puttypid
-    if($puttyname.length -eq 0){
-        #$pidd=(get-process putty|Sort-Object StartTime|Select-Object -Last 1).Id
-        $logputty="C:\Matter_AI\logs\*putty.log"      
-    }
-    else{
-        $logputty="C:\Matter_AI\logs\*putty_$($puttyname).log"
-    }
-
-    if ($manual){
-        $endpid0=((get-content C:\Matter_AI\settings\config_linux.txt | Select-String "endpoint0"|out-string).split(":"))[-1].trim()
-        $endpid1=((get-content C:\Matter_AI\settings\config_linux.txt | Select-String "endpoint1"|out-string).split(":"))[-1].trim()
-        $endpid2=((get-content C:\Matter_AI\settings\config_linux.txt | Select-String "endpoint2"|out-string).split(":"))[-1].trim()
-        if($endpid0 -ne 0 -or $endpid1 -ne 1 -or $endpid2 -ne 2){      
-        $eplists=import-csv "C:\Matter_AI\settings\chip-tool_clustercmd - endpoint_list.csv"
+    if ($manual){   
+        $eplists=import-csv "C:\Matter_AI\settings\chip-tool_clustercmd - point_list.csv"
         $splitcmd=($cmdline.replace("./chip-tool ","")).split(" ")|where-object{$_.Length -gt 0}
         $endpiont=($eplists|Where-Object{$_.name -eq $splitcmd[0] -and $_.command -eq $splitcmd[1] -and $_.attribute -eq $splitcmd[2]}).endpoint
+        $destid=($eplists|Where-Object{$_.name -eq $splitcmd[0] -and $_.command -eq $splitcmd[1] -and $_.attribute -eq $splitcmd[2]})."destination-id"
          if(!$endpiont){
           $endpiont=($eplists|Where-Object{$_.name -eq $splitcmd[0] -and $_.command -eq $splitcmd[1]}).endpoint
            }
-       if($endpiont){
-        
+           if(!$destid){
+            $destid=($eplists|Where-Object{$_.name -eq $splitcmd[0] -and $_.command -eq $splitcmd[1]})."destination-id"
+             }
+
+       if($endpiont){        
+        $endpid0=((get-content C:\Matter_AI\settings\config_linux.txt | Select-String "endpoint0"|out-string).split(":"))[-1].trim()
+        $endpid1=((get-content C:\Matter_AI\settings\config_linux.txt | Select-String "endpoint1"|out-string).split(":"))[-1].trim()
+        $endpid2=((get-content C:\Matter_AI\settings\config_linux.txt | Select-String "endpoint2"|out-string).split(":"))[-1].trim()
+        if($endpid0 -ne 0 -or $endpid1 -ne 1 -or $endpid2 -ne 2){ 
         $patterns =  @('(?<!0x\d+)\b\d+\b', '0x\d+')
             $matchData = @()  # Array to store match information
 
@@ -161,13 +155,22 @@ if(get-process putty){
          }
         }
        }
+      if($destid){
+        $puttyname="putty$($destid)"
+      }
+
     }   
 
-    add-content C:\Matter_AI\logs\testing.log -value $cmdline 
-    if($global:testing){        
-        return
+    if($puttyname.length -eq 0){
+        #$pidd=(get-process putty|Sort-Object StartTime|Select-Object -Last 1).Id
+        $logputty="C:\Matter_AI\logs\*putty.log"      
     }
-
+    else{
+        $logputty="C:\Matter_AI\logs\*putty_$($puttyname).log"
+    }
+ 
+    puttystart -puttyname $puttyname
+ 
 #replace hardcode
 if($cmdline -like "*pairing*" -and $cmdline -like "*gamma*"){
     $pairsettings=import-csv C:\Matter_AI\settings\_manual\settings.csv
@@ -181,6 +184,12 @@ if($cmdline -like "*pairing*" -and $cmdline -like "*beta*"){
     $storepath=$pairsettings."paapath"
     $cmdline=$cmdline.replace("beta","beta --paa-trust-store-path $storepath --trace_decode 1")
 }
+
+
+add-content C:\Matter_AI\logs\testing.log -value $cmdline
+if($global:testing){        
+return
+ }
 
 if($check_sec -eq 0){$check_sec = 1}
 
@@ -961,11 +970,16 @@ function selection_manual($data, $column1, $column2) {
    #endregion 
 
 #region putty starting functions
+
 function puttystart ([string]$puttyname) {
- 
+     
+   $puttypid=($global:puttyset|Where-Object{$_.name -eq $puttyname}|Select-Object -last 1).puttypid
+   if($puttypid){
+    $checkpid=get-process -id $puttypid -ErrorAction SilentlyContinue
+   }
+   if(!$puttypid -or !$checkpid){
     $settings=get-content C:\Matter_AI\settings\config_linux.txt
     $sship=($settings[0].split(":"))[-1]
-
     $regfile="C:\Matter_AI\puttyreg.reg"
       if($sship -ne "192.168.2.201"){
         (get-content "C:\Matter_AI\puttyreg.reg").replace("192.168.2.201",$sship)|Set-Content "C:\Matter_AI\puttyreg1.reg"
@@ -994,12 +1008,16 @@ function puttystart ([string]$puttyname) {
 
     start-process $putty -ArgumentList "-load $sesname" -WindowStyle Maximized
     $afterpid=(get-process -name putty|Where-Object{$_.id -notin $beforepid}).id
-    $global:puttyset+=New-Object -TypeName PSObject -Property @{
-        name=$puttyname
-        puttypid=$afterpid
-    }
-    
-    $puttypid=($global:puttyset|Where-Object{$_.name -eq $puttyname}|Select-Object -last 1).puttypid
+    if($puttypid){
+        ($global:puttyset|Where-Object{$_.name -eq $puttyname}).puttypid=$afterpid
+    }else{
+      $global:puttyset+=New-Object -TypeName PSObject -Property @{
+          name=$puttyname
+          puttypid=$afterpid
+        }
+     }
+    $global:puttyset|Format-Table
+     $puttypid=($global:puttyset|Where-Object{$_.name -eq $puttyname}|Select-Object -last 1).puttypid
     
        $settings=get-content C:\Matter_AI\settings\config_linux.txt
        $pskey=($settings[2].split(":"))[-1]
@@ -1043,6 +1061,7 @@ function puttystart ([string]$puttyname) {
        putty_paste -cmdline $pskey -puttyname $puttyname
        putty_paste -cmdline "cd /root/apps" -puttyname $puttyname
        }
+    }
 }
 
 #endregion
