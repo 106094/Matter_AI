@@ -211,7 +211,7 @@ if ($global:testtype -eq 2){
              $newputtyname=$special."diff_session"
              $getlastkey=$special."lastlog_keyword"
              $paraname=$special."para_name"             
-             $newwaittime=$special."waittime"
+             $newwaittime=[int64]$special."waittime"
                if($method -match "replace"){
                  $keyword=$special."cmd_keyword"
                  $replaceby=$special."replace"
