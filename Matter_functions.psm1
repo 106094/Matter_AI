@@ -115,12 +115,7 @@ if(get-process putty){
             $destid=($eplists|Where-Object{$_.name -eq $splitcmd[0] -and $_.command -eq $splitcmd[1]})."destination-id"
              }
 
-       if($endpiont){        
-        $endpid0=((get-content C:\Matter_AI\settings\config_linux.txt | Select-String "endpoint0"|out-string).split(":"))[-1].trim()
-        $endpid1=((get-content C:\Matter_AI\settings\config_linux.txt | Select-String "endpoint1"|out-string).split(":"))[-1].trim()
-        $endpid2=((get-content C:\Matter_AI\settings\config_linux.txt | Select-String "endpoint2"|out-string).split(":"))[-1].trim()
-        if($endpid0 -ne 0 -or $endpid1 -ne 1 -or $endpid2 -ne 2){ 
-        $patterns =  @('(?<!0x\d+)\b\d+\b', '0x\d+')
+           $patterns =  @('(?<!0x\d+)\b\d+\b', '0x\d+')
             $matchData = @()  # Array to store match information
 
             foreach ($pattern in $patterns) {
@@ -137,27 +132,33 @@ if(get-process putty){
                     }
                 }
             }
-        $matchData=$matchData|Sort-Object index
-        $endpiont=$endpiont-1        
-        if ($matchData.Count -ge $endpiont) {
-            $matched= $matchData[$endpiont].Value
-            $numberIndex = $matchData[$endpiont].Index
-            $numberLength = $matchData[$endpiont].Length
-            if($endpid0 -and $endpid0 -ne 0 -and $matched -eq 0){
-             $cmdline = $cmdline.Substring(0, $numberIndex) + $endpid0 + $cmdline.Substring($numberIndex + $numberLength)   
-            }          
-            if($endpid1 -and $endpid1 -ne 1 -and $matched -eq 1){
-             $cmdline = $cmdline.Substring(0, $numberIndex) + $endpid1 + $cmdline.Substring($numberIndex + $numberLength)   
-            } 
-            if($endpid2 -and $endpid2 -ne 2 -and $matched -eq 2){
-                $cmdline = $cmdline.Substring(0, $numberIndex) + $endpid2 + $cmdline.Substring($numberIndex + $numberLength)   
-               } 
+         $matchData=$matchData|Sort-Object index
+        if($destid){
+            $destnodeid= $matchData[$destid-1].Value
+            $puttyname="putty$($destnodeid)"
+        }
+        if($endpiont){        
+            $endpid0=((get-content C:\Matter_AI\settings\config_linux.txt | Select-String "endpoint0"|out-string).split(":"))[-1].trim()
+            $endpid1=((get-content C:\Matter_AI\settings\config_linux.txt | Select-String "endpoint1"|out-string).split(":"))[-1].trim()
+            $endpid2=((get-content C:\Matter_AI\settings\config_linux.txt | Select-String "endpoint2"|out-string).split(":"))[-1].trim()
+            if($endpid0 -ne 0 -or $endpid1 -ne 1 -or $endpid2 -ne 2){ 
+               $endpiont=$endpiont-1        
+            if ($matchData.Count -ge $endpiont) {
+                $matched= $matchData[$endpiont].Value
+                $numberIndex = $matchData[$endpiont].Index
+                $numberLength = $matchData[$endpiont].Length
+                if($endpid0 -and $endpid0 -ne 0 -and $matched -eq 0){
+                $cmdline = $cmdline.Substring(0, $numberIndex) + $endpid0 + $cmdline.Substring($numberIndex + $numberLength)   
+                }          
+                if($endpid1 -and $endpid1 -ne 1 -and $matched -eq 1){
+                $cmdline = $cmdline.Substring(0, $numberIndex) + $endpid1 + $cmdline.Substring($numberIndex + $numberLength)   
+                } 
+                if($endpid2 -and $endpid2 -ne 2 -and $matched -eq 2){
+                    $cmdline = $cmdline.Substring(0, $numberIndex) + $endpid2 + $cmdline.Substring($numberIndex + $numberLength)   
+                } 
          }
         }
        }
-      if($destid){
-        $puttyname="putty$($destid)"
-      }
 
     }   
 
