@@ -100,7 +100,7 @@ Add-Type @"
 #endregion
 
 #region putty cmd and check    
-function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int64]$line1,[string]$checkline1,[int64]$line2,[string]$checkline2,[switch]$manual){
+function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int64]$line1,[string]$checkline1,[int64]$line2,[string]$checkline2,[switch]$manual,[switch]$skipcheck){
 
 if(get-process putty){
     if ($manual){   
@@ -243,7 +243,7 @@ Start-Sleep -s $check_sec
 do{
 start-sleep -s 1
 #interactive mode abnormal output prevention
-if( !($cmdline -match "\./chip\-tool\s")){
+if( !($cmdline -match "\./chip\-tool\s") -and !$skipcheck){
     $wshell.SendKeys("{enter}")
     start-sleep -s 1
 }
@@ -1055,13 +1055,13 @@ function puttystart ([string]$puttyname) {
        #putty_paste -cmdline "docker exec -it $ctnid /bin/bash"
        #putty_paste -cmdline "cd $sshpath"
         if(!$gloal:failmsg){
-        putty_paste -cmdline "docker start $ctnid; docker exec -it $ctnid /bin/bash; cd $sshpath"
+        putty_paste -cmdline "docker start $ctnid; docker exec -it $ctnid /bin/bash; cd $sshpath" -skipcheck
         }
        }
        if($global:testtype -eq 2){
-       putty_paste -cmdline "sudo -s" -puttyname $puttyname
-       putty_paste -cmdline $pskey -puttyname $puttyname
-       putty_paste -cmdline "cd /root/apps" -puttyname $puttyname
+       putty_paste -cmdline "sudo -s" -puttyname $puttyname -skipcheck
+       putty_paste -cmdline $pskey -puttyname $puttyname -skipcheck
+       putty_paste -cmdline "cd /root/apps" -puttyname $puttyname -skipcheck
        }
     }
 }
