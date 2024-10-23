@@ -102,7 +102,6 @@ Add-Type @"
 #region putty cmd and check    
 function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int64]$line1,[string]$checkline1,[int64]$line2,[string]$checkline2,[switch]$manual,[switch]$skipcheck){
 
-if(get-process putty){
     if ($manual){   
         $eplists=import-csv "C:\Matter_AI\settings\chip-tool_clustercmd - pointid_list.csv"
         $splitcmd=($cmdline.replace("./chip-tool ","")).split(" ")|where-object{$_.Length -gt 0}
@@ -271,7 +270,6 @@ $checkresult=$checklog -like "*$checkline2*"
 $checkresult
 }
 
-}
 }    
 #endregion
 
