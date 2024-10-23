@@ -111,26 +111,54 @@ $htmlContent += "</tr></thead><tbody>"
     foreach($log in $logcontent){
       $k++
       $logdata=get-content $log |Where-Object{$_.length -gt 0}| Select-Object -skip 2
-      if($logdata.length -le 200){
-        $tdlog=$logdata|foreach-object{
-          $newline=(($_ -split "CHIP\:")[1]) + "<br>"
-          $newline
-             }
-      }else{
-        $tdlog=$logdata| foreach-object{
+      $checkitems = $csv.example.split("`n")|Where-Object{$_.trim().length -gt 0}
+      $matchedlines=@()
+      foreach($logline in $logdata){
+        if($logline -match "CHIP:" ){
+          $logline=($logline -split "CHIP:")[1]
+        }
+        $matchc=0
+        foreach ($checkit in $checkitems){
+          $match2=$match3=$maxdcm=0
+          $totalc=($checkit.split(" ")|Where-Object{$_.length -gt 2}).count
+          $checkit.split(" ")|ForEach-Object{
+            if($_.length -gt 2){
+              $newcheckit=$_.replace("[","*").replace("]","*")
+              if($logline -like "*$newcheckit*"){
+                $matchc++
+                $match2++
+                if($match2 -gt $match3){
+                   $match3=$match2
+                   $maxdcm=[math]::round($match3/$totalc,3)                  
+                   Write-Output $formattedPercentage  # Output: 12.3%
+                   $matchgline=$checkit.ToString()
+                   }
+                }
+           }
+          }
+        }
+        if($maxdcm -gt 0.3){
+          #$matchedlines+=@("$($match3) matched [$($matchgline.trim())], $logline")
+          $maxdcmp = "{0:P1}" -f  $maxdcm
+          $matchedlines+=@($logline+" ($maxdcmp)")
+          }
+      }
+
+        $tdlog=@()
+        $htmllog=$reportPathlog+"\"+(get-childitem $log).name
+        
+        $linkfile=(get-childitem $log).name
+        $linkfolder=((get-childitem $log).Directory).Name
+        $tdlog = "<a href='$linkfolder/$linkfile' target='_blank'>checklog</a><br>"
+        $matchedlines| foreach-object{
           $newline=$_
           if($_ -like "*CHIP:*"){
-            $newline=(($_ -split "CHIP\:")[1]) 
+            $newline=(($_ -split "CHIP\:")[1])
           }
-         $newline
-        }
-        $htmllog=$reportPathlog+"\"+(get-childitem $log).name
-        set-content $htmllog -Value $tdlog -Force
-        $linkfile=(get-childitem $log).name
-        $tdlog= "<a href='html/$linkfile' target='_blank'>checklog</a>"
-      }
-          
-
+          $tdlog+=@($newline+ "<br>")
+        }       
+        $tdlog|Select-Object -skip 1| set-content $htmllog -force
+        $tdlog=$tdlog|out-string
         <#
           $refdata = $csv.flow|foreach-object{
           $newline=(($_ -split "CHIP\:")[1]) + "<br>"
@@ -142,8 +170,10 @@ $htmlContent += "</tr></thead><tbody>"
         $newline
         }
         $example = $csv.example.split("`n")|foreach-object{
-        $newline=$_ + "<br>"
-        $newline
+          if($_.trim().length -gt 0){
+            $newline=$_ + "<br>"
+            $newline
+          }
         }
 
         $cmd=($($csv.cmd) -split "`n")[$k-1]
@@ -157,9 +187,9 @@ $htmlContent += "</tr></thead><tbody>"
       $htmlContent += "<td class='top-align' style='width: 4%;'>$($csv.step)</td>"
       $htmlContent += "<td class='top-align' style='width: 1%;'>$($k)</td>"      
       $htmlContent += "<td class='top-align' style='width: 10%;'>$($cmd)</td>"
-      $htmlContent += "<td class='top-align' style='width: 24%;'>$($tdlog)</td>"
-      $htmlContent += "<td class='top-align' style='width: 24%;'>$($varify)</td>"
-      $htmlContent += "<td class='top-align' style='width: 24%;'>$($example)</td>"
+      $htmlContent += "<td class='top-align' style='width: 36%;'>$($tdlog)</td>"
+      $htmlContent += "<td class='top-align' style='width: 18%;'>$($varify)</td>"
+      $htmlContent += "<td class='top-align' style='width: 18%;'>$($example)</td>"
       $htmlContent += "<td class='top-align' style='width: 4%;'></td>"      
       $htmlContent += "<td class='top-align' style='width: 4%;'></td>"
       $htmlContent += "</tr>"
