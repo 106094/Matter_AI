@@ -104,7 +104,7 @@ function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int6
 
 if(get-process putty){
     if ($manual){   
-        $eplists=import-csv "C:\Matter_AI\settings\chip-tool_clustercmd - point_list.csv"
+        $eplists=import-csv "C:\Matter_AI\settings\chip-tool_clustercmd - pointid_list.csv"
         $splitcmd=($cmdline.replace("./chip-tool ","")).split(" ")|where-object{$_.Length -gt 0}
         $endpoint=($eplists|Where-Object{$_.name -eq $splitcmd[0] -and $_.command -eq $splitcmd[1] -and $_.attribute -eq $splitcmd[2]}).endpoint
         $destid=($eplists|Where-Object{$_.name -eq $splitcmd[0] -and $_.command -eq $splitcmd[1] -and $_.attribute -eq $splitcmd[2]})."destination-id"

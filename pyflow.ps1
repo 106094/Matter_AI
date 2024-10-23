@@ -164,11 +164,6 @@ if ($global:testtype -eq 2){
     
    #check if putty session exist
    $puttyname=$puttyname0
-     $sessionid= ($global:puttyset|Where-Object{$_.name -eq $puttyname}|Select-Object -Last 1).puttypid
-        if(!$sessionid -or !(get-process -id $sessionid -ErrorAction SilentlyContinue)){   
-           puttystart -puttyname $puttyname
-        }
-
     #start pairing with restest
     foreach($header in $headers){
       if ($paringcmd -match $hearder){
@@ -183,7 +178,7 @@ if ($global:testtype -eq 2){
         putty_paste -cmdline "rm -rf /tmp/chip_*" -puttyname $puttyname
         while (!$pairresult -and $k -lt $retesttime){
           $k++
-          $pairresult=putty_paste -cmdline "$paringcmd" -checkline1 "Device commissioning completed with success" -puttyname $puttyname
+          $pairresult=putty_paste -cmdline "$paringcmd" -checkline1 "Device commissioning completed with success"
           add-content -path $logpair -Value (get-content -path C:\Matter_AI\logs\lastlog.log )
           write-host "round $k"
         }
@@ -249,13 +244,9 @@ if ($global:testtype -eq 2){
                 if($method -match "add"){
                   $addcmd=$special."add_cmd"
                    #check if putty session exist
-                  $sessionid= ($global:puttyset|Where-Object{$_.name -eq $puttyname}|Select-Object -Last 1).puttypid
-                  if(!$sessionid -or !(get-process -id $sessionid -ErrorAction SilentlyContinue)){   
-                      puttystart -puttyname $puttyname
-                  }
                   if($method -match "add_before"){
                     $waittime=[int64]$special."waittime"
-                    $pycmd=putty_paste -cmdline "$addcmd" -puttyname $puttyname -check_sec $waittime -manual 
+                    $pycmd=putty_paste -cmdline "$addcmd" -check_sec $waittime -manual 
                     $lastlogcontent=get-content -path C:\Matter_AI\logs\lastlog.log
                     $datetime2=get-date -Format yyyyMMdd_HHmmss
                     $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid)-$($k)_$($method).log"
@@ -282,11 +273,7 @@ if ($global:testtype -eq 2){
               }
           }
           if($runflag -eq 1){
-            $sessionid= ($global:puttyset|Where-Object{$_.name -eq $puttyname}|Select-Object -Last 1).puttypid
-            if(!$sessionid -or !(get-process -id $sessionid -ErrorAction SilentlyContinue)){   
-                puttystart -puttyname $puttyname
-            }
-          $pycmd=putty_paste -cmdline "$pyline" -puttyname $puttyname -check_sec $waittime -manual 
+          $pycmd=putty_paste -cmdline "$pyline" -check_sec $waittime -manual 
           $lastlogcontent=get-content -path C:\Matter_AI\logs\lastlog.log
           
           $datetime2=get-date -Format yyyyMMdd_HHmmss
