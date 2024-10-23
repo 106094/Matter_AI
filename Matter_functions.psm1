@@ -102,7 +102,7 @@ Add-Type @"
 #region putty cmd and check    
 function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int64]$line1,[string]$checkline1,[int64]$line2,[string]$checkline2,[switch]$manual,[switch]$skipcheck){
 
-    if ($manual){   
+    if ($manual -and !$skipcheck){   
         $eplists=import-csv "C:\Matter_AI\settings\chip-tool_clustercmd - pointid_list.csv"
         $splitcmd=($cmdline.replace("./chip-tool ","")).split(" ")|where-object{$_.Length -gt 0}
         $endpoint=($eplists|Where-Object{$_.name -eq $splitcmd[0] -and $_.command -eq $splitcmd[1] -and $_.attribute -eq $splitcmd[2]}).endpoint
@@ -160,9 +160,6 @@ function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int6
        }
 
     }   
-
-
- 
  
 #replace hardcode
 if($cmdline -like "*pairing*" -and $cmdline -like "*gamma*"){
@@ -1039,10 +1036,10 @@ function puttystart ([string]$puttyname) {
        
        if($global:testtype -eq 1){
         $gloal:failmsg=$null
-        putty_paste -cmdline "sudo -s"
-        putty_paste -cmdline $pskey  
-        putty_paste -cmdline "docker ps -a"
-        $idlogin=get-content "C:\Matter_AI\logs\lastlog.log"
+        putty_paste -cmdline "sudo -s" -skipcheck
+        putty_paste -cmdline $pskey  -skipcheck
+        putty_paste -cmdline "docker ps -a" -skipcheck
+        $idlogin=get-content "C:\Matter_AI\logs\lastlog.log" 
         $checkmatch=$idlogin -match "\/bin\/bash"
         if($checkmatch){
             $ctnid= (($idlogin -match "\/bin\/bash").split(" "))[0]
