@@ -201,6 +201,9 @@ $checkend=((get-content $logfile)[-1]|Out-String).Trim()
 #(get-process notepad).CloseMainWindow()|Out-Null
 $lastlogline=(get-content $logfile).count -1
 $pidd=($global:puttyset|Where-Object{$_.name -eq $puttyname}|Select-Object -last 1).puttypid
+if($pidd){
+
+
 [Microsoft.VisualBasic.interaction]::AppActivate($pidd)|out-null
 Set-Clipboard -Value $cmdline
 start-sleep -s 3
@@ -269,7 +272,7 @@ $checkresult=$checklog -like "*$checkline2*"
 }
 $checkresult
 }
-
+}
 }    
 #endregion
 
