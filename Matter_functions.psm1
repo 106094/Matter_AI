@@ -223,7 +223,7 @@ if($checkend -eq ">>>" -and $cmdline -match "\./chip\-tool\s"){
 }
 
 #interactive mode abnormal output prevention
-if( !($cmdline -match "\./chip\-tool\s")){
+if( !($cmdline -match "\./chip\-tool\s") -and !$skipcheck){
     $wshell.SendKeys("{enter}")
     start-sleep -s 1
 }
