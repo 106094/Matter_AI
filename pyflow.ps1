@@ -250,10 +250,10 @@ if ($global:testtype -eq 2){
                     $lastlogcontent=get-content -path C:\Matter_AI\logs\lastlog.log
                     $datetime2=get-date -Format yyyyMMdd_HHmmss
                     $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid)-$($k)_$($method).log"
+                    if( $global:puttylogname.length -gt 0){
+                      $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid)-$($k)_$($method)_$( $global:puttylogname).log"
+                    }                     
                     new-item -ItemType File -Path $logtcstep | Out-Null
-                    if($puttyname.length -gt 0){
-                      $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid)-$($k)_$($method)_$($puttyname).log"
-                    }    
                     add-content -path $logtcstep -Value $lastlogcontent
                     if ($getlastkey.Length -gt 0){
                       getparameter -getlastkey $getlastkey
@@ -278,8 +278,8 @@ if ($global:testtype -eq 2){
           
           $datetime2=get-date -Format yyyyMMdd_HHmmss
           $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid)-$($k).log"
-          if($puttyname.length -gt 0){
-            $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid)-$($k)_$($puttyname).log"
+          if($global:puttylogname.length -gt 0){
+            $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid)-$($k)_$($global:puttylogname).log"
           }    
           new-item -ItemType File -Path $logtcstep | Out-Null
           add-content -path $logtcstep -Value $lastlogcontent
@@ -295,16 +295,17 @@ if ($global:testtype -eq 2){
            foreach ($addcmd in $addcmdall){
             $k++
             $addcmdaf=$addcmd.addcmdaf
-            $puttysesstion=$addcmd.puttysesstion
+            #$puttysesstion=$addcmd.puttysesstion
             $waittime=[int64]$addcmd.waittime
-            $pycmd=putty_paste -cmdline "$addcmdaf" -puttyname $puttysesstion -check_sec $waittime -manual
+            #$pycmd=putty_paste -cmdline "$addcmdaf" -puttyname $puttysesstion -check_sec $waittime -manual
+            $pycmd=putty_paste -cmdline "$addcmdaf" -check_sec $waittime -manual
             $lastlogcontent=get-content -path C:\Matter_AI\logs\lastlog.log
             $datetime2=get-date -Format yyyyMMdd_HHmmss
             $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid)-$($k)_$($method).log"
+            if($global:puttylogname.length -gt 0){
+              $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid)-$($k)_$($method)_$($global:puttylogname).log"
+            }
             new-item -ItemType File -Path $logtcstep | Out-Null
-            if($puttyname.length -gt 0){
-              $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid)-$($k)_$($method)_$($puttyname).log"
-            }    
             add-content -path $logtcstep -Value $lastlogcontent
             if ($getlastkey.Length -gt 0){
               getparameter -getlastkey $getlastkey

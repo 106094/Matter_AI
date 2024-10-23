@@ -101,7 +101,7 @@ Add-Type @"
 
 #region putty cmd and check    
 function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int64]$line1,[string]$checkline1,[int64]$line2,[string]$checkline2,[switch]$manual,[switch]$skipcheck){
-
+    $global:puttylogname=$null
     if ($manual -and !$skipcheck){   
         $eplists=import-csv "C:\Matter_AI\settings\chip-tool_clustercmd - pointid_list.csv"
         $splitcmd=($cmdline.replace("./chip-tool ","")).split(" ")|where-object{$_.Length -gt 0}
@@ -158,21 +158,25 @@ function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int6
          }
         }
        }
-
+        
+       #replace hardcode
+        if($cmdline -like "*pairing*" -and $cmdline -like "*gamma*"){
+            $pairsettings=import-csv C:\Matter_AI\settings\_manual\settings.csv
+            $storepath=$pairsettings."paapath"
+            $cmdline=$cmdline.replace("gamma","gamma --paa-trust-store-path $storepath --trace_decode 1")
+        }
+        
+        #replace hardcode
+        if($cmdline -like "*pairing*" -and $cmdline -like "*beta*"){
+            $pairsettings=import-csv C:\Matter_AI\settings\_manual\settings.csv
+            $storepath=$pairsettings."paapath"
+            $cmdline=$cmdline.replace("beta","beta --paa-trust-store-path $storepath --trace_decode 1")
+        }
     }   
  
-#replace hardcode
-if($cmdline -like "*pairing*" -and $cmdline -like "*gamma*"){
-    $pairsettings=import-csv C:\Matter_AI\settings\_manual\settings.csv
-    $storepath=$pairsettings."paapath"
-    $cmdline=$cmdline.replace("gamma","gamma --paa-trust-store-path $storepath --trace_decode 1")
-}
 
-#replace hardcode
-if($cmdline -like "*pairing*" -and $cmdline -like "*beta*"){
-    $pairsettings=import-csv C:\Matter_AI\settings\_manual\settings.csv
-    $storepath=$pairsettings."paapath"
-    $cmdline=$cmdline.replace("beta","beta --paa-trust-store-path $storepath --trace_decode 1")
+if($puttyname.length -gt 0){
+    $global:puttylogname=$puttyname
 }
 
 puttystart -puttyname $puttyname
@@ -183,7 +187,8 @@ puttystart -puttyname $puttyname
     else{
         $logputty="C:\Matter_AI\logs\*putty_$($puttyname).log"
     }
-    
+
+
 add-content C:\Matter_AI\logs\testing.log -value $cmdline
 if($global:testing){        
 return
