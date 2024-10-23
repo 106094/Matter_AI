@@ -106,10 +106,10 @@ if(get-process putty){
     if ($manual){   
         $eplists=import-csv "C:\Matter_AI\settings\chip-tool_clustercmd - point_list.csv"
         $splitcmd=($cmdline.replace("./chip-tool ","")).split(" ")|where-object{$_.Length -gt 0}
-        $endpiont=($eplists|Where-Object{$_.name -eq $splitcmd[0] -and $_.command -eq $splitcmd[1] -and $_.attribute -eq $splitcmd[2]}).endpoint
+        $endpoint=($eplists|Where-Object{$_.name -eq $splitcmd[0] -and $_.command -eq $splitcmd[1] -and $_.attribute -eq $splitcmd[2]}).endpoint
         $destid=($eplists|Where-Object{$_.name -eq $splitcmd[0] -and $_.command -eq $splitcmd[1] -and $_.attribute -eq $splitcmd[2]})."destination-id"
-         if(!$endpiont){
-          $endpiont=($eplists|Where-Object{$_.name -eq $splitcmd[0] -and $_.command -eq $splitcmd[1]}).endpoint
+         if(!$endpoint){
+          $endpoint=($eplists|Where-Object{$_.name -eq $splitcmd[0] -and $_.command -eq $splitcmd[1]}).endpoint
            }
            if(!$destid){
             $destid=($eplists|Where-Object{$_.name -eq $splitcmd[0] -and $_.command -eq $splitcmd[1]})."destination-id"
@@ -137,16 +137,16 @@ if(get-process putty){
             $destnodeid= $matchData[$destid-1].Value
             $puttyname="putty$($destnodeid)"
         }
-        if($endpiont){        
+        if($endpoint){        
             $endpid0=((get-content C:\Matter_AI\settings\config_linux.txt | Select-String "endpoint0"|out-string).split(":"))[-1].trim()
             $endpid1=((get-content C:\Matter_AI\settings\config_linux.txt | Select-String "endpoint1"|out-string).split(":"))[-1].trim()
             $endpid2=((get-content C:\Matter_AI\settings\config_linux.txt | Select-String "endpoint2"|out-string).split(":"))[-1].trim()
             if($endpid0 -ne 0 -or $endpid1 -ne 1 -or $endpid2 -ne 2){ 
-               $endpiont=$endpiont-1        
-            if ($matchData.Count -ge $endpiont) {
-                $matched= $matchData[$endpiont].Value
-                $numberIndex = $matchData[$endpiont].Index
-                $numberLength = $matchData[$endpiont].Length
+               $endpoint=$endpoint-1        
+            if ($matchData.Count -ge $endpoint) {
+                $matched= $matchData[$endpoint].Value
+                $numberIndex = $matchData[$endpoint].Index
+                $numberLength = $matchData[$endpoint].Length
                 if($endpid0 -and $endpid0 -ne 0 -and $matched -eq 0){
                 $cmdline = $cmdline.Substring(0, $numberIndex) + $endpid0 + $cmdline.Substring($numberIndex + $numberLength)   
                 }          

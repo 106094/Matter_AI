@@ -112,7 +112,7 @@ if ($global:testtype -eq 2){
     webdownload -goo_link $goo_link -gid $gid -sv_range $sv_range -savepath $savepath -errormessage $errormessage
     #endregion
 
-    if(!(test-path "C:\Matter_AI\settings\chip-tool_clustercmd - point_list.csv")){
+    if(!(test-path "C:\Matter_AI\settings\chip-tool_clustercmd - pointid_list.csv")){
     #region download manual endpoint referance
     $goo_link="https://docs.google.com/spreadsheets/d/1-vSsxIMLxcSibvRLyez-SJD0ZfF-Su7aVUCV2bUJuWk/"
     $gid="1082391814"
