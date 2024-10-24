@@ -101,6 +101,7 @@ Add-Type @"
 
 #region putty cmd and check    
 function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int64]$line1,[string]$checkline1,[int64]$line2,[string]$checkline2,[switch]$manual,[switch]$skipcheck){
+    if($check_sec -eq 0){$check_sec = 1}
     $global:puttylogname=$puttynamedest=$null
     if ($manual -and !$skipcheck){
         $lastword=$endpoint=$destid=$endpoint=$null
@@ -203,12 +204,11 @@ puttystart -puttyname $global:puttylogname
     }
 
 
-add-content C:\Matter_AI\logs\testing.log -value "$global:puttylogname : $cmdline"
-if($global:testing){        
+$pidd=($global:puttyset|Where-Object{$_.name -eq $global:puttylogname}|Select-Object -last 1).puttypid
+add-content C:\Matter_AI\logs\testing.log -value "$global:puttylogname (pid id: $pidd): $cmdline"
+if($global:testing){
 return
  }
-
-if($check_sec -eq 0){$check_sec = 1}
 
 $logfile=(Get-ChildItem $logputty|Sort-Object LastWriteTime|Select-Object -last 1).fullname
 $checkend=((get-content $logfile)[-1]|Out-String).Trim()
@@ -216,10 +216,6 @@ $checkend=((get-content $logfile)[-1]|Out-String).Trim()
 #start-sleep -s 3
 #(get-process notepad).CloseMainWindow()|Out-Null
 $lastlogline=(get-content $logfile).count -1
-$pidd=($global:puttyset|Where-Object{$_.name -eq $global:puttylogname}|Select-Object -last 1).puttypid
-if($pidd){
-
-
 [Microsoft.VisualBasic.interaction]::AppActivate($pidd)|out-null
 Set-Clipboard -Value $cmdline
 start-sleep -s 3
@@ -288,7 +284,7 @@ $checkresult=$checklog -like "*$checkline2*"
 }
 $checkresult
 }
-}
+
 }    
 #endregion
 
