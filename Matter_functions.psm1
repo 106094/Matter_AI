@@ -140,7 +140,7 @@ function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int6
         
           if($destid -and $destid.length -gt 0){
              #$destnodeid= $matchData[$destid].Value
-             $puttyname="putty$($endpoint)"
+             $puttyname="putty$($destid)"
            }
           if($endpoint){   
             $endpid0=((get-content C:\Matter_AI\settings\config_linux.txt | Select-String "endpoint0"|out-string).split(":"))[-1].trim()
