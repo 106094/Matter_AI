@@ -103,7 +103,7 @@ Add-Type @"
 function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int64]$line1,[string]$checkline1,[int64]$line2,[string]$checkline2,[switch]$manual,[switch]$skipcheck){
     $puttyname=$global:puttylogname=$null
     if ($manual -and !$skipcheck){
-        $lastword=$endpoint=$destid=$null
+        $lastword=$endpoint=$destid=$endpoint=$null
         $eplists=import-csv "C:\Matter_AI\settings\chip-tool_clustercmd - id_list.csv"
         $splitcmd=($cmdline.replace("./chip-tool ","")).split(" ")|where-object{$_.Length -gt 0}
         #check if matched chiptool cmd
