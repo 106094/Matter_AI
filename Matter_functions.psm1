@@ -205,6 +205,7 @@ puttystart -puttyname $global:puttylogname
 
 
 $pidd=($global:puttyset|Where-Object{$_.name -eq $global:puttylogname}|Select-Object -last 1).puttypid
+if(!$pidd){$pidd=$global:puttyset[0].puttypid}
 add-content C:\Matter_AI\logs\testing.log -value "$global:puttylogname (pid id: $pidd): $cmdline"
 if($global:testing){
 return
