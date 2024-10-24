@@ -182,14 +182,14 @@ function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int6
             $cmdline=$cmdline.replace("beta","beta --paa-trust-store-path $storepath --trace_decode 1")
         }
     }   
+
+if($puttynamedest.length -gt 0){
+    $global:puttylogname=$puttynamedest
+}
  
 if($puttyname.length -gt 0){
     $global:puttylogname=$puttyname
 }
-if($puttynamedest.length -gt 0){
-    $global:puttylogname=$puttynamedest
-}
-
 puttystart -puttyname $global:puttylogname
     if($global:puttylogname.length -eq 0){
         #$pidd=(get-process putty|Sort-Object StartTime|Select-Object -Last 1).Id
