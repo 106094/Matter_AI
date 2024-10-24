@@ -200,7 +200,7 @@ puttystart -puttyname $global:puttylogname
         $logputty="C:\Matter_AI\logs\*putty.log"      
     }
     else{
-        $logputty="C:\Matter_AI\logs\*putty_$($puttyname).log"
+        $logputty="C:\Matter_AI\logs\*putty_$($global:puttylogname).log"
     }
 
 
