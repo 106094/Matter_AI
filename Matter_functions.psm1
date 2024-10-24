@@ -138,7 +138,7 @@ function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int6
                     }
                 }
         
-          if($destid){
+          if($destid -and $destid.length -gt 0){
              #$destnodeid= $matchData[$destid].Value
              $puttyname="putty$($endpoint)"
            }
@@ -197,7 +197,7 @@ puttystart -puttyname $puttyname
     }
 
 
-add-content C:\Matter_AI\logs\testing.log -value $cmdline
+add-content C:\Matter_AI\logs\testing.log -value "$global:puttylogname : $cmdline"
 if($global:testing){        
 return
  }
