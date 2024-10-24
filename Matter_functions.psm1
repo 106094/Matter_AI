@@ -101,7 +101,7 @@ Add-Type @"
 
 #region putty cmd and check    
 function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int64]$line1,[string]$checkline1,[int64]$line2,[string]$checkline2,[switch]$manual,[switch]$skipcheck){
-    $global:puttylogname=$null
+    $puttyname=$global:puttylogname=$null
     if ($manual -and !$skipcheck){
         $lastword=$endpoint=$destid=$null
         $eplists=import-csv "C:\Matter_AI\settings\chip-tool_clustercmd - id_list.csv"
