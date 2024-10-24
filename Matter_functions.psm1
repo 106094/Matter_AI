@@ -101,7 +101,7 @@ Add-Type @"
 
 #region putty cmd and check    
 function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int64]$line1,[string]$checkline1,[int64]$line2,[string]$checkline2,[switch]$manual,[switch]$skipcheck){
-    $puttyname=$global:puttylogname=$null
+    $global:puttylogname=$puttynamedest=$null
     if ($manual -and !$skipcheck){
         $lastword=$endpoint=$destid=$endpoint=$null
         $eplists=import-csv "C:\Matter_AI\settings\chip-tool_clustercmd - id_list.csv"
@@ -140,7 +140,7 @@ function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int6
         
           if($destid.trim().length -gt 0){
              $destnodeid= $matchData[$destid].Value
-             $puttyname="putty$($destnodeid)"
+             $puttynamedest="putty$($destnodeid)"
            }
           if($endpoint){   
             $endpid0=((get-content C:\Matter_AI\settings\config_linux.txt | Select-String "endpoint0"|out-string).split(":"))[-1].trim()
@@ -186,9 +186,12 @@ function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int6
 if($puttyname.length -gt 0){
     $global:puttylogname=$puttyname
 }
+if($puttynamedest.length -gt 0){
+    $global:puttylogname=$puttynamedest
+}
 
-puttystart -puttyname $puttyname
-    if($puttyname.length -eq 0){
+puttystart -puttyname $global:puttylogname
+    if($global:puttylogname.length -eq 0){
         #$pidd=(get-process putty|Sort-Object StartTime|Select-Object -Last 1).Id
         $logputty="C:\Matter_AI\logs\*putty.log"      
     }
@@ -210,7 +213,7 @@ $checkend=((get-content $logfile)[-1]|Out-String).Trim()
 #start-sleep -s 3
 #(get-process notepad).CloseMainWindow()|Out-Null
 $lastlogline=(get-content $logfile).count -1
-$pidd=($global:puttyset|Where-Object{$_.name -eq $puttyname}|Select-Object -last 1).puttypid
+$pidd=($global:puttyset|Where-Object{$_.name -eq $global:puttylogname}|Select-Object -last 1).puttypid
 if($pidd){
 
 
