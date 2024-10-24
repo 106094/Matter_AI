@@ -126,7 +126,7 @@ function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int6
 
         if ($matchline){
             $matchData = @()  # Array to store match information
-            $matches = [regex]::Match($cmdline, $pattern)
+            $matches = [regex]::Match($cmdline+" abcd efgh 1234", $pattern)
                 if ($matches.Success) {
                     foreach ($match in $matches.Groups) {
                         $matchInfo = [PSCustomObject]@{
