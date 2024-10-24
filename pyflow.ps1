@@ -251,7 +251,7 @@ if ($global:testtype -eq 2){
                     $datetime2=get-date -Format yyyyMMdd_HHmmss
                     $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid)-$($k)_$($method).log"
                     if( $global:puttylogname.length -gt 0){
-                      $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid)-$($k)_$($method)_$( $global:puttylogname).log"
+                      $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid)-$($k)_$($method)_$($global:puttylogname).log"
                     }                     
                     new-item -ItemType File -Path $logtcstep | Out-Null
                     add-content -path $logtcstep -Value $lastlogcontent

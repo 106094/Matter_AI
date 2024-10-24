@@ -119,7 +119,7 @@ function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int6
          $matchline=$eplists|Where-Object{$_.name -eq $splitcmd[0] -and $_.command -eq $splitcmd[1]}
          $endpoint=$matchline.endpoint
          $destid=$matchline."destination-id"
-         $lastword=$splitcmd[2]
+         $lastword=$splitcmd[1]
          $laststring= [regex]::Escape($lastword)
          $pattern = "$laststring\s+(\S+)\s+(\S+)"
         }
@@ -139,8 +139,8 @@ function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int6
                 }
         
           if($destid){
-             $destnodeid= $matchData[$destid].Value
-             $puttyname="putty$($destnodeid)"
+             #$destnodeid= $matchData[$destid].Value
+             $puttyname="putty$($endpoint)"
            }
           if($endpoint){   
             $endpid0=((get-content C:\Matter_AI\settings\config_linux.txt | Select-String "endpoint0"|out-string).split(":"))[-1].trim()
