@@ -103,26 +103,31 @@ Add-Type @"
 function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int64]$line1,[string]$checkline1,[int64]$line2,[string]$checkline2,[switch]$manual,[switch]$skipcheck){
     $global:puttylogname=$null
     if ($manual -and !$skipcheck){
-        $lastword=$null
+        $lastword=$endpoint=$destid=$null
         $eplists=import-csv "C:\Matter_AI\settings\chip-tool_clustercmd - pointid_list.csv"
         $splitcmd=($cmdline.replace("./chip-tool ","")).split(" ")|where-object{$_.Length -gt 0}
-        $endpoint=($eplists|Where-Object{$_.name -eq $splitcmd[0] -and $_.command -eq $splitcmd[1] -and $_.attribute -eq $splitcmd[2]}).endpoint
-        $destid=($eplists|Where-Object{$_.name -eq $splitcmd[0] -and $_.command -eq $splitcmd[1] -and $_.attribute -eq $splitcmd[2]})."destination-id"
-        $lastword=$splitcmd[2]
-         if(!$endpoint){
-          $endpoint=($eplists|Where-Object{$_.name -eq $splitcmd[0] -and $_.command -eq $splitcmd[1]}).endpoint
-           $lastword=$splitcmd[1]
-           }
-           if(!$destid){
-            $destid=($eplists|Where-Object{$_.name -eq $splitcmd[0] -and $_.command -eq $splitcmd[1]})."destination-id"
-            $lastword=$splitcmd[1]
-             }
-          if($lastword){
-            $laststring= [regex]::Escape($lastword)             
-           $pattern = "$laststring\s+(\S+)\s+(\S+)\s+(\S+)"
+        #check if matched chiptool cmd
+        $matchline=$eplists|Where-Object{$_.name -eq $splitcmd[0] -and $_.command -eq $splitcmd[1] -and $_.attribute -eq $splitcmd[2]}
+        if($matchline){
+            $endpoint=$matchline.endpoint
+            $destid=$matchline."destination-id"
+            $lastword=$splitcmd[2]
+            $laststring= [regex]::Escape($lastword)
+            $pattern = "$laststring\s+(\S+)\s+(\S+)\s+(\S+)"
+        }
+        else{
+         $matchline=$eplists|Where-Object{$_.name -eq $splitcmd[0] -and $_.command -eq $splitcmd[1]}
+         $endpoint=$matchline.endpoint
+         $destid=$matchline."destination-id"
+         $lastword=$splitcmd[2]
+         $laststring= [regex]::Escape($lastword)
+         $pattern = "$laststring\s+(\S+)\s+(\S+)"
+        }
+
+        if ($matchline){
             $matchData = @()  # Array to store match information
             $matches = [regex]::Match($cmdline, $pattern)
-                if ($matches.Count -gt 0) {
+                if ($match.Success) {
                     foreach ($match in $matches.Groups) {
                         $matchInfo = [PSCustomObject]@{
                             Value = $match.Value
@@ -132,18 +137,18 @@ function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int6
                         $matchData += $matchInfo
                     }
                 }
-        }
-        if($destid){
-            $destnodeid= $matchData[$destid].Value
-            $puttyname="putty$($destnodeid)"
-        }
-        if($endpoint){        
+        
+          if($destid){
+             $destnodeid= $matchData[$destid].Value
+             $puttyname="putty$($destnodeid)"
+           }
+          if($endpoint){   
             $endpid0=((get-content C:\Matter_AI\settings\config_linux.txt | Select-String "endpoint0"|out-string).split(":"))[-1].trim()
             $endpid1=((get-content C:\Matter_AI\settings\config_linux.txt | Select-String "endpoint1"|out-string).split(":"))[-1].trim()
             $endpid2=((get-content C:\Matter_AI\settings\config_linux.txt | Select-String "endpoint2"|out-string).split(":"))[-1].trim()
             $endpid3=((get-content C:\Matter_AI\settings\config_linux.txt | Select-String "endpoint3"|out-string).split(":"))[-1].trim()
             if($endpid0 -ne 0 -or $endpid1 -ne 1 -or $endpid2 -ne 2){                  
-            if ($matchData.Count -ge $endpoint) {
+             if ($matchData.Count -ge $endpoint) {
                 $matched= $matchData[$endpoint].Value
                 $numberIndex = $matchData[$endpoint].Index
                 $numberLength = $matchData[$endpoint].Length
@@ -159,10 +164,10 @@ function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int6
                 if($endpid3 -and $endpid3 -ne 3 -and $matched -eq 3){
                     $cmdline = $cmdline.Substring(0, $numberIndex) + $endpid3 + $cmdline.Substring($numberIndex + $numberLength)   
                 } 
-         }
+              }
+            }
+          }
         }
-       }
-        
        #replace hardcode
         if($cmdline -like "*pairing*" -and $cmdline -like "*gamma*"){
             $pairsettings=import-csv C:\Matter_AI\settings\_manual\settings.csv
@@ -178,7 +183,6 @@ function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int6
         }
     }   
  
-
 if($puttyname.length -gt 0){
     $global:puttylogname=$puttyname
 }
