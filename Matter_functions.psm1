@@ -140,7 +140,7 @@ function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int6
         
           if($destid.trim().length -gt 0){
              $destnodeid= $matchData[$destid].Value
-             $puttynamedest="putty$($destnodeid)"
+             $puttynamedest="session$($destnodeid)"
            }
           if($endpoint){   
             $endpid0=((get-content C:\Matter_AI\settings\config_linux.txt | Select-String "endpoint0"|out-string).split(":"))[-1].trim()
@@ -189,6 +189,9 @@ if($puttynamedest.length -gt 0){
  
 if($puttyname.length -gt 0){
     $global:puttylogname=$puttyname
+}
+if($cmdline -match "avahi\-browse"){
+    $global:puttylogname="session1"
 }
 puttystart -puttyname $global:puttylogname
     if($global:puttylogname.length -eq 0){
