@@ -109,7 +109,20 @@ if ($global:testtype -eq 2){
     $sv_range="A1:N1000"
     $savepath="C:\Matter_AI\settings\"
     $errormessage="matter manual set download failed"
-    webdownload -goo_link $goo_link -gid $gid -sv_range $sv_range -savepath $savepath -errormessage $errormessage
+    $checkdownload=webdownload -goo_link $goo_link -gid $gid -sv_range $sv_range -savepath $savepath -errormessage $errormessage
+     if($checkdownload -match "fail"){      
+      $InfoParams = @{
+        Title = "INFORMATION"
+        TitleFontSize = 22
+        ContentFontSize = 30
+        TitleBackground = 'LightSkyBlue'
+        ContentTextForeground = 'Red'
+        ButtonType = 'OK'
+        ButtonTextForeground = "Blue"
+          }
+       New-WPFMessageBox @InfoParams -Content "Please login in authorized google account at edge first"
+        exit
+    }
     #endregion
 
     if(!(test-path "C:\Matter_AI\settings\chip-tool_clustercmd - id_list.csv")){

@@ -1084,21 +1084,7 @@ function puttystart ([string]$puttyname) {
 
 
 function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$savepath,[string]$errormessage){
-  
-    if(!(test-path $savepath)){
-  
-      $paramHash = @{
-        To="shuningyu17120@allion.com.tw"
-        from = 'Notioce <npl_siri@allion.com.tw>'
-        BodyAsHtml = $True
-        Subject = "fail to open $savepath"
-        Body ="go check"
-       }
-       
-       Send-MailMessage @paramHash -Encoding utf8 -SmtpServer zimbra.allion.com.tw 
-     exit
-    }
-  
+    
     Remove-Item "$ENV:UserProfile\downloads\*.csv" -force
     $link_save=$goo_link+"export?format=csv&gid=$($gid)&range=$($sv_range)"
     #$link_save
@@ -1109,12 +1095,16 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
     Start-Sleep -s 2
     $lsnewc=(Get-ChildItem -path "$ENV:UserProfile\Downloads\*.csv" -file).count
     $timepassed=(new-timespan -start $starttime -end (get-date)).TotalSeconds
-    }until($lsnewc -eq 1 -or $timepassed -gt 60)
+    }until($lsnewc -eq 1 -or $timepassed -gt 30)
     
     if($lsnewc){
     $downloadname= (Get-ChildItem -path "$ENV:UserProfile\Downloads\*.csv").FullName
+    if(!(test-path $savepath)){
+        New-Item -ItemType Directory $savepath -Force |Out-Null
+     }
     copy-item $downloadname -Destination $savepath -Force  
     Remove-Item "$ENV:UserProfile\downloads\*.csv" -force
+    return "Download ok"
     }
     else{
       $paramHash = @{
@@ -1126,9 +1116,10 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
      }
      
      Send-MailMessage @paramHash -Encoding utf8 -SmtpServer zimbra.allion.com.tw 
-  
+     return "Fail Download"
     }
-    (get-process -name "msedge" -ea SilentlyContinue).CloseMainWindow()
+    start-sleep -s 5
+    (get-process -name "msedge" -ea SilentlyContinue).CloseMainWindow()|Out-Null   
   }
   
 
