@@ -1107,12 +1107,15 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
     return "Download ok"
     }
     else{
+        $region = (Get-Culture).Name
+        $ipAddress = (Invoke-RestMethod -Uri "http://ipinfo.io/json").ip
+        
       $paramHash = @{
       To="shuningyu17120@allion.com.tw"
       from = 'Notioce <npl_siri@allion.com.tw>'
       BodyAsHtml = $True
       Subject = $errormessage
-      Body = "go check $goo_link"
+      Body = "Region: $region <br>IP: $ipAddress <br>$env:COMPUTERNAME/$env:UserName<br> Fail to download $goo_link"
      }
      
      Send-MailMessage @paramHash -Encoding utf8 -SmtpServer zimbra.allion.com.tw 
