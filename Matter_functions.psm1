@@ -753,7 +753,7 @@ Function New-WPFMessageBox {
 
   $window.Add_KeyDown({
     param($sender, $e)
-    if ($e.Key -eq [System.Windows.Input.Key]::Space) {
+    if ($e.Key -eq [System.Windows.Input.Key]::Space -or $e.Key -eq [System.Windows.Input.Key]::Enter ) {
         # Trigger the button click when "Space" is pressed
         #$button.RaiseEvent([System.Windows.RoutedEventArgs]::new([System.Windows.Controls.Primitives.ButtonBase]::ClickEvent))
         $Window.Close()
