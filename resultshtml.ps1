@@ -194,7 +194,8 @@ $htmlContent += "</tr></thead><tbody>"
         $cmd=($($csv.cmd) -split "`n")[$k-1]
     
         if($k -gt 1){
-          $varify=$example="ª"
+          #$varify=$example="ª"
+          $varify=$example="(same as last one)"
         }
 
         $passresult="Failed"
