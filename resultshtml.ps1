@@ -112,12 +112,22 @@ $htmlContent += "</tr></thead><tbody>"
       $k++
       $logdata=get-content $log |Where-Object{$_.length -gt 0}| Select-Object -skip 2
       $checkitems = $csv.example.split("`n")|Where-Object{$_.trim().length -gt 0}
-      $matchedlines=@()
+      if($checkitems){     
+        $passmatch=@()
+        foreach ($checkitem in $checkitems){
+          $passmatch += New-Object -TypeName PSObject -Property @{
+            checkline=$checkitem
+            matched=0
+          }
+
+        }
+       $matchedlines=@()
       foreach($logline in $logdata){
         if($logline -match "CHIP:" ){
           $logline=($logline -split "CHIP:")[1]
         }
         $matchc=0
+        $j=0
         foreach ($checkit in $checkitems){
           $match2=$match3=$maxdcm=0
           $totalc=($checkit.split(" ")|Where-Object{$_.length -gt 2}).count
@@ -136,6 +146,10 @@ $htmlContent += "</tr></thead><tbody>"
                 }
            }
           }
+          if ($maxdcm -eq 1){
+            $passmatch[$j].matched=1
+          }
+          $j++
         }
         if($maxdcm -gt 0.3){
           #$matchedlines+=@("$($match3) matched [$($matchgline.trim())], $logline")
@@ -143,7 +157,7 @@ $htmlContent += "</tr></thead><tbody>"
           $matchedlines+=@($logline+" ($maxdcmp)")
           }
       }
-
+      }
         $tdlog=@()
         $htmllog=$reportPathlog+"\"+(get-childitem $log).name
         
@@ -182,6 +196,11 @@ $htmlContent += "</tr></thead><tbody>"
           $varify=$example="Å™"
         }
 
+        $passresult="Failed"
+        if(($passmatch|where-object{$_.matched = "1"}).matched.count -eq $checkitems.count -and $checkitems.count -gt 0){
+          $passresult="Passed"
+        }
+
       $htmlContent += "<tr>"
       $htmlContent += "<td class='top-align' style='width: 5%;'>$($tcname)</td>"
       $htmlContent += "<td class='top-align' style='width: 4%;'>$($csv.step)</td>"
@@ -190,7 +209,7 @@ $htmlContent += "</tr></thead><tbody>"
       $htmlContent += "<td class='top-align' style='width: 36%;'>$($tdlog)</td>"
       $htmlContent += "<td class='top-align' style='width: 18%;'>$($varify)</td>"
       $htmlContent += "<td class='top-align' style='width: 18%;'>$($example)</td>"
-      $htmlContent += "<td class='top-align' style='width: 4%;'></td>"      
+      $htmlContent += "<td class='top-align' style='width: 4%;'>$($passresult)</td>"      
       $htmlContent += "<td class='top-align' style='width: 4%;'></td>"
       $htmlContent += "</tr>"
     }    
