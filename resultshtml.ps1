@@ -104,11 +104,13 @@ $htmlContent += @"
 $htmlContent += "</tr></thead><tbody>"
 
   $csvfilter=$csvData|Where-Object{$_.TestCaseID -like "*$tcname*"}
-  foreach($csv in $csvfilter){
+  foreach($csv in $csvfilter){    
     $tcstep=$csv.step
     $logcontent=(get-childitem $fullpath -Recurse -file |Where-Object{!($_.Name -like "*0pairing*") -and  $_.name -like "*_$($tcstep)-*.log"}|Sort-Object LastWriteTime).FullName
     $k=0
     foreach($log in $logcontent){
+      $tdlog=@()
+      $matchedlines=@()
       $k++
       $logdata=get-content $log |Where-Object{$_.length -gt 0}| Select-Object -skip 2
       $checkitems = $csv.example.split("`n")|Where-Object{$_.trim().length -gt 0}
@@ -121,7 +123,6 @@ $htmlContent += "</tr></thead><tbody>"
           }
 
         }
-       $matchedlines=@()
       foreach($logline in $logdata){
         if($logline -match "CHIP:" ){
           $logline=($logline -split "CHIP:")[1]
@@ -158,7 +159,7 @@ $htmlContent += "</tr></thead><tbody>"
           }
       }
       }
-        $tdlog=@()
+        
         $htmllog=$reportPathlog+"\"+(get-childitem $log).name
         
         $linkfile=(get-childitem $log).name
@@ -197,6 +198,9 @@ $htmlContent += "</tr></thead><tbody>"
         }
 
         $passresult="Failed"
+        if($checkitems.count -eq 0){
+          $passresult="N/A"
+        }
         if(($passmatch|where-object{$_.matched = "1"}).matched.count -eq $checkitems.count -and $checkitems.count -gt 0){
           $passresult="Passed"
         }
