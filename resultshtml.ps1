@@ -152,7 +152,7 @@ $htmlContent += "</tr></thead><tbody>"
           }
           $j++
         }
-        if($maxdcm -gt 0.3){
+        if($maxdcm -eq 1){ # if 100% then log
           #$matchedlines+=@("$($match3) matched [$($matchgline.trim())], $logline")
           $maxdcmp = "{0:P1}" -f  $maxdcm
           $matchedlines+=@($logline+" ($maxdcmp)")
@@ -201,7 +201,7 @@ $htmlContent += "</tr></thead><tbody>"
         if($checkitems.count -eq 0){
           $passresult="N/A"
         }
-        if(($passmatch|where-object{$_.matched = "1"}).matched.count -eq $checkitems.count -and $checkitems.count -gt 0){
+        if(($passmatch|where-object{$_.matched -eq "1"}).matched.count -eq $checkitems.count -and $checkitems.count -gt 0){
           $passresult="Passed"
         }
 
