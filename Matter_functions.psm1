@@ -1040,7 +1040,7 @@ function puttystart ([string]$puttyname) {
        #$sshpath=($settings[3].split(":"))[-1]
        $fname=(Get-ChildItem $global:excelfile).name
        $sshpath=(import-csv C:\Matter_AI\settings\filesettings.csv|Where-Object{$_.filename -eq $fname}).path
-       
+       $sshpathmanual=(import-csv C:\Matter_AI\settings\filesettings.csv|Where-Object{$_.filename -eq $fname}).manual_path
        $wshell = New-Object -ComObject WScript.Shell
        $wshell.AppActivate($puttypid)
        start-sleep -s 5
@@ -1075,7 +1075,7 @@ function puttystart ([string]$puttyname) {
        if($global:testtype -eq 2){
        putty_paste -cmdline "sudo -s" -puttyname $puttyname -skipcheck
        putty_paste -cmdline $pskey -puttyname $puttyname -skipcheck
-       putty_paste -cmdline "cd /root/apps" -puttyname $puttyname -skipcheck
+       putty_paste -cmdline "cd $($sshpathmanual)" -puttyname $puttyname -skipcheck
        }
     }
 }
