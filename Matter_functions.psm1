@@ -107,6 +107,11 @@ function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int6
         $lastword=$endpoint=$destid=$endpoint=$null
         $eplists=import-csv "C:\Matter_AI\settings\chip-tool_clustercmd - id_list.csv"
         $splitcmd=($cmdline.replace("./chip-tool ","")).split(" ")|where-object{$_.Length -gt 0}
+        #checkif  attribute with ''
+        $cmdline -match  "'([^']*)'"
+        if ($cmdline -match "'([^']*)'") {
+            $attribute ="'"+ $matches[1]+"'"
+        }
         #check if matched chiptool cmd
         $matchline=$eplists|Where-Object{$_.name -eq $splitcmd[0] -and $_.command -eq $splitcmd[1] -and $_.attribute -eq $splitcmd[2]}
         if($matchline){
@@ -129,7 +134,10 @@ function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int6
         }
         if ($matchline){
             $matchData = @()  # Array to store match information
-            $matches = [regex]::Match($cmdline+" abcd efgh 1234", $pattern) # for lack after id
+            $matches = [regex]::Match($cmdline +" abcd efgh 1234", $pattern) # for lack after id
+            if($attribute){
+                $matches = [regex]::Match( $cmdline.replace($attribute,"att1") +" abcd efgh 1234", $pattern) # for lack after id   
+            }
                 if ($matches.Success) {
                     foreach ($match in $matches.Groups) {
                         $matchInfo = [PSCustomObject]@{
