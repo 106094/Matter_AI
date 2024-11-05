@@ -3,6 +3,7 @@ $global:csvfilename
 $global:sels 
 $htmlContent=$null
 # Import the CSV data
+$showpct=[double]((get-content C:\Matter_AI\settings\config_linux.txt|where-object {$_ -match "showpercentage"}).split(":"))[1]/100
 $csvData = Import-Csv -Path $global:csvfilename|Where-Object{$_.TestCaseID -in $global:sels}
 $resultlog=(get-childitem "C:\Matter_AI\logs\_manual\" -directory | Sort-Object LastWriteTime -Descending | Select-Object -First 1).fullname
 $resultpaths=Get-ChildItem $resultlog -Directory |Where-Object{$_.name -ne "html"}
@@ -152,7 +153,7 @@ $htmlContent += "</tr></thead><tbody>"
           }
           $j++
         }
-        if($maxdcm -eq 1){ # if 100% then log
+        if($maxdcm -ge $showpct){ # if setting % then log
           #$matchedlines+=@("$($match3) matched [$($matchgline.trim())], $logline")
           $maxdcmp = "{0:P1}" -f  $maxdcm
           $matchedlines+=@($logline+" ($maxdcmp)")
