@@ -128,25 +128,25 @@ $htmlContent += "</tr></thead><tbody>"
         if($logline -match "CHIP:" ){
           $logline=($logline -split "CHIP:")[1]
         }
-        $matchc=0
+            
         $j=0
+        $maxdcm=0
         foreach ($checkit in $checkitems){
-          $match2=$match3=$maxdcm=0
-          $totalc=($checkit.split(" ")|Where-Object{$_.length -gt 2}).count
-          $checkit.split(" ")|ForEach-Object{
-            if($_.length -gt 2){
-              $newcheckit=$_.replace("[","*").replace("]","*")
+          $match2=$maxdcm2=0
+          $totalc=($checkit.split(" ")|Where-Object{[int]::TryParse($_, [ref]$null) -or $_.trim().length -gt 2}).count
+          $checkit.split(" ")|Where-Object{[int]::TryParse($_, [ref]$null) -or $_.trim().length -gt 2}|ForEach-Object{
+            $checkkit1=$_.trim()
+              $newcheckit=$checkkit1.replace("[","*").replace("]","*")
               if($logline -like "*$newcheckit*"){
-                $matchc++
                 $match2++
-                if($match2 -gt $match3){
-                   $match3=$match2
-                   $maxdcm=[math]::round($match3/$totalc,3)                  
-                   Write-Output $formattedPercentage  # Output: 12.3%
+                $maxdcm2=[math]::round($match2/$totalc,3)   
+                if($maxdcm2 -gt $maxdcm){
+                   $maxdcm=$maxdcm2                
+                   #Write-Output "$logline match $checkkit1 in $checkit with $maxdcm"  # Output: 12.3%                  
                    $matchgline=$checkit.ToString()
                    }
                 }
-           }
+           
           }
           if ($maxdcm -eq 1){
             $passmatch[$j].matched=1
