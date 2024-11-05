@@ -119,7 +119,7 @@ function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int6
             $destid=$matchline."destination-id"
             $lastword=$splitcmd[2]
             $laststring= [regex]::Escape($lastword)
-            $pattern = "$laststring\s+(\S+)\s+(\S+)\s+(\S+)"
+            #$pattern = "$laststring\s+(\S+)\s+(\S+)\s+(\S+)"
         }
         else{
          $matchline=$eplists|Where-Object{$_.name -eq $splitcmd[0] -and $_.command -eq $splitcmd[1]}
@@ -127,11 +127,11 @@ function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int6
          $destid=$matchline."destination-id"
          $lastword=$splitcmd[1]
          $laststring= [regex]::Escape($lastword)
-         $pattern = "$laststring\s+(\S+)\s+(\S+)"
-        }
-        if($cmdline -match "0x\d+"){
-            $pattern = "$pattern\s+(\S+)"
-        }
+         }
+        $maxid=(@($endpoint,$destid)|Measure-Object -maximum).maximum
+        $patterns="\s+(\S+)"*$maxid
+        $pattern = "$laststring$($patterns)"
+
         if ($matchline){
             $matchData = @()  # Array to store match information
             $matches = [regex]::Match($cmdline +" abcd efgh 1234", $pattern) # for lack after id
