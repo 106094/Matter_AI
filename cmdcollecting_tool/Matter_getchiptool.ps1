@@ -303,7 +303,7 @@ for($i=$Indexfirst;$i -le $Indexlast;$i++){
 
       <# Action to perform if the condition is true #>
        $tccmd=($content.$cmdcol|out-string).trim()
-       $checklines=($sheetpackage.Cells[$row,[int32]($cmdcol.replace("P",""))].RichText|Where-Object{$_.Color.R -ne 0}).Text
+       $checklines=($sheetpackage.Cells[$row,[int32]($cmdcol.replace("P",""))].RichText|Where-Object{$_.Color.G -gt 100 -and $_.Color.G -gt $_.Color.R}).Text
        $example=$null
        if($checklines){
        $example=($checklines.split("`n")|ForEach-Object{
