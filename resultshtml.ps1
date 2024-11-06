@@ -136,7 +136,7 @@ $htmlContent += "</tr></thead><tbody>"
           $totalc=($checkit.split(" ")|Where-Object{[int]::TryParse($_, [ref]$null) -or $_.trim().length -gt 2}).count
           $checkit.split(" ")|Where-Object{[int]::TryParse($_, [ref]$null) -or $_.trim().length -gt 2}|ForEach-Object{
             $checkkit1=$_.trim()
-              $newcheckit=$checkkit1.replace("[","\[").replace("]","\]").replace(")","\)").replace("(","\(")
+              $newcheckit=$checkkit1.replace("[","\[").replace("]","\]").replace(")","\)").replace("(","\(").replace(":","\:").replace("{","\{").replace("}","\}")
               #if($logline -like "*$newcheckit*"){
                 if($logline -match "\b(^|\s)$newcheckit($|\s)\b"){
                 $match2++
@@ -149,7 +149,7 @@ $htmlContent += "</tr></thead><tbody>"
                 }
            
           }
-          if ($maxdcm -eq 1){
+          if ($maxdcm2 -eq 1){
             $passmatch[$j].matched=1
           }
           $j++
