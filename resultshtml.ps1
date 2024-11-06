@@ -1,4 +1,15 @@
 # Path to your CSV file
+param (
+    [string]$csvfile,
+    [string]$selections
+)
+
+if($csvfile){
+  $global:csvfilename=$csvfil
+}
+if($selections){
+  $global:sels =$selections
+}
 $global:csvfilename
 $global:sels 
 $htmlContent=$null
