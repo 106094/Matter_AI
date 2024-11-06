@@ -114,7 +114,7 @@ $htmlContent += "</tr></thead><tbody>"
       $matchedlines=@()
       $k++
       $logdata=get-content $log |Where-Object{$_.length -gt 0}| Select-Object -skip 2
-      $checkitems = $csv.example.split("`n")|Where-Object{$_.trim().length -gt 0}
+      $checkitems = $csv.example.split("`n")|Where-Object{$_.trim().length -gt 0}|Sort-Object|Get-Unique
       if($checkitems){     
         $passmatch=@()
         foreach ($checkitem in $checkitems){
@@ -136,8 +136,9 @@ $htmlContent += "</tr></thead><tbody>"
           $totalc=($checkit.split(" ")|Where-Object{[int]::TryParse($_, [ref]$null) -or $_.trim().length -gt 2}).count
           $checkit.split(" ")|Where-Object{[int]::TryParse($_, [ref]$null) -or $_.trim().length -gt 2}|ForEach-Object{
             $checkkit1=$_.trim()
-              $newcheckit=$checkkit1.replace("[","*").replace("]","*")
-              if($logline -like "*$newcheckit*"){
+              $newcheckit=$checkkit1.replace("[","\[").replace("]","\]")
+              #if($logline -like "*$newcheckit*"){
+                if($logline -match "\b(^|\s)$newcheckit($|\s)\b"){
                 $match2++
                 $maxdcm2=[math]::round($match2/$totalc,3)   
                 if($maxdcm2 -gt $maxdcm){
