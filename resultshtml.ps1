@@ -136,7 +136,7 @@ $htmlContent += "</tr></thead><tbody>"
           $totalc=($checkit.split(" ")|Where-Object{[int]::TryParse($_, [ref]$null) -or $_.trim().length -gt 2}).count
           $checkit.split(" ")|Where-Object{[int]::TryParse($_, [ref]$null) -or $_.trim().length -gt 2}|ForEach-Object{
             $checkkit1=$_.trim()
-              $newcheckit=$checkkit1.replace("[","\[").replace("]","\]")
+              $newcheckit=$checkkit1.replace("[","\[").replace("]","\]").replace(")","\)").replace("(","\(")
               #if($logline -like "*$newcheckit*"){
                 if($logline -match "\b(^|\s)$newcheckit($|\s)\b"){
                 $match2++
