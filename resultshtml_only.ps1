@@ -4,3 +4,5 @@ $global:csvfilename=. $getcmdpsfile
 $data=Import-Csv  $global:csvfilename
 $global:sels =selection_manual -data $data -column1 "catg" -column2 "TestCaseID"
 . C:\Matter_AI\resultshtml.ps1
+
+Start-Process $reportPath
