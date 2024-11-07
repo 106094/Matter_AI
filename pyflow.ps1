@@ -114,7 +114,7 @@ if ($global:testtype -eq 2){
   $csvdata=import-csv $global:csvfilename | Where-Object {$_.TestCaseID -in $caseids -and $_.cmd.length -gt 0}
   #$sound = New-Object -TypeName System.Media.SoundPlayer
   #$sound.SoundLocation = "C:\Windows\Media\notify.wav"
-   $paring_thread="TBD"
+   $paring_thread="./chip-tool pairing ble-thread node-id operationalDataset --passcode --discriminator --paa-trust-store-path paapath --trace_decode 1"
    $paring_manual="./chip-tool pairing code-wifi node-id --wifi-ssid --wifi-passphrase --manual-code --paa-trust-store-path paapath --trace_decode 1"
    $paring_ble="./chip-tool pairing ble-wifi node-id --wifi-ssid --wifi-passphrase --passcode --discriminator --paa-trust-store-path paapath --trace_decode 1"
    
