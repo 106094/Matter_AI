@@ -153,7 +153,12 @@ function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int6
              $destnodeid= $matchData[$destid].Value
              $puttynamedest="session$($destnodeid)"
            }
-          if($endpoint){   
+           #for special cmd "interactive start" without session info
+          if($cmdline -match "interactive" -and $cmdline -match "start"  ){
+            $puttynamedest="session1"
+          }
+
+                      if($endpoint){   
             $endpid0=((get-content C:\Matter_AI\settings\config_linux.txt | Select-String "endpoint0"|out-string).split(":"))[-1].trim()
             $endpid1=((get-content C:\Matter_AI\settings\config_linux.txt | Select-String "endpoint1"|out-string).split(":"))[-1].trim()
             $endpid2=((get-content C:\Matter_AI\settings\config_linux.txt | Select-String "endpoint2"|out-string).split(":"))[-1].trim()
