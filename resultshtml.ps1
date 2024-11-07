@@ -16,6 +16,7 @@ $htmlContent=$null
 # Import the CSV data
 $showpct=[double]((get-content C:\Matter_AI\settings\config_linux.txt|where-object {$_ -match "showpercentage"}).split(":"))[1]/100
 $csvData = Import-Csv -Path $global:csvfilename|Where-Object{$_.TestCaseID -in $global:sels}
+$eckeys=(import-csv C:\Matter_AI\settings\report_exclude.csv).e_key|Get-Unique
 $resultlog=(get-childitem "C:\Matter_AI\logs\_manual\" -directory | Sort-Object LastWriteTime -Descending | Select-Object -First 1).fullname
 $resultpaths=Get-ChildItem $resultlog -Directory |Where-Object{$_.name -ne "html"}
 $reportPathlog = "$resultlog\html"
@@ -144,12 +145,15 @@ $htmlContent += "</tr></thead><tbody>"
         $maxdcm=0
         foreach ($checkit in $checkitems){
           $match2=$maxdcm2=0
+          foreach($ekey in $eckeys){
+            $checkit=$checkit.replace($ekey," ")
+          }          
           $totalc=($checkit.split(" ")|Where-Object{[int]::TryParse($_, [ref]$null) -or $_.trim().length -gt 2}).count
           $checkit.split(" ")|Where-Object{[int]::TryParse($_, [ref]$null) -or $_.trim().length -gt 2}|ForEach-Object{
             $checkkit1=$_.trim()
               $newcheckit=$checkkit1.replace("[","\[").replace("]","\]").replace(")","\)").replace("(","\(").replace(":","\:").replace("{","\{").replace("}","\}")
               #if($logline -like "*$newcheckit*"){
-                if($logline -match "\b(^|\s)$newcheckit($|\s)\b"){
+                if($logline -match "\b(^|\s)$newcheckit($|\s)" -or $logline -match "\b(^|\s)$newcheckit($|\s)\b" ){
                 $match2++
                 $maxdcm2=[math]::round($match2/$totalc,3)   
                 if($maxdcm2 -gt $maxdcm){
