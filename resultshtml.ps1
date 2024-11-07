@@ -154,7 +154,7 @@ $htmlContent += "</tr></thead><tbody>"
             $checkkit1=$_.trim()
               $newcheckit=$checkkit1.replace("[","\[").replace("]","\]").replace(")","\)").replace("(","\(").replace(":","\:").replace("{","\{").replace("}","\}")
               #if($logline -like "*$newcheckit*"){
-                if($logline -match "(^|\s|\b)$newcheckit($|\s|\b)" ){
+                if($logline -match "(^|\s|)\b$newcheckit($|\s|\b)" ){
                 $match2++
                 $maxdcm2=[math]::round($match2/$totalc,3)   
                 if($maxdcm2 -gt $maxdcm){
