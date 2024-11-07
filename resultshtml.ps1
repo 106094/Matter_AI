@@ -147,13 +147,14 @@ $htmlContent += "</tr></thead><tbody>"
           $match2=$maxdcm2=0
           foreach($ekey in $eckeys){
             $checkit=$checkit.replace($ekey," ")
-          }          
-          $totalc=($checkit.split(" ")|Where-Object{[int]::TryParse($_, [ref]$null) -or $_.trim().length -gt 2}).count
-          $checkit.split(" ")|Where-Object{[int]::TryParse($_, [ref]$null) -or $_.trim().length -gt 2}|ForEach-Object{
+          }
+          $splitchecjs=($checkit.split(" ")|Where-Object{[int]::TryParse($_, [ref]$null) -or $_.trim().length -gt 2}|Sort-Object|Get-Unique)
+          $totalc=$splitchecjs.count
+          $splitchecjs|ForEach-Object{
             $checkkit1=$_.trim()
               $newcheckit=$checkkit1.replace("[","\[").replace("]","\]").replace(")","\)").replace("(","\(").replace(":","\:").replace("{","\{").replace("}","\}")
               #if($logline -like "*$newcheckit*"){
-                if($logline -match "\b(^|\s)$newcheckit($|\s)" -or $logline -match "\b(^|\s)$newcheckit($|\s)\b" ){
+                if($logline -match "(^|\s|\b)$newcheckit($|\s|\b)" ){
                 $match2++
                 $maxdcm2=[math]::round($match2/$totalc,3)   
                 if($maxdcm2 -gt $maxdcm){
