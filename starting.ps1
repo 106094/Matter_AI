@@ -11,6 +11,7 @@ Add-Type -AssemblyName Microsoft.VisualBasic,System.Windows.Forms,System.Drawing
 $shell=New-Object -ComObject shell.application
 $wshell=New-Object -ComObject wscript.shell
 new-item -path C:\Matter_AI\logs\testing.log -Force|Out-Null
+Import-Module C:\Matter_AI\Matter_functions.psm1
 #region check test type
 while(!$global:testtype -or ($global:testtype -ne 1 -and $global:testtype -ne 2)){
   $global:testtype=read-host "Which kind of testing? 1. Python 2. Manual (input 1 or 2) (q for quit)"
@@ -65,7 +66,6 @@ $ctcmds=import-csv C:\Matter_AI\settings\chiptoolcmds.csv
 $global:matchcmds=$ctcmds.name|Get-Unique
 
 $timestart=get-date
-Import-Module C:\Matter_AI\Matter_functions.psm1
 $global:puttyset = @()
 $logpath="C:\Matter_AI\logs"
 if(!(test-path $logpath)){
