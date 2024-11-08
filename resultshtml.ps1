@@ -152,7 +152,7 @@ $htmlContent += "</tr></thead><tbody>"
           $totalc=$splitchecjs.count
           $splitchecjs|ForEach-Object{
             $checkkit1=$_.trim()
-              $newcheckit=$checkkit1.replace("[","\[").replace("]","\]").replace(")","\)").replace("(","\(").replace(":","\:").replace("{","\{").replace("}","\}")
+              $newcheckit=$checkkit1.replace("[","\[").replace("]","\]").replace(")","\)").replace("(","\(").replace(":","\:").replace("{","\{").replace("}","\}").replace("""","")
               #if($logline -like "*$newcheckit*"){
                 if($logline -match "(^|\s|)\b$newcheckit($|\s|\b)" ){
                 $match2++
