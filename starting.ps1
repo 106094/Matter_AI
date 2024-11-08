@@ -26,6 +26,11 @@ while(!$global:dutcontrol -or ($global:dutcontrol -ne 1 -and $global:dutcontrol 
     exit
   }
   if($global:dutcontrol -ne 1){
+   if (!(get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "up_wait"})){
+    $messinfo="please update config_linux.txt for DUT control settings"
+      [System.Windows.Forms.MessageBox]::Show($messinfo,"Info",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Information)
+     exit
+   }
     dutcontrol -mode "open"
     if($Global:seialport -ne "ok"){
       [System.Windows.Forms.MessageBox]::Show("Fail to open serial port","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
