@@ -1153,3 +1153,49 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
         })      
         $global:varhash
   }
+
+  function dutcontrol ([string]$mode){
+    if ($mode.length -gt 0){
+        $port = New-Object System.IO.Ports.SerialPort
+        $port.PortName =  [System.IO.Ports.SerialPort]::getportnames()
+        $port.BaudRate = "9600"
+        $port.Parity = "None"
+        $port.DataBits = 8
+        $port.StopBits = 1
+        $port.ReadTimeout = 9000 # 9 seconds
+        $port.DtrEnable = "true"
+
+       if($mode -eq "open"){
+        $port.open() #opens serial connection
+        if($? -eq 0){
+            add-content C:\Matter_AI\logs\testing.log -value "fail to open the serial port"
+        }
+        else{
+            $Global:seialport="ok"
+        }
+       }
+       elseif($mode -eq "close"){
+        $port.Close() #closes serial connection
+        if($? -eq 0){
+            add-content C:\Matter_AI\logs\testing.log -value "fail to close the serial port"
+           }
+       }
+       else{
+            $modes=@("on","off","up","down")
+            $sendings=@("o","f","b","c")
+            $sending=$sendings[$modes.indexof($mode.ToLower())]
+            $waittime=((get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "wait" -and $_ -match $mode}) -split ":")[1]
+            if ($sending.length -gt 0){
+                Start-Sleep 2 # wait 2 seconds until Arduino is ready
+                $port.Write("sending") #writes your content to the serial connection
+                if($? -eq 0){
+                add-content C:\Matter_AI\logs\testing.log -value "fail to send signal to serial port"
+                }
+                else{
+                    start-sleep -s $waittime
+                }
+            }
+            
+        }
+   }
+  }

@@ -19,7 +19,21 @@ while(!$global:testtype -or ($global:testtype -ne 1 -and $global:testtype -ne 2)
   }
  }
  #endregion
-
+#region check dut contril mode
+while(!$global:dutcontrol -or ($global:dutcontrol -ne 1 -and $global:dutcontrol -ne 2 -and $global:dutcontrol -ne 3)){
+  $global:dutcontrol=read-host "The DUT Reset mode is ? 1. Manual 2. DUT_Dalcent (power onoff) 3. DUT_LIFX (simulator switch)  (input 1/2/3) (q for quit)"
+  if($global:dutcontrol -eq "q"){
+    exit
+  }
+  if($global:dutcontrol -ne 1){
+    dutcontrol -mode "open"
+    if($Global:seialport -ne "ok"){
+      [System.Windows.Forms.MessageBox]::Show("Fail to open serial port","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
+      exit
+    }
+  }
+ }
+ #endregion
 #region check internet connection
 if (!(test-Connection "www.google.com" -count 1 -ErrorAction SilentlyContinue)) {
   $messinfo="Internet disconnected, please check internet connection"
@@ -204,3 +218,7 @@ Start-Process $reportPath -ErrorAction SilentlyContinue
 $timepassed=New-TimeSpan -start $starttime -end $endtime
 $timegap="{0} Hours, {1} minutes, {2} seconds" -f $timepassed.Hours, $timepassed.Minutes, $timepassed.Seconds
 [System.Windows.Forms.MessageBox]::Show("Matter auto test completed in $timegap","Info",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Information)
+
+if($global:dutcontrol -ne 1){
+  dutcontrol -mode "close"
+}

@@ -19,6 +19,7 @@ $logtc=(get-childitem -path "C:\Matter_AI\logs\_py" -directory | Sort-Object Las
 foreach($csv in $csvdata){
     #$sound.Play()
     #([System.Media.SystemSounds]::Asterisk).Play()
+    if($global:dutcontrol -eq 1){
     $InfoParams = @{
       Title = "INFORMATION"
       TitleFontSize = 22
@@ -28,7 +29,22 @@ foreach($csv in $csvdata){
       ButtonType = 'OK'
       ButtonTextForeground = "Blue"
         }
-  New-WPFMessageBox @InfoParams -Content "Please Reset Your DUT, then click ok"
+   New-WPFMessageBox @InfoParams -Content "Please Reset Your DUT, then click ok"
+   }
+   if($global:dutcontrol -eq 2){
+    $cycletime= ((get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "cycle" -and $_ -match "onoff"}) -split ":")[1]
+    foreach($i in 1..$cycletime){ 
+     dutcontrol -mode on
+     dutcontrol -mode off
+    }
+    }
+    if($global:dutcontrol -eq 3){
+      $cycletime= ((get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "cycle" -and $_ -match "downup"}) -split ":")[1]
+      foreach($i in 1..$cycletime){
+        dutcontrol -mode donw
+        dutcontrol -mode up   
+      }
+    }
     $caseid=($csv.TestCaseID).trim()
     $pyline=($csv.command).trim()
         #start-sleep -s 300
