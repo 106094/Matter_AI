@@ -153,12 +153,7 @@ function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int6
              $destnodeid= $matchData[$destid].Value
              $puttynamedest="session$($destnodeid)"
            }
-           #for special cmd "interactive start" without session info
-          if($cmdline -match "interactive" -and $cmdline -match "start"  ){
-            $puttynamedest="session1"
-          }
-
-          if($endpoint){   
+              if($endpoint){   
             $endpid0=((get-content C:\Matter_AI\settings\config_linux.txt | Select-String "endpoint0"|out-string).split(":"))[-1].trim()
             $endpid1=((get-content C:\Matter_AI\settings\config_linux.txt | Select-String "endpoint1"|out-string).split(":"))[-1].trim()
             $endpid2=((get-content C:\Matter_AI\settings\config_linux.txt | Select-String "endpoint2"|out-string).split(":"))[-1].trim()
@@ -198,6 +193,11 @@ function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int6
             $cmdline=$cmdline.replace("beta","beta --paa-trust-store-path $storepath --trace_decode 1")
         }
     }   
+
+#for special cmd "interactive start" without session info
+if($cmdline -match "interactive\sstart" ){
+   $puttynamedest="session1"
+}
 
 if($puttynamedest.length -gt 0){
     $global:puttylogname=$puttynamedest
@@ -263,7 +263,7 @@ start-sleep -s 2
 $wshell.SendKeys("{enter}")
 start-sleep -s 2
 #check log complete
-if($cmdline -match "interactive start" -or ($cmdline.split(" "))[0] -in $global:matchcmds){
+if($cmdline -match "interactive\sstart" -or ($cmdline.split(" "))[0] -in $global:matchcmds){
     $wshell.SendKeys("{enter}")
     start-sleep -s 2
 }
