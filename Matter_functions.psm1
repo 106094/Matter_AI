@@ -1152,10 +1152,69 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
         $global:varhash
   }
 
+        function selectcom{# Load the required .NET assembly for Windows Forms
+            Add-Type -AssemblyName System.Windows.Forms
+            
+            # Create a new form
+            $form = New-Object System.Windows.Forms.Form
+            $form.Text = "Select COM Port"
+            $form.Size = New-Object System.Drawing.Size(300, 150)
+            $form.StartPosition = "CenterScreen"
+            
+            # Create a ComboBox for COM ports selection
+            $comboBox = New-Object System.Windows.Forms.ComboBox
+            $comboBox.Location = New-Object System.Drawing.Point(50, 20)
+            $comboBox.Size = New-Object System.Drawing.Size(180, 20)
+            
+            # Populate the ComboBox with COM1 to COM256 without writing output
+            for ($i = 1; $i -le 256; $i++) {
+                $comboBox.Items.Add("COM$i") | Out-Null
+            }
+            
+            # Create a Button to confirm selection
+            $button = New-Object System.Windows.Forms.Button
+            $button.Location = New-Object System.Drawing.Point(100, 60)
+            $button.Size = New-Object System.Drawing.Size(80, 30)
+            $button.Text = "Select"
+            
+            # Add the ComboBox and Button to the form
+            $form.Controls.Add($comboBox)
+            $form.Controls.Add($button)
+            
+            # Add an event handler for the Button click event
+            $button.Add_Click({
+                if ($comboBox.SelectedItem) {
+                    $global:comport = $comboBox.SelectedItem
+                    $form.Close()
+                } else {
+                    [System.Windows.Forms.MessageBox]::Show("Please select a COM port!", "Warning")
+                }
+            })
+            
+            # Show the form
+            $form.Topmost = $true
+            $form.ShowDialog()
+       
+   }
   function dutcontrol ([string]$mode){
     if ($mode.length -gt 0){
+        $portid=((get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "serialport"}) -split ":")[1]
+        if(!($portid -match "\d+")){
+            selectcom
+            if($global:comport -match "\d+"){
+                $newcontent=get-content C:\Matter_AI\settings\config_linux.txt|ForEach-Object{
+                    if($_ -match "serialport"){
+                        $_="serialport:$global:comport"
+                    }
+                    $_
+                }
+                $newcontent|set-content C:\Matter_AI\settings\config_linux.txt
+            }
+            $portid=$global:comport
+        }
+       
         $port = New-Object System.IO.Ports.SerialPort
-        $port.PortName =  [System.IO.Ports.SerialPort]::getportnames()
+        $port.PortName = $portid
         $port.BaudRate = "9600"
         $port.Parity = "None"
         $port.DataBits = 8
@@ -1163,37 +1222,50 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
         $port.ReadTimeout = 9000 # 9 seconds
         $port.DtrEnable = "true"
 
-       if($mode -eq "open"){
+        $modes=@("on","off","up","down","testcom")
+        $sendings=@("o","f","b","c","")
+        $sending=$sendings[$modes.indexof($mode.ToLower())]
+        $waittime=((get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "wait" -and $_ -match $mode}) -split ":")[1]
+
+        do{
+        $port.PortName = $portid    
         $port.open() #opens serial connection
         if($? -eq 0){
             add-content C:\Matter_AI\logs\testing.log -value "fail to open the serial port"
-        }
-        else{
-            $Global:seialport="ok"
-        }
-       }
-       elseif($mode -eq "close"){
-        $port.Close() #closes serial connection
-        if($? -eq 0){
-            add-content C:\Matter_AI\logs\testing.log -value "fail to close the serial port"
-           }
-       }
-       else{
-            $modes=@("on","off","up","down")
-            $sendings=@("o","f","b","c")
-            $sending=$sendings[$modes.indexof($mode.ToLower())]
-            $waittime=((get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "wait" -and $_ -match $mode}) -split ":")[1]
-            if ($sending.length -gt 0){
-                Start-Sleep 2 # wait 2 seconds until Arduino is ready
-                $port.Write("sending") #writes your content to the serial connection
+            do{
+                selectcom
+             }until($global:comport -match "\d+")
+             $portid=$global:comport
+             $newcontent=get-content C:\Matter_AI\settings\config_linux.txt|ForEach-Object{
+                 if($_ -match "serialport"){
+                     $_="serialport:$global:comport"
+                 }
+                 $_
+             }
+             $newcontent|set-content C:\Matter_AI\settings\config_linux.txt        
+          }
+          else{
+            $Global:seialport="ok"    
+          }
+        }while(!$Global:seialport)
+
+          Start-Sleep 2 # wait 2 seconds until Arduino is ready
+             if ($sending.length -gt 0){
+                $port.Write($sending) #writes your content to the serial connection
                 if($? -eq 0){
                 add-content C:\Matter_AI\logs\testing.log -value "fail to send signal to serial port"
                 }
                 else{
                     start-sleep -s $waittime
                 }
-            }
-            
+                }
+         
+          $port.Close() #closes serial connection
+          if($? -eq 0){
+            add-content C:\Matter_AI\logs\testing.log -value "fail to close the serial port"
+           }
+           Start-Sleep 2
+
         }
-   }
-  }
+    
+     }

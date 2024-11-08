@@ -168,6 +168,7 @@ if ($global:testtype -eq 2){
 
       #$sound.Play()
       #([System.Media.SystemSounds]::Asterisk).Play()
+ if($global:dutcontrol -eq 1){
       $InfoParams = @{
         Title = "INFORMATION" 
         TitleFontSize = 22
@@ -177,7 +178,21 @@ if ($global:testtype -eq 2){
         ButtonType = 'OK'
           }
     New-WPFMessageBox @InfoParams -Content "Please Reset Your DUT, then click ok"
-    
+    }
+ if($global:dutcontrol -eq 2){
+    $cycletime= ((get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "cycle" -and $_ -match "onoff"}) -split ":")[1]
+    foreach($i in 1..$cycletime){ 
+     dutcontrol -mode on
+     dutcontrol -mode off
+    }
+    }
+ if($global:dutcontrol -eq 3){
+      $cycletime= ((get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "cycle" -and $_ -match "downup"}) -split ":")[1]
+      foreach($i in 1..$cycletime){
+        dutcontrol -mode down
+        dutcontrol -mode up   
+      }
+    }
    #check if putty session exist
    $puttyname=$puttyname0
     #start pairing with restest

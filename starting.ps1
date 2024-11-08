@@ -27,17 +27,25 @@ while(!$global:dutcontrol -or ($global:dutcontrol -ne 1 -and $global:dutcontrol 
     exit
   }
   if($global:dutcontrol -ne 1){
-   if (!(get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "up_wait"})){
-    $messinfo="please update config_linux.txt for DUT control settings"
+    $currnetset=get-content C:\Matter_AI\settings\config_linux.txt
+   if (!($currnetset|Where-Object{$_ -match "serialport"})){
+     $newsettings=get-content C:\Matter_Git\settings\config_linux.txt
+     Compare-Object $newsettings $currnetset|where-object{$_.sideIndicator -eq "<="}|ForEach-Object{
+      $newadd+=@($_.inputObject)
+      add-content C:\Matter_AI\settings\config_linux.txt -value $_.inputObject
+     }
+     $newadds=[string]::Join("`n",$newadd)
+    $messinfo="please update config_linux.txt for new settings of $newadds"
       [System.Windows.Forms.MessageBox]::Show($messinfo,"Info",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Information)
      exit
    }
-    dutcontrol -mode "open"
-    if($Global:seialport -ne "ok"){
-      [System.Windows.Forms.MessageBox]::Show("Fail to open serial port","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
-      exit
-    }
+   dutcontrol -mode testcom
+   if ($Global:seialport -ne "ok"){
+    [System.Windows.Forms.MessageBox]::Show("Fail to connect SerialPort","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
+      exit  
+   }
   }
+
  }
  #endregion
 #region check internet connection
