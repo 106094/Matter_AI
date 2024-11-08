@@ -194,10 +194,6 @@ function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int6
         }
     }   
 
-#for special cmd "interactive start" without session info
-if($cmdline -match "interactive\sstart" ){
-   $puttynamedest="session1"
-}
 
 if($puttynamedest.length -gt 0){
     $global:puttylogname=$puttynamedest
@@ -206,7 +202,9 @@ if($puttynamedest.length -gt 0){
 if($puttyname.length -gt 0){
     $global:puttylogname=$puttyname
 }
-if($cmdline -match "avahi\-browse"){
+
+#for special cmd "interactive start" without session info
+if($cmdline -match "avahi\-browse" -or $cmdline -match "interactive\sstart" ){
     $global:puttylogname="session1"
 }
 puttystart -puttyname $global:puttylogname
