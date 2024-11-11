@@ -1167,8 +1167,9 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
             $comboBox.Size = New-Object System.Drawing.Size(180, 20)
             
             # Populate the ComboBox with COM1 to COM256 without writing output
-            for ($i = 1; $i -le 256; $i++) {
-                $comboBox.Items.Add("COM$i") | Out-Null
+            $portnames=[System.IO.Ports.SerialPort]::getportnames()
+            foreach ($portname in $portnames) {
+                $comboBox.Items.Add($portname) | Out-Null
             }
             
             # Create a Button to confirm selection
