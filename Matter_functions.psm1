@@ -1062,7 +1062,7 @@ function puttystart ([string]$puttyname) {
        start-sleep -s 2
 
        
-       if($gloal:testtype -eq 1){
+       if($global:testtype -eq 1){
         $global:failmsg=$null
         putty_paste -cmdline "sudo -s" -skipcheck
         putty_paste -cmdline $pskey  -skipcheck
