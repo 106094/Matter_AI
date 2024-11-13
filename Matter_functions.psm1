@@ -1082,7 +1082,9 @@ function puttystart ([string]$puttyname) {
        #putty_paste -cmdline "docker exec -it $ctnid /bin/bash"
        #putty_paste -cmdline "cd $sshpath"
         if(!$gloal:failmsg){
-        putty_paste -cmdline "docker start $ctnid; docker exec -it $ctnid /bin/bash; cd $sshpath" -skipcheck
+        putty_paste -cmdline "docker start $ctnid" -skipcheck
+        putty_paste -cmdline "docker exec -it $ctnid /bin/bash" -skipcheck
+        putty_paste -cmdline "cd $sshpath" -skipcheck
         }
        }
        if($global:testtype -eq 2){
