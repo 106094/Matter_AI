@@ -34,14 +34,14 @@ foreach($csv in $csvdata){
    if($global:dutcontrol -eq 2){
     $cycletime= ((get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "cycle" -and $_ -match "onoff"}) -split ":")[1]
     foreach($i in 1..$cycletime){ 
-     dutcontrol -mode on
      dutcontrol -mode off
+     dutcontrol -mode on
     }
     }
     if($global:dutcontrol -eq 3){
       $cycletime= ((get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "cycle" -and $_ -match "downup"}) -split ":")[1]
       foreach($i in 1..$cycletime){
-        dutcontrol -mode donw
+        dutcontrol -mode down
         dutcontrol -mode up   
       }
     }
@@ -181,8 +181,8 @@ if ($global:testtype -eq 2){
  if($global:dutcontrol -eq 2){
     $cycletime= ((get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "cycle" -and $_ -match "onoff"}) -split ":")[1]
     foreach($i in 1..$cycletime){ 
-     dutcontrol -mode on
      dutcontrol -mode off
+     dutcontrol -mode on
     }
     }
  if($global:dutcontrol -eq 3){
