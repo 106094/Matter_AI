@@ -1259,6 +1259,7 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
                 add-content C:\Matter_AI\logs\testing.log -value "fail to send signal to serial port"
                 }
                 else{
+                    add-content C:\Matter_AI\logs\testing.log -value "$mode - action done $((get-date|Out-String).trim())"
                     start-sleep -s $waittime
                 }
                 }
