@@ -1062,8 +1062,8 @@ function puttystart ([string]$puttyname) {
        start-sleep -s 2
 
        
-       if($global:testtype -eq 1){
-        $gloal:failmsg=$null
+       if($gloal:testtype -eq 1){
+        $global:failmsg=$null
         putty_paste -cmdline "sudo -s" -skipcheck
         putty_paste -cmdline $pskey  -skipcheck
         putty_paste -cmdline "docker ps -a" -skipcheck
@@ -1074,13 +1074,13 @@ function puttystart ([string]$puttyname) {
         }
         else{
             #puttyexit
-            $gloal:failmsg="No found /bin/bash path"
-            Write-Output $gloal:failmsg
+            $global:failmsg="No found /bin/bash path"
+            Write-Output $global:failmsg
         }
        #putty_paste -cmdline "docker start $ctnid"
        #putty_paste -cmdline "docker exec -it $ctnid /bin/bash"
        #putty_paste -cmdline "cd $sshpath"
-        if(!$gloal:failmsg){
+        if(!$global:failmsg){
         putty_paste -cmdline "docker start $ctnid" -skipcheck
         putty_paste -cmdline "docker exec -it $ctnid /bin/bash" -skipcheck
         putty_paste -cmdline "cd $sshpath" -skipcheck
