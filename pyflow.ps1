@@ -103,7 +103,7 @@ foreach($csv in $csvdata){
     $k=$pycmd=0
     while (!$pycmd -and $k -lt $retesttime){
       $k++
-      $pycmd=putty_paste -cmdline "rm -f admin_storage.json && $pyline" -line1 -1 -checkline1 "pass"
+      $pycmd=putty_paste -cmdline "rm -f admin_storage.json && $pyline" -checkline1 -checkline1
       write-host "round $k"
     }
     $datetime=get-date -Format yyyyMMdd_HHmmss
