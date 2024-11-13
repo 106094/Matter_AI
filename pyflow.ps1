@@ -157,7 +157,6 @@ if ($global:testtype -eq 2){
     }
     $caseid = ($matches[0].replace(" ","")).trim()
     $pylines=($csv.cmd).split("`n")
-
     
     if($lastcaseid -ne $caseid){
         $lastcaseid=$caseid
