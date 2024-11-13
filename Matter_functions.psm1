@@ -108,7 +108,6 @@ function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int6
         $eplists=import-csv "C:\Matter_AI\settings\chip-tool_clustercmd - id_list.csv"
         $splitcmd=($cmdline.replace("./chip-tool ","")).split(" ")|where-object{$_.Length -gt 0}
         #checkif  attribute with ''
-        $cmdline -match  "'([^']*)'"
         if ($cmdline -match "'([^']*)'") {
             $attribute ="'"+ $matches[1]+"'"
         }
