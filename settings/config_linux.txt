@@ -8,9 +8,9 @@ endpoint1:1
 endpoint2:2
 showpercentage:60
 serialport:COM
-on_wait:6
-off_wait:3
+on_wait:6000
+off_wait:3000
 onoff_cycle:10
-down_wait:14
+down_wait:14000
 up_wait:0
 downup_cycle:1

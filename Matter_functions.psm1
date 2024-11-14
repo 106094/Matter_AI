@@ -1259,7 +1259,7 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
                 }
                 else{
                     add-content C:\Matter_AI\logs\testing.log -value "$mode - action done $((get-date|Out-String).trim())"
-                    start-sleep -s $waittime
+                    start-sleep -Milliseconds $waittime
                 }
                 }
          
