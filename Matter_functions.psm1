@@ -198,14 +198,16 @@ if($puttynamedest.length -gt 0){
     $global:puttylogname=$puttynamedest
 }
  
-if($puttyname.length -gt 0){
-    $global:puttylogname=$puttyname
-}
-
 #for special cmd "interactive start" without session info
 if($cmdline -match "avahi\-browse" -or $cmdline -match "interactive\sstart" ){
     $global:puttylogname="session1"
 }
+
+#first priority
+if($puttyname.length -gt 0){
+    $global:puttylogname=$puttyname
+}
+
 puttystart -puttyname $global:puttylogname
     if($global:puttylogname.length -eq 0){
         #$pidd=(get-process putty|Sort-Object StartTime|Select-Object -Last 1).Id
