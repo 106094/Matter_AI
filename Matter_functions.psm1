@@ -199,8 +199,18 @@ if($puttynamedest.length -gt 0){
 }
  
 #for special cmd "interactive start" without session info
-if($cmdline -match "avahi\-browse" -or $cmdline -match "interactive\sstart" ){
+if($cmdline -match "avahi\-browse" ){
     $global:puttylogname="session1"
+}
+#for special cmd "interactive start" without session info
+if( $cmdline -match "interactive\sstart"){
+    $global:puttylogname="session1"
+    if($cmdline -match "commissioner\-name\sbeta"){
+        $global:puttylogname="session2"
+    } 
+    if($cmdline -match "commissioner\-name\sgamma"){
+        $global:puttylogname="session3"
+    }
 }
 
 #first priority
