@@ -13,8 +13,8 @@ $wshell=New-Object -ComObject wscript.shell
 new-item -path C:\Matter_AI\logs\testing.log -Force|Out-Null
 Import-Module C:\Matter_AI\Matter_functions.psm1
 #region check test type
-while(!$global:testtype -or ($global:testtype -ne 1 -and $global:testtype -ne 2)){
-  $global:testtype=read-host "Which kind of testing? 1. Python 2. Manual 3. Auto (input 1,2 or 3) (q for quit)"
+while(!$global:testtype -or ($global:testtype -ne 1 -and $global:testtype -ne 2 -and $global:testtype -ne 3)){
+  $global:testtype=read-host "Which kind of testing? 1. Python 2. Manual 3. Auto (input 1, 2 or 3) (q for quit)"
   if($global:testtype -eq "q"){
     exit
   }
@@ -56,18 +56,19 @@ if (!(test-Connection "www.google.com" -count 1 -ErrorAction SilentlyContinue)) 
 }
 #endregion
 
-#region check ssh connection
-$settings=get-content C:\Matter_AI\settings\config_linux.txt
-$sship=($settings[0].split(":"))[-1]
-#$sshusername=($settings[1].split(":"))[-1]
-write-host "check ssh ip $sship if connected"
-if (!(Test-Connection -ComputerName $sship -Count 1 -ErrorAction SilentlyContinue)) {
-  $messinfo="SSH IP disconnected, please check RPI connection or SSH IP is correct"
-  [System.Windows.Forms.MessageBox]::Show($messinfo,"Info",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Information)
-  start-process C:\Matter_AI\settings\config_linux.txt
-  exit
-}
-write-host "ssh ip $sship is connected"
+#region check ssh/webui connection
+  $settings=get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "sship"}
+  $sship=($settings.split(":"))[-1]
+  #$sshusername=($settings[1].split(":"))[-1]
+  write-host "check ssh ip $sship if connected"
+  if (!(Test-Connection -ComputerName $sship -Count 1 -ErrorAction SilentlyContinue)) {
+    $messinfo="SSH IP disconnected, please check RPI connection or SSH IP is correct"
+    [System.Windows.Forms.MessageBox]::Show($messinfo,"Info",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Information)
+    start-process C:\Matter_AI\settings\config_linux.txt
+    exit
+  }
+  write-host "ssh ip $sship is connected"
+
 #endregion
 
 $ctcmds=import-csv C:\Matter_AI\settings\chiptoolcmds.csv
