@@ -95,9 +95,10 @@ if(!($chkmod)){
   $matchcmds=$ctcmds.name|Get-Unique
   #endregion
 #reg read excel to csv
-$columncor=(import-csv "C:\Matter_AI\settings\filesettings.csv"|Where-Object{$_.filename -eq ($excelfile).name}|Select-Object -Property column_title).column_title
+$columncor=((import-csv "C:\Matter_AI\settings\filesettings.csv"|Where-Object{$_.filename -eq ($excelfile).name}|Select-Object -Property manual_column_title).manual_column_title).trim()
+$sumsheetname=((import-csv "C:\Matter_AI\settings\filesettings.csv"|Where-Object{$_.filename -eq ($excelfile).name}|Select-Object -Property manual_page).manual_page).trim()
 $worksheetNames = (Get-ExcelSheetInfo -Path $excelfull).Name
-$sumsheetname=$worksheetNames|Where-Object{$_ -match "cert_repo"}
+#$sumsheetname=$worksheetNames|Where-Object{$_ -match "cert_repo"}
 
 $excelPackage = [OfficeOpenXml.ExcelPackage]::new((Get-Item $excelfull))
 $worksheetsum=Import-Excel $excelfull -WorksheetName $sumsheetname

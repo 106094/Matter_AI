@@ -83,7 +83,8 @@ new-item -Path $logpath -ItemType directory|out-null
 if ($global:testtype -eq 1){
   
  $getcmdpsfile="C:\Matter_AI\cmdcollecting_tool\Matter_getpy.ps1"
-  $selectionpsfile="C:\Matter_AI\selections.ps1"
+  $caseids=(import-csv C:\Matter_AI\settings\_py\py.csv).TestCaseID
+  $selectionpsfile=selections -Inputdata $caseids
    $cmdcsvfile="C:\Matter_AI\settings\_py\py.csv"
 
 . $getcmdpsfile
