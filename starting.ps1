@@ -85,16 +85,25 @@ if ($global:testtype -eq 1){
   
  $getcmdpsfile="C:\Matter_AI\cmdcollecting_tool\Matter_getpy.ps1"
   $caseids=(import-csv C:\Matter_AI\settings\_py\py.csv).TestCaseID
-  $selectionpsfile=selections -Inputdata $caseids
+  $selectionpsfile=selgui -Inputdata $caseids -instruction "Please select caseids" -errmessage "No caseid selected"
    $cmdcsvfile="C:\Matter_AI\settings\_py\py.csv"
 . $getcmdpsfile
 $checkfile=Get-ChildItem $cmdcsvfile|Where-Object{$_.LastWriteTime -gt $timestart}
-if(!$checkfile){
+if(!($checkfile[-1])){
     [System.Windows.Forms.MessageBox]::Show("Fail to get (update) cmd csv","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
     exit
 }
 #$puttystart=1
 }
+
+if ($global:testtype -eq 3){
+   $getprojects=(get-childitem C:\Matter_AI\settings\_auto\ -Directory).Name
+   $getproject=selgui -Inputdata $getprojects -instruction "Please select project" -errmessage "No project selected"
+ if(!($getproject[-1])){
+     [System.Windows.Forms.MessageBox]::Show("Fail to get project","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
+     exit
+ }
+ }
 
 if ($global:testtype -eq 2){
   $getcmdpsfile="C:\Matter_AI\cmdcollecting_tool\Matter_getchiptool.ps1"

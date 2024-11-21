@@ -1286,7 +1286,7 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
      }
 
 
-     function selections ( [string[]]$Inputdata){
+     function selgui ( [string[]]$Inputdata,[string]$instruction,[string]$errmessage) {
 
         Add-Type -AssemblyName System.Windows.Forms
         Add-Type -AssemblyName System.Drawing
@@ -1315,7 +1315,7 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
         $label = New-Object System.Windows.Forms.Label
         $label.Location = New-Object System.Drawing.Point(10,20)
         $label.Size = New-Object System.Drawing.Size(280,20)
-        $label.Text = 'Please make a selection from the list below:'
+        $label.Text = $instruction
         $form.Controls.Add($label)
         
         $listBox = New-Object System.Windows.Forms.Listbox
@@ -1351,7 +1351,7 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
         
         if($global:sels.count -eq 0){
         
-            [System.Windows.Forms.MessageBox]::Show("Please select testcases","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
+            [System.Windows.Forms.MessageBox]::Show($errmessage,"Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
             return 0
             
         }
