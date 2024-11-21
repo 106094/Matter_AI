@@ -19,32 +19,7 @@ $logtc=(get-childitem -path "C:\Matter_AI\logs\_py" -directory | Sort-Object Las
 foreach($csv in $csvdata){
     #$sound.Play()
     #([System.Media.SystemSounds]::Asterisk).Play()
-    if($global:dutcontrol -eq 1){
-    $InfoParams = @{
-      Title = "INFORMATION"
-      TitleFontSize = 22
-      ContentFontSize = 30
-      TitleBackground = 'LightSkyBlue'
-      ContentTextForeground = 'Red'
-      ButtonType = 'OK'
-      ButtonTextForeground = "Blue"
-        }
-   New-WPFMessageBox @InfoParams -Content "Please Reset Your DUT, then click ok"
-   }
-   if($global:dutcontrol -eq 2){
-    $cycletime= ((get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "cycle" -and $_ -match "onoff"}) -split ":")[1]
-    foreach($i in 1..$cycletime){ 
-     dutcontrol -mode off
-     dutcontrol -mode on
-    }
-    }
-    if($global:dutcontrol -eq 3){
-      $cycletime= ((get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "cycle" -and $_ -match "downup"}) -split ":")[1]
-      foreach($i in 1..$cycletime){
-        dutcontrol -mode down
-        dutcontrol -mode up   
-      }
-    }
+    dutpower $global:dutcontrol
     $caseid=($csv.TestCaseID).trim()
     $pyline=($csv.command).trim()
         #start-sleep -s 300
@@ -167,31 +142,8 @@ if ($global:testtype -eq 2){
 
       #$sound.Play()
       #([System.Media.SystemSounds]::Asterisk).Play()
- if($global:dutcontrol -eq 1){
-      $InfoParams = @{
-        Title = "INFORMATION" 
-        TitleFontSize = 22
-        ContentFontSize = 30
-        TitleBackground = 'LightSkyBlue'
-        ContentTextForeground = 'Red'
-        ButtonType = 'OK'
-          }
-    New-WPFMessageBox @InfoParams -Content "Please Reset Your DUT, then click ok"
-    }
- if($global:dutcontrol -eq 2){
-    $cycletime= ((get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "cycle" -and $_ -match "onoff"}) -split ":")[1]
-    foreach($i in 1..$cycletime){ 
-     dutcontrol -mode off
-     dutcontrol -mode on
-    }
-    }
- if($global:dutcontrol -eq 3){
-      $cycletime= ((get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "cycle" -and $_ -match "downup"}) -split ":")[1]
-      foreach($i in 1..$cycletime){
-        dutcontrol -mode down
-        dutcontrol -mode up   
-      }
-    }
+ 
+      dutpower $global:dutcontrol
    #check if putty session exist
    $puttyname=$puttyname0
     #start pairing with restest
@@ -349,4 +301,102 @@ if ($global:testtype -eq 2){
     }  #test
               
   }
+  }
+
+  if ($global:testtype -eq 3){
+    
+  $logtc=(get-childitem -path "C:\Matter_AI\logs\_manual" -directory | Sort-Object LastWriteTime -Descending | Select-Object -First 1).fullname
+
+    Add-Type -AssemblyName System.Windows.Forms
+    $fileContent=get-content C:\Matter_AI\settings\_auto\json.txt 
+  . C:\Matter_AI\cmdcollecting_tool\download_driver.ps1
+  Get-ChildItem  "C:\Matter_AI\cmdcollecting_tool\tool\WebDriver.dll" |Unblock-File 
+  Add-Type -Path "C:\Matter_AI\cmdcollecting_tool\tool\WebDriver.dll"
+
+  #$driver = New-Object OpenQA.Selenium.Edge.EdgeDriver
+  $optionsType = [OpenQA.Selenium.Edge.EdgeOptions]  
+  $options = New-Object $optionsType
+  $options.AddArgument("--disable-notifications") ## block the notification popup message
+    $driverType = [OpenQA.Selenium.Edge.EdgeDriver]
+      try{
+          $driver = New-Object $driverType -ArgumentList $options
+      }
+      catch{
+        write-output "fail to install web driver"
+      }
+    
+
+# Create an Actions object
+[OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($driver)
+#$actions = New-Object OpenQA.Selenium.Interactions.Actions($driver)
+$driver.Manage().Window.Maximize()
+$driver.Navigate().GoToUrl("http://$sship")
+$wait = [OpenQA.Selenium.Support.UI.WebDriverWait]::new($driver, [TimeSpan]::FromSeconds(60))
+
+# Define a custom condition for the element's visibility using a ScriptBlock converted to a delegate
+$element = $wait.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.IWebElement]]{
+    param ($driver)
+    try {
+        # Find the element
+        $el = ($driver.FindElement([OpenQA.Selenium.By]::ClassName("icon-add-square")))
+        # Check if the element is displayed
+        if ($el.Displayed) {
+            return $el  # Return the element if found and visible
+        } else {
+            return $null  # Return null if it's not yet visible
+        }
+    } catch {
+        return $null  # Return null if an exception occurs (e.g., element not found)
+    }
+})
+
+    # Perform actions on the element (if it was found)
+    if ($element -ne $null) {
+        $element.Click()
+    } else {
+        Write-Host "Element not found within the timeout period."
+    }
+    $projname="Matter_"+(get-date -format "yyMMddHHmm")
+    ($driver.FindElement([OpenQA.Selenium.By]::ClassName("p-inputtext"))).Clear()
+    start-sleep -s 2
+    ($driver.FindElement([OpenQA.Selenium.By]::ClassName("p-inputtext"))).SendKeys($projname)  #set project name
+    start-sleep -s 2
+    ($driver.FindElement([OpenQA.Selenium.By]::ClassName("p-button-label"))).click()  #click edit
+    start-sleep -s 2
+     $textarea =  ($driver.FindElement([OpenQA.Selenium.By]::XPath('//textarea[@rows="10" and contains(@class, "p-inputtextarea")]')))
+     start-sleep -s 2
+     #$textarea.Click()
+     $textarea.Clear()
+     Set-Clipboard -Value $fileContent
+     start-sleep -s 5
+     $textarea.SendKeys([OpenQA.Selenium.Keys]::Control + "v")
+     <#
+     foreach ($keyin in $fileContent){
+     $textarea.SendKeys($keyin)
+     $textarea.SendKeys([OpenQA.Selenium.Keys]::Enter)
+      }
+     #>
+     start-sleep -s 2     
+     ($driver.FindElement([OpenQA.Selenium.By]::ClassName("p-button-label"))).click()  #click update
+     start-sleep -s 2
+     ($driver.FindElement([OpenQA.Selenium.By]::XPath('//span[text()="Create"]'))).click()
+     start-sleep -s 2
+     $tdRow =  ($driver.FindElement([OpenQA.Selenium.By]::XPath('//td[contains(text(),$projname)]')))
+     $actions.MoveToElement($tdRow).Perform() # hover to the project
+      start-sleep -s 2
+     ($driver.FindElement([OpenQA.Selenium.By]::XPath('//i[@ptooltip="Edit"]'))).click()
+     start-sleep -s 5
+     ($driver.FindElement([OpenQA.Selenium.By]::XPath('//i[@class="pi pi-upload"]'))).click()  #click update
+     start-sleep -s 3     
+     [System.Windows.Forms.SendKeys]::SendWait("^{l}")
+     
+     foreach($webtc in $global:webuicases){
+     dutpower $global:dutcontrol
+     
+        $tclogfd="$logtc\$($caseid)"
+
+
+
+  }
+
   }

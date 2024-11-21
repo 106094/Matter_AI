@@ -82,24 +82,22 @@ new-item -Path $logpath -ItemType directory|out-null
 }
 
 if ($global:testtype -eq 1){
-  
  $getcmdpsfile="C:\Matter_AI\cmdcollecting_tool\Matter_getpy.ps1"
-  $caseids=(import-csv C:\Matter_AI\settings\_py\py.csv).TestCaseID
-  $selectionpsfile=selgui -Inputdata $caseids -instruction "Please select caseids" -errmessage "No caseid selected"
    $cmdcsvfile="C:\Matter_AI\settings\_py\py.csv"
 . $getcmdpsfile
 $checkfile=Get-ChildItem $cmdcsvfile|Where-Object{$_.LastWriteTime -gt $timestart}
-if(!($checkfile[-1])){
+if(!$checkfile){
     [System.Windows.Forms.MessageBox]::Show("Fail to get (update) cmd csv","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
     exit
 }
+$caseids=(import-csv C:\Matter_AI\settings\_py\py.csv).TestCaseID
 #$puttystart=1
 }
 
 if ($global:testtype -eq 3){
    $getprojects=(get-childitem C:\Matter_AI\settings\_auto\ -Directory).Name
-   $getproject=selgui -Inputdata $getprojects -instruction "Please select project" -errmessage "No project selected"
- if(!($getproject[-1])){
+   $global:getproject=selgui -Inputdata $getprojects -instruction "Please select project" -errmessage "No project selected"
+ if(!($global:getproject[-1])){
      [System.Windows.Forms.MessageBox]::Show("Fail to get project","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
      exit
  }
@@ -183,8 +181,8 @@ $starttime=get-date
 $continueq="Yes"
 while ($continueq -eq "Yes"){
   if ($global:testtype -eq 1){
-    $selchek=. $selectionpsfile
-    if(!$selchek){
+    $selchek=selgui -Inputdata $caseids -instruction "Please select caseids" -errmessage "No caseid selected"
+    if(!($selchek[-1])){
       [System.Windows.Forms.MessageBox]::Show("Fail to select the test case id, test will be stopped","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
       $continueq=0
     }else{
@@ -211,7 +209,7 @@ while ($continueq -eq "Yes"){
     }else{
       #create a log folder
       $datetime=get-date -Format yyyyMMdd_HHmmss
-      $logtc="C:\Matter_AI\logs\_auto\$($datetime)"
+      $logtc="C:\Matter_AI\logs\_auto\$($global:getproject)_$($datetime)"
       if(!(test-path $logtc)){
         new-item -ItemType Directory -Path $logtc | Out-Null
       }
