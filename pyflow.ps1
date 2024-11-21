@@ -305,10 +305,11 @@ if ($global:testtype -eq 2){
 
   if ($global:testtype -eq 3){
     
-  $logtc=(get-childitem -path "C:\Matter_AI\logs\_manual" -directory | Sort-Object LastWriteTime -Descending | Select-Object -First 1).fullname
-
     Add-Type -AssemblyName System.Windows.Forms
-    $fileContent=get-content C:\Matter_AI\settings\_auto\json.txt 
+  $logtc=(get-childitem -path "C:\Matter_AI\logs\_auto" -directory | Sort-Object LastWriteTime -Descending | Select-Object -First 1).fullname
+  $settings=get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "sship"}
+  $sship=($settings.split(":"))[-1]
+    $fileContent=get-content C:\Matter_AI\settings\_auto\$($global:getproject)\json.txt 
   . C:\Matter_AI\cmdcollecting_tool\download_driver.ps1
   Get-ChildItem  "C:\Matter_AI\cmdcollecting_tool\tool\WebDriver.dll" |Unblock-File 
   Add-Type -Path "C:\Matter_AI\cmdcollecting_tool\tool\WebDriver.dll"
@@ -331,32 +332,24 @@ if ($global:testtype -eq 2){
 #$actions = New-Object OpenQA.Selenium.Interactions.Actions($driver)
 $driver.Manage().Window.Maximize()
 $driver.Navigate().GoToUrl("http://$sship")
-$wait = [OpenQA.Selenium.Support.UI.WebDriverWait]::new($driver, [TimeSpan]::FromSeconds(60))
+$wait = [OpenQA.Selenium.Support.UI.WebDriverWait]::new($driver, [TimeSpan]::FromSeconds(20))
 
 # Define a custom condition for the element's visibility using a ScriptBlock converted to a delegate
 $element = $wait.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.IWebElement]]{
     param ($driver)
-    try {
-        # Find the element
-        $el = ($driver.FindElement([OpenQA.Selenium.By]::ClassName("icon-add-square")))
-        # Check if the element is displayed
-        if ($el.Displayed) {
-            return $el  # Return the element if found and visible
-        } else {
-            return $null  # Return null if it's not yet visible
-        }
-    } catch {
-        return $null  # Return null if an exception occurs (e.g., element not found)
-    }
+      try{
+        ($driver.FindElement([OpenQA.Selenium.By]::ClassName("icon-add-square")))
+      }catch{
+        return $null
+      }
+
 })
 
     # Perform actions on the element (if it was found)
-    if ($element -ne $null) {
+    if ($element.Displayed) {
         $element.Click()
-    } else {
-        Write-Host "Element not found within the timeout period."
-    }
-    $projname="Matter_"+(get-date -format "yyMMddHHmm")
+    
+    $projname="MatterAI_$($global:getproject)_"+(get-date -format "yyMMddHHmm")
     ($driver.FindElement([OpenQA.Selenium.By]::ClassName("p-inputtext"))).Clear()
     start-sleep -s 2
     ($driver.FindElement([OpenQA.Selenium.By]::ClassName("p-inputtext"))).SendKeys($projname)  #set project name
@@ -378,9 +371,11 @@ $element = $wait.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.
      #>
      start-sleep -s 2     
      ($driver.FindElement([OpenQA.Selenium.By]::ClassName("p-button-label"))).click()  #click update
-     start-sleep -s 2
+     start-sleep -s 10
      ($driver.FindElement([OpenQA.Selenium.By]::XPath('//span[text()="Create"]'))).click()
-     start-sleep -s 2
+     start-sleep -s 5
+    } 
+
      $tdRow =  ($driver.FindElement([OpenQA.Selenium.By]::XPath('//td[contains(text(),$projname)]')))
      $actions.MoveToElement($tdRow).Perform() # hover to the project
       start-sleep -s 2
@@ -389,12 +384,52 @@ $element = $wait.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.
      ($driver.FindElement([OpenQA.Selenium.By]::XPath('//i[@class="pi pi-upload"]'))).click()  #click update
      start-sleep -s 3     
      [System.Windows.Forms.SendKeys]::SendWait("^{l}")
-     
-     foreach($webtc in $global:webuicases){
-     dutpower $global:dutcontrol
-     
-        $tclogfd="$logtc\$($caseid)"
+     $xmlpath=join-path (join-path "C:\Matter_AI\settings\_auto" $global:getproject) "xml"
+     Set-Clipboard -Value $xmlpath
+     start-sleep -s 5
+     [System.Windows.Forms.SendKeys]::SendWait("^{v}")
+     start-sleep -s 2
+     [System.Windows.Forms.SendKeys]::SendWait("~")
+     start-sleep -s 2
+     [System.Windows.Forms.SendKeys]::SendWait("{tab}")
+     start-sleep -s 2
+     [System.Windows.Forms.SendKeys]::SendWait("{tab}")
+      start-sleep -s 2
+     [System.Windows.Forms.SendKeys]::SendWait(" ")
+      start-sleep -s 2
+     [System.Windows.Forms.SendKeys]::SendWait("s")
+     start-sleep -s 2
+    [System.Windows.Forms.SendKeys]::SendWait("%{o}")
+    
+    $xpath = '//div[contains(@class, "p-toast-top-right")]'
+    # Monitor the 'z-index' value until it stops changing
+    $timeout = [DateTime]::Now.AddSeconds(100)  # Set a 30-second timeout
+    $currentZIndex = ""
+    do{
+        try{
+            # Find the element
+            $element =   ($driver.FindElement([OpenQA.Selenium.By]::XPath($xpath)))
+            $zIndex = $element.GetAttribute("style")
+            if ($zIndex -eq $currentZIndex) {
+                break
+            }
+            $currentZIndex = $zIndex
+    
+        }catch {
+            Write-Output "Element not found or inaccessible."
+        }
+        Start-Sleep -s 5
+    
+    }while([DateTime]::Now -lt $timeout)
+       
+    ($driver.FindElement([OpenQA.Selenium.By]::XPath('//span[text()="Update"]'))).click()
+    Start-Sleep -s 5
 
+   foreach($webtc in $global:webuicases){
+      dutpower $global:dutcontrol    
+        $tclogfd="$logtc\$($caseid)"
+        
+     $driver.Navigate().GoToUrl("http://$sship")
 
 
   }
