@@ -14,7 +14,7 @@ new-item -path C:\Matter_AI\logs\testing.log -Force|Out-Null
 Import-Module C:\Matter_AI\Matter_functions.psm1
 #region check test type
 while(!$global:testtype -or ($global:testtype -ne 1 -and $global:testtype -ne 2)){
-  $global:testtype=read-host "Which kind of testing? 1. Python 2. Manual (input 1 or 2) (q for quit)"
+  $global:testtype=read-host "Which kind of testing? 1. Python 2. Manual 3. Auto (input 1,2 or 3) (q for quit)"
   if($global:testtype -eq "q"){
     exit
   }
@@ -86,17 +86,15 @@ if ($global:testtype -eq 1){
   $caseids=(import-csv C:\Matter_AI\settings\_py\py.csv).TestCaseID
   $selectionpsfile=selections -Inputdata $caseids
    $cmdcsvfile="C:\Matter_AI\settings\_py\py.csv"
-
 . $getcmdpsfile
 $checkfile=Get-ChildItem $cmdcsvfile|Where-Object{$_.LastWriteTime -gt $timestart}
 if(!$checkfile){
     [System.Windows.Forms.MessageBox]::Show("Fail to get (update) cmd csv","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
     exit
 }
-
-$puttystart=1
-$starttime=get-date
+#$puttystart=1
 }
+
 if ($global:testtype -eq 2){
   $getcmdpsfile="C:\Matter_AI\cmdcollecting_tool\Matter_getchiptool.ps1"
   $global:updatechiptool = [System.Windows.Forms.MessageBox]::Show("Need update UI-Manual database?", "Check", [System.Windows.Forms.MessageBoxButtons]::YesNo, [System.Windows.Forms.MessageBoxIcon]::Question, [System.Windows.Forms.MessageBoxDefaultButton]::Button2)
@@ -167,15 +165,14 @@ if ($global:testtype -eq 2){
     #endregion
     }
 
-    
-    $starttime=get-date
 }
+
+$starttime=get-date
 ###########################
 
 $continueq="Yes"
 while ($continueq -eq "Yes"){
   if ($global:testtype -eq 1){
-
     $selchek=. $selectionpsfile
     if(!$selchek){
       [System.Windows.Forms.MessageBox]::Show("Fail to select the test case id, test will be stopped","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
@@ -188,9 +185,26 @@ while ($continueq -eq "Yes"){
         new-item -ItemType Directory -Path $logtc | Out-Null
       }
     }
+    <#
     if($puttystart){
     $puttystart=0
     puttystart
+    }
+    #>
+  }
+  if ($global:testtype -eq 3){
+    $getcmdpsfile="C:\Matter_AI\cmdcollecting_tool\Matter_getauto.ps1"
+    . $getcmdpsfile
+   if(!$global:webuicases){
+       [System.Windows.Forms.MessageBox]::Show("Fail to get auto TC Ids","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
+       $continueq=0      
+    }else{
+      #create a log folder
+      $datetime=get-date -Format yyyyMMdd_HHmmss
+      $logtc="C:\Matter_AI\logs\_auto\$($datetime)"
+      if(!(test-path $logtc)){
+        new-item -ItemType Directory -Path $logtc | Out-Null
+      }
     }
   }
   if($global:testtype -eq 2){
