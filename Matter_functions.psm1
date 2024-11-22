@@ -1289,16 +1289,15 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
      function selgui ( [string[]]$Inputdata,[string]$instruction,[string]$errmessage) {
 
         Add-Type -AssemblyName System.Windows.Forms
-            $newFont = New-Object System.Drawing.Font("Microsoft Sans Serif", $fontSize)
+         $newFont = New-Object System.Drawing.Font("Microsoft Sans Serif", 12)
         # Create the form
         $form = New-Object System.Windows.Forms.Form
         $form.Text = "List Box Transfer UI"
         $form.Size = New-Object System.Drawing.Size(800, 600)  # Enlarged form size
         $form.StartPosition = "CenterScreen"
-        $newFont = New-Object System.Drawing.Font("Microsoft Sans Serif", 12)
         
         $label = New-Object System.Windows.Forms.Label
-        $label.Location = New-Object System.Drawing.Point(30,20)
+        $label.Location = New-Object System.Drawing.Point(40,20)
         $label.Size = New-Object System.Drawing.Size(280,20)
         $label.Text = $instruction
         $label.Font = $newFont
