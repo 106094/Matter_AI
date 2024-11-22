@@ -460,8 +460,13 @@ $element = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Seleni
           }
   
       })
+      
       if($element.Displayed){
+        start-sleep -s 2
         $element.Click()
+      }else{
+        ($driver.FindElement([OpenQA.Selenium.By]::XPath('//span[text()="Add Test"]'))).click() # for 2nd run without add icon
+       }
         start-sleep -s 2
         #set project name
         $testname=($driver.FindElement([OpenQA.Selenium.By]::XPath('//input[@ng-reflect-model="UI_Test_Run"]')))
@@ -503,10 +508,18 @@ $element = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Seleni
         #Clear Selection
         $clearbt=($driver.FindElement([OpenQA.Selenium.By]::XPath('//button[text()="Clear Selection "]')))
         start-sleep -s 2
-        $clearbt.Click()        
-        #select TC
+        $clearbt.Click() 
+        $labelElement = ($driver.FindElement([OpenQA.Selenium.By]::XPath("//label[text()='FirstChipToolSuite']")))
+        # Find the corresponding checkbox by navigating to its sibling elements
+        $checkSuite = ($labelElement.FindElement([OpenQA.Selenium.By]::XPath("../p-checkbox//div[@class='p-checkbox-box']")))
         start-sleep -s 2
-        $checktc = ($driver.FindElement([OpenQA.Selenium.By]::XPath("//label[text()='$webtc']"))) # Locate the label with the matching text
+        $checkSuite.Click() 
+        start-sleep -s 10
+        $cleartc = ($driver.FindElement([OpenQA.Selenium.By]::CssSelector("#p-tabpanel-7 > div > app-test-cases-list > div.test-name-master > div > p-checkbox > div > div.p-checkbox-box.p-highlight > span")))
+        $cleartc.Click()
+        
+        #select TC
+        $checktc = ($driver.FindElement([OpenQA.Selenium.By]::XPath("//label[contains(text(), '$webtc')]"))) # Locate the label with the matching text
         start-sleep -s 2
         $checkbox =  $checktc.FindElement([OpenQA.Selenium.By]::XPath("../p-checkbox//div[@class='p-checkbox-box']")) # Find the corresponding checkbox box (clickable area)
         start-sleep -s 2
@@ -514,15 +527,48 @@ $element = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Seleni
         start-sleep -s 2
         #start
         $startbt=($driver.FindElement([OpenQA.Selenium.By]::XPath('//button[text()="Start "]')))
-        if($startbt.Enabled){
+      if($startbt.Enabled){
          $startbt.Click()
-        }
-        else{
-          rename-item $tclogfd -NewName "$($webtc)_FailToStart"
-        }
         #wait run complete, save log
         start-sleep -s 30
-
+        $getreport=($driver.FindElement([OpenQA.Selenium.By]::ClassName("button-finish")))
+        $getreport.Click()
+        start-sleep -s 5
+       #download json(report)/log
+        remove-item $env:USERPROFILE\downloads\*.json -force -ea SilentlyContinue
+        remove-item $env:USERPROFILE\downloads\*.log -force -ea SilentlyContinue
+        $tdRow =  ($driver.FindElement([OpenQA.Selenium.By]::XPath('//td[contains(text(),$webtcn)]')))
+        $actions.MoveToElement($tdRow).Perform() # hover to the project
+        start-sleep -s 1
+        ($driver.FindElement([OpenQA.Selenium.By]::XPath('//i[@ptooltip="Download Report"]'))).click()
+        start-sleep -s 1
+        ($driver.FindElement([OpenQA.Selenium.By]::XPath('//i[@ptooltip="Download Logs"]'))).click()
+        do{
+          start-sleep -s 1
+          $dljson=(get-childitem $env:USERPROFILE\downloads\*.json).FullName         
+          $dllog=(get-childitem $env:USERPROFILE\downloads\*.log).FullName
+        }until($dljson -and $dllog)
+        move-item -Path $dljson -Destination $tclogfd
+        move-item -Path $dllog -Destination $tclogfd
+       #download pdf
+       
+       
+       $tdRow =  ($driver.FindElement([OpenQA.Selenium.By]::XPath('//td[contains(text(),$webtcn)]')))
+       $actions.MoveToElement($tdRow).Perform() # hover to the project
+       start-sleep -s 1
+       ($driver.FindElement([OpenQA.Selenium.By]::XPath('//i[@ptooltip="Show Report"]'))).click()
+       start-sleep -s 5
+       $originalWindow = $driver.CurrentWindowHandle
+       ($driver.FindElement([OpenQA.Selenium.By]::XPath('//span[text()="Print"]'))).click()
+       start-sleep -s 5
+       $allWindows = $driver.WindowHandles
+        $newWindow = $allWindows | Where-Object { $_ -ne $originalWindow }
+        $driver.SwitchTo().Window($newWindow)
+        start-sleep -s 5
+        ($driver.FindElement([OpenQA.Selenium.By]::XPath('//span[text()="Print"]'))).click()
+      }
+      else{
+        rename-item $tclogfd -NewName "$($webtc)_FailToStart"
       }
 
   }
