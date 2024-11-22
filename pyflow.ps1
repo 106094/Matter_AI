@@ -171,7 +171,6 @@ if ($global:testtype -eq 2){
     }
     #start step cmd if connected pass
     if ($pairresult){ #test
-      
       $k=0
       foreach($pyline in $pylines){
         $runflag=1
@@ -434,9 +433,10 @@ $element = $wait.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.
     Start-Sleep -s 5
 
    foreach($webtc in $global:webuicases){
+
       dutpower $global:dutcontrol    
-        $tclogfd="$logtc\$($caseid)"
-        
+        $tclogfd="$logtc\$($webtc)"
+        $webtcn=$webtc.Replace(".","_")
      $driver.Navigate().GoToUrl("http://$sship")
      start-sleep -s 10
      $tdRow =  ($driver.FindElement([OpenQA.Selenium.By]::XPath('//td[contains(text(),$projname)]')))
@@ -459,7 +459,7 @@ $element = $wait.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.
         start-sleep -s 2
         $testname.Clear()
         start-sleep -s 2
-        $testname.SendKeys($webtc)  
+        $testname.SendKeys($webtcn)  
         start-sleep -s 2
         #set tester name
         $testername=($driver.FindElement([OpenQA.Selenium.By]::XPath('//input[@placeholder="Enter Operator"]')))
@@ -503,6 +503,8 @@ $element = $wait.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.
         $startbt=($driver.FindElement([OpenQA.Selenium.By]::XPath('//button[text()="Start "]')))
         start-sleep -s 2
         $startbt.Click()
+        #wait run complete, save log
+        start-sleep -s 30
 
       }
 
