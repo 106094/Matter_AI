@@ -379,7 +379,7 @@ $element = $wait.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.
      ($driver.FindElement([OpenQA.Selenium.By]::ClassName("p-button-label"))).click()  #click update
      start-sleep -s 10
      ($driver.FindElement([OpenQA.Selenium.By]::XPath('//span[text()="Create"]'))).click()
-     start-sleep -s 5
+     start-sleep -s 10
     
 
      $tdRow =  ($driver.FindElement([OpenQA.Selenium.By]::XPath('//td[contains(text(),$projname)]')))
@@ -396,6 +396,8 @@ $element = $wait.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.
      [System.Windows.Forms.SendKeys]::SendWait("^{v}")
      start-sleep -s 2
      [System.Windows.Forms.SendKeys]::SendWait("~")
+     start-sleep -s 2
+     [System.Windows.Forms.SendKeys]::SendWait("{tab}")
      start-sleep -s 2
      [System.Windows.Forms.SendKeys]::SendWait("{tab}")
      start-sleep -s 2
