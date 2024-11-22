@@ -337,7 +337,7 @@ $wait = [OpenQA.Selenium.Support.UI.WebDriverWait]::new($driver, [TimeSpan]::Fro
 $waitfive = [OpenQA.Selenium.Support.UI.WebDriverWait]::new($driver, [TimeSpan]::FromSeconds(5))
 
 # Define a custom condition for the element's visibility using a ScriptBlock converted to a delegate
-$element = $wait.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.IWebElement]]{
+$element = $waitfive.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.IWebElement]]{
     param ($driver)
       try{
         ($driver.FindElement([OpenQA.Selenium.By]::ClassName("icon-add-square")))
@@ -438,6 +438,9 @@ $element = $wait.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.
         dutpower $global:dutcontrol 
        }   
         $tclogfd="$logtc\$($webtc)"
+        if (!(test-path $tclogfd)){
+        new-item -ItemType Directory $tclogfd -Force|Out-Null
+        }
         $webtcn=$webtc.Replace(".","_")
      $driver.Navigate().GoToUrl("http://$sship")
      start-sleep -s 10
@@ -480,14 +483,17 @@ $element = $wait.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.
   
       })
        if($element.Displayed){
+        start-sleep -s 2
         $testernadd=($driver.FindElement([OpenQA.Selenium.By]::ClassName("add-new-operator")))
         start-sleep -s 2
         $testernadd.click()
+        start-sleep -s 2
       }else{
         start-sleep -s 2        
         $testername2=($driver.FindElement([OpenQA.Selenium.By]::ClassName("operator-item")))
         start-sleep -s 2
-        $testername2.click() 
+        $testername2.click()
+        start-sleep -s 2
       }
         
         #Clear Selection
@@ -501,10 +507,15 @@ $element = $wait.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.
         $checkbox =  $checktc.FindElement([OpenQA.Selenium.By]::XPath("../p-checkbox//div[@class='p-checkbox-box']")) # Find the corresponding checkbox box (clickable area)
         start-sleep -s 2
         $checkbox.Click()
+        start-sleep -s 2
         #start
         $startbt=($driver.FindElement([OpenQA.Selenium.By]::XPath('//button[text()="Start "]')))
-        start-sleep -s 2
-        $startbt.Click()
+        if($startbt.Enabled){
+         $startbt.Click()
+        }
+        else{
+          rename-item $tclogfd -NewName "$($webtc)_FailToStart"
+        }
         #wait run complete, save log
         start-sleep -s 30
 
