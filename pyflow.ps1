@@ -303,6 +303,8 @@ if ($global:testtype -eq 2){
   }
 
   if ($global:testtype -eq 3){
+    
+    dutpower $global:dutcontrol    
     Add-Type -AssemblyName System.Windows.Forms
   $logtc=(get-childitem -path "C:\Matter_AI\logs\_auto" -directory | Sort-Object LastWriteTime -Descending | Select-Object -First 1).fullname
   $settings=get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "sship"}
@@ -431,10 +433,10 @@ $element = $wait.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.
        
     ($driver.FindElement([OpenQA.Selenium.By]::XPath('//span[text()="Update"]'))).click()
     Start-Sleep -s 5
-
    foreach($webtc in $global:webuicases){
-
-      dutpower $global:dutcontrol    
+       if ( $global:webuicases.indexof($webtc)  -ne 0){
+        dutpower $global:dutcontrol 
+       }   
         $tclogfd="$logtc\$($webtc)"
         $webtcn=$webtc.Replace(".","_")
      $driver.Navigate().GoToUrl("http://$sship")
