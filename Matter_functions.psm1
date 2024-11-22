@@ -1286,6 +1286,35 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
      }
 
 
+ function dutpower([int32]$mode){    
+    if($mode -eq 1){
+        $InfoParams = @{
+          Title = "INFORMATION"
+          TitleFontSize = 22
+          ContentFontSize = 30
+          TitleBackground = 'LightSkyBlue'
+          ContentTextForeground = 'Red'
+          ButtonType = 'OK'
+          ButtonTextForeground = "Blue"
+            }
+       New-WPFMessageBox @InfoParams -Content "Please Reset Your DUT, then click ok"
+       }
+       if($mode -eq 2){
+        $cycletime= ((get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "cycle" -and $_ -match "onoff"}) -split ":")[1]
+        foreach($i in 1..$cycletime){ 
+         dutcontrol -mode off
+         dutcontrol -mode on
+        }
+        }
+        if($mode -eq 3){
+          $cycletime= ((get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "cycle" -and $_ -match "downup"}) -split ":")[1]
+          foreach($i in 1..$cycletime){
+            dutcontrol -mode down
+            dutcontrol -mode up   
+          }
+        }
+    }
+
      function selguis ( [string[]]$Inputdata,[string]$instruction,[string]$errmessage) {
 
         Add-Type -AssemblyName System.Windows.Forms
