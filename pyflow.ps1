@@ -432,18 +432,21 @@ $element = $waitfive.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selen
     }while([DateTime]::Now -lt $timeout)
        
     ($driver.FindElement([OpenQA.Selenium.By]::XPath('//span[text()="Update"]'))).click()
-    Start-Sleep -s 5
+    Start-Sleep -s 10
+    # start loop
    foreach($webtc in $global:webuicases){
-       if ( $global:webuicases.indexof($webtc)  -ne 0){
+
+      if ( $global:webuicases.indexof($webtc) -ne 0){
+        $driver.Navigate().GoToUrl("http://$sship")
+        start-sleep -s 5
         dutpower $global:dutcontrol 
-       }   
-        $tclogfd="$logtc\$($webtc)"
-        if (!(test-path $tclogfd)){
-        new-item -ItemType Directory $tclogfd -Force|Out-Null
-        }
-        $webtcn=$webtc.Replace(".","_")
-     $driver.Navigate().GoToUrl("http://$sship")
-     start-sleep -s 10
+      }   
+      $tclogfd="$logtc\$($webtc)"
+      if (!(test-path $tclogfd)){
+      new-item -ItemType Directory $tclogfd -Force|Out-Null
+      }
+     $webtcn=$webtc.Replace(".","_")
+     start-sleep -s 5
      $tdRow =  ($driver.FindElement([OpenQA.Selenium.By]::XPath('//td[contains(text(),$projname)]')))
      $actions.MoveToElement($tdRow).Perform() # hover to the project
      start-sleep -s 2  
