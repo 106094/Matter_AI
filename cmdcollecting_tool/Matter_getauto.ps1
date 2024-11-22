@@ -49,12 +49,13 @@ if($global:excelfile -eq 0){
 }
 $excelfilename=(Get-ChildItem $global:excelfile).name
 #reg read excel to csv
-$columncor=((import-csv "C:\Matter_AI\settings\filesettings.csv"|Where-Object{$_.filename -eq $excelfilename}|Select-Object -Property webui_column_title).webui_column_title).trim()
+$columncor=((import-csv "C:\Matter_AI\settings\filesettings.csv"|Where-Object{$_.filename -eq $excelfilename}|Select-Object -Property webui_column_No).webui_column_No).trim()
 $sumsheetname=((import-csv "C:\Matter_AI\settings\filesettings.csv"|Where-Object{$_.filename -eq $excelfilename}|Select-Object -Property webui_page).webui_page).trim()
 #$worksheetNames = (Get-ExcelSheetInfo -Path $excelfull).Name
 $excelPackage = [OfficeOpenXml.ExcelPackage]::new((Get-Item $global:excelfile))
 $worksheetsum=Import-Excel $global:excelfile -WorksheetName $sumsheetname
-$filteredtcs = ($worksheetsum |Where-Object{$_."Test Case ID".length -gt 0}|  Where-Object {$_."$columncor" -eq "UI-Automated"})."Test Case ID"
+$columnName = ($worksheetsum[0].PSObject.Properties.Name)[[int32]$columncor-1]
+$filteredtcs = ($worksheetsum |Where-Object{$_."Test Case ID".length -gt 0}|  Where-Object {$_."$columncor" -eq $columnName})."Test Case ID"
 $global:webuicases=selgui -Inputdata $filteredtcs -instruction "Please select caseids" -errmessage "No caseid selected"
 
 <#

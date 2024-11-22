@@ -1,5 +1,3 @@
-﻿filename,python_path,manual_path,manual_page,manual_column_title,webui_page,webui_column_title
-Matter_V_1_3_TestPlanVerificationSteps_Auto.xlsx,python_testing/scripts/sdk,/root/apps,All_TCs_Available_In_cert_repo_,Image Version: v2.10+spring2024,Summary TC Sheet for 1.3 releas,This test case can be executed using Version: v2.10+spring2024
-Matter_V_1_2_TestPlanVerificationSteps_Auto.xlsx,python_testing,/home/ubuntu/apps,All_TCs_Available_In_cert_repo_,Version: TH Fall2023 Sha: 3f84bff5,Summary TC Sheet for 1.2 releas,"This test case can be executed using 
-Version: TH Fall2023
-Sha: 3f84bff5"
+﻿filename,python_path,manual_path,manual_page,manual_column_title,webui_page,webui_column_No
+Matter_V_1_3_TestPlanVerificationSteps_Auto.xlsx,python_testing/scripts/sdk,/root/apps,All_TCs_Available_In_cert_repo_,Image Version: v2.10+spring2024,Summary TC Sheet for 1.3 releas,6
+Matter_V_1_2_TestPlanVerificationSteps_Auto.xlsx,python_testing,/home/ubuntu/apps,All_TCs_Available_In_cert_repo_,Version: TH Fall2023 Sha: 3f84bff5,Summary TC Sheet for 1.2 releas,6
