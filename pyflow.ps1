@@ -335,9 +335,10 @@ $driver.Manage().Window.Maximize()
 $driver.Navigate().GoToUrl("http://$sship")
 $wait = [OpenQA.Selenium.Support.UI.WebDriverWait]::new($driver, [TimeSpan]::FromSeconds(20))
 $waitfive = [OpenQA.Selenium.Support.UI.WebDriverWait]::new($driver, [TimeSpan]::FromSeconds(5))
+$waitten = [OpenQA.Selenium.Support.UI.WebDriverWait]::new($driver, [TimeSpan]::FromSeconds(10))
 
 # Define a custom condition for the element's visibility using a ScriptBlock converted to a delegate
-$element = $waitfive.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.IWebElement]]{
+$element = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.IWebElement]]{
     param ($driver)
       try{
         ($driver.FindElement([OpenQA.Selenium.By]::ClassName("icon-add-square")))
