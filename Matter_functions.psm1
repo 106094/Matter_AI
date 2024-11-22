@@ -1289,65 +1289,96 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
      function selgui ( [string[]]$Inputdata,[string]$instruction,[string]$errmessage) {
 
         Add-Type -AssemblyName System.Windows.Forms
-        Add-Type -AssemblyName System.Drawing
-        
+            $newFont = New-Object System.Drawing.Font("Microsoft Sans Serif", $fontSize)
+        # Create the form
         $form = New-Object System.Windows.Forms.Form
-        $form.Text = 'Data Entry Form'
-        $form.Size = New-Object System.Drawing.Size(300,250)
-        $form.StartPosition = 'CenterScreen'
-        
-        $OKButton = New-Object System.Windows.Forms.Button
-        $OKButton.Location = New-Object System.Drawing.Point(75,150)
-        $OKButton.Size = New-Object System.Drawing.Size(75,23)
-        $OKButton.Text = 'OK'
-        $OKButton.DialogResult = [System.Windows.Forms.DialogResult]::OK
-        $form.AcceptButton = $OKButton
-        $form.Controls.Add($OKButton)
-        
-        $CancelButton = New-Object System.Windows.Forms.Button
-        $CancelButton.Location = New-Object System.Drawing.Point(150,150)
-        $CancelButton.Size = New-Object System.Drawing.Size(75,23)
-        $CancelButton.Text = 'Cancel'
-        $CancelButton.DialogResult = [System.Windows.Forms.DialogResult]::Cancel
-        $form.CancelButton = $CancelButton
-        $form.Controls.Add($CancelButton)
+        $form.Text = "List Box Transfer UI"
+        $form.Size = New-Object System.Drawing.Size(800, 600)  # Enlarged form size
+        $form.StartPosition = "CenterScreen"
+        $newFont = New-Object System.Drawing.Font("Microsoft Sans Serif", 12)
         
         $label = New-Object System.Windows.Forms.Label
-        $label.Location = New-Object System.Drawing.Point(10,20)
+        $label.Location = New-Object System.Drawing.Point(30,20)
         $label.Size = New-Object System.Drawing.Size(280,20)
         $label.Text = $instruction
-        $form.Controls.Add($label)
-        
-        $listBox = New-Object System.Windows.Forms.Listbox
-        $listBox.Location = New-Object System.Drawing.Point(10,40)
-        $listBox.Size = New-Object System.Drawing.Size(260,20)
-        
-        $listBox.SelectionMode = 'MultiExtended'
-        
-        #select testcase
-        $sels=@()
-        $pylines=@()
+        $label.Font = $newFont
+        # Left ListBox
+        $leftListBox = New-Object System.Windows.Forms.ListBox
+        $leftListBox.Location = New-Object System.Drawing.Point(40, 50)
+        $leftListBox.Size = New-Object System.Drawing.Size(260, 400)  # Enlarged
+        $leftListBox.SelectionMode = "MultiExtended" 
+        $leftListBox.Items.AddRange($Inputdata)
         
         
-        foreach ($select in $Inputdata){
-        [void] $listBox.Items.Add($select)
-        }
+        # Right ListBox
+        $rightListBox = New-Object System.Windows.Forms.ListBox
+        $rightListBox.Location = New-Object System.Drawing.Point(480, 50)
+        $rightListBox.Size = New-Object System.Drawing.Size(260, 400)  # Enlarged
+        $rightListBox.SelectionMode = "MultiExtended" 
         
-        $listBox.Height = 100
-        $form.Controls.Add($listBox)
-        $form.Topmost = $true
+        # Add Button
+        $addButton = New-Object System.Windows.Forms.Button
+        $addButton.Text = "+"
+        $addButton.Location = New-Object System.Drawing.Point(370, 160)  # Adjusted for larger form
+        $addButton.Size = New-Object System.Drawing.Size(60, 30)  # Enlarged button
         
-        $result = $form.ShowDialog()
-        $global:sels=@()
+        # Remove Button
+        $removeButton = New-Object System.Windows.Forms.Button
+        $removeButton.Text = "-"
+        $removeButton.Location = New-Object System.Drawing.Point(370, 220)  # Adjusted for larger form
+        $removeButton.Size = New-Object System.Drawing.Size(60, 30)  # Enlarged button
         
-        if ($result -eq [System.Windows.Forms.DialogResult]::OK)
-        {
-            $x = $listBox.SelectedItems
-            if($x){
-                $global:sels+=@($x.trim())
+        # Done Button
+        $doneButton = New-Object System.Windows.Forms.Button
+        $doneButton.Text = "Done"
+        $doneButton.Location = New-Object System.Drawing.Point(360, 450)  # Adjusted for larger form
+        $doneButton.Size = New-Object System.Drawing.Size(80, 30)  # Enlarged button
+        
+        # Add Button Click Event
+        $addButton.Add_Click({
+            if ($leftListBox.SelectedItems.Count -gt 0) {
+                foreach ($item in $leftListBox.SelectedItems) {
+                    $rightListBox.Items.Add($item)
+                }
+                # Remove selected items from the left ListBox
+                foreach ($item in @($leftListBox.SelectedItems)) {
+                    $leftListBox.Items.Remove($item)
+                }
             }
-            
-        }
+        })
+        
+        
+        # Remove Button Click Event
+        $removeButton.Add_Click({
+            if ($rightListBox.SelectedItems.Count -gt 0) {
+                foreach ($item in $rightListBox.SelectedItems) {
+                    $leftListBox.Items.Add($item)
+                }
+                # Remove selected items from the left ListBox
+                foreach ($item in @($rightListBox.SelectedItems)) {
+                    $rightListBox.Items.Remove($item)
+                }
+            }
+        })
+        
+        # Done Button Click Event
+        $doneButton.Add_Click({
+            $global:sels=$rightListBox.Items
+            $form.Close()
+        })
+        
+        # Add controls to the form
+        
+        $form.Controls.Add($label)
+        $form.Controls.Add($leftListBox)
+        $form.Controls.Add($rightListBox)
+        $form.Controls.Add($addButton)
+        $form.Controls.Add($removeButton)
+        $form.Controls.Add($doneButton)
+        
+        # Show the form
+        $global:sels=@()
+        [void]$form.ShowDialog()
         
         if($global:sels.count -eq 0){
         
@@ -1356,7 +1387,6 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
             
         }
         
-        
         $global:sels
-
-     }
+        
+        }
