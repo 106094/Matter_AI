@@ -304,7 +304,6 @@ if ($global:testtype -eq 2){
   }
 
   if ($global:testtype -eq 3){
-    
     Add-Type -AssemblyName System.Windows.Forms
   $logtc=(get-childitem -path "C:\Matter_AI\logs\_auto" -directory | Sort-Object LastWriteTime -Descending | Select-Object -First 1).fullname
   $settings=get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "sship"}
@@ -333,6 +332,7 @@ if ($global:testtype -eq 2){
 $driver.Manage().Window.Maximize()
 $driver.Navigate().GoToUrl("http://$sship")
 $wait = [OpenQA.Selenium.Support.UI.WebDriverWait]::new($driver, [TimeSpan]::FromSeconds(20))
+$waitfive = [OpenQA.Selenium.Support.UI.WebDriverWait]::new($driver, [TimeSpan]::FromSeconds(5))
 
 # Define a custom condition for the element's visibility using a ScriptBlock converted to a delegate
 $element = $wait.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.IWebElement]]{
@@ -430,7 +430,73 @@ $element = $wait.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.
         $tclogfd="$logtc\$($caseid)"
         
      $driver.Navigate().GoToUrl("http://$sship")
+     start-sleep -s 10
+     $tdRow =  ($driver.FindElement([OpenQA.Selenium.By]::XPath('//td[contains(text(),$projname)]')))
+     $actions.MoveToElement($tdRow).Perform() # hover to the project
+     start-sleep -s 2  
+     ($driver.FindElement([OpenQA.Selenium.By]::XPath('//i[@ptooltip="Go To Test-Run"]'))).click()
+      $element = $waitfive.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.IWebElement]]{
+          try{
+            ($driver.FindElement([OpenQA.Selenium.By]::ClassName("icon-add-square")))
+          }catch{
+            return $null
+          }
+  
+      })
+      if($element.Displayed){
+        $element.Click()
+        start-sleep -s 2
+        #set project name
+        $testname=($driver.FindElement([OpenQA.Selenium.By]::XPath('//input[@ng-reflect-model="UI_Test_Run"]')))
+        start-sleep -s 2
+        $testname.Clear()
+        start-sleep -s 2
+        $testname.SendKeys($webtc)  
+        start-sleep -s 2
+        #set tester name
+        $testername=($driver.FindElement([OpenQA.Selenium.By]::XPath('//input[@placeholder="Enter Operator"]')))
+        start-sleep -s 2
+        $testername.Clear()
+        start-sleep -s 2
+        $testername.SendKeys("Allion")  
+        start-sleep -s 2
+        $testername.click() 
+        $element = $wait5.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.IWebElement]]{
+          try{
+            ($driver.FindElement([OpenQA.Selenium.By]::ClassName("icon-add-square")))
+          }catch{
+            return $null
+          }
+  
+      })
+       if($element.Displayed){
+        $testernadd=($driver.FindElement([OpenQA.Selenium.By]::ClassName("add-new-operator")))
+        start-sleep -s 2
+        $testernadd.click()
+      }else{
+        start-sleep -s 2        
+        $testername2=($driver.FindElement([OpenQA.Selenium.By]::ClassName("operator-item")))
+        start-sleep -s 2
+        $testername2.click() 
+      }
+        
+        #Clear Selection
+        $clearbt=($driver.FindElement([OpenQA.Selenium.By]::XPath('//button[text()="Clear Selection "]')))
+        start-sleep -s 2
+        $clearbt.Click()        
+        #select TC
+        start-sleep -s 2
+        $checktc = ($driver.FindElement([OpenQA.Selenium.By]::XPath("//label[text()='$webtc']"))) # Locate the label with the matching text
+        start-sleep -s 2
+        $checkbox =  $checktc.FindElement([OpenQA.Selenium.By]::XPath("../p-checkbox//div[@class='p-checkbox-box']")) # Find the corresponding checkbox box (clickable area)
+        start-sleep -s 2
+        $checkbox.Click()
+        #start
+        $startbt=($driver.FindElement([OpenQA.Selenium.By]::XPath('//button[text()="Start "]')))
+        start-sleep -s 2
+        $startbt.Click()
 
+      }
 
   }
 
