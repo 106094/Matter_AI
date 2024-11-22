@@ -181,8 +181,8 @@ $starttime=get-date
 $continueq="Yes"
 while ($continueq -eq "Yes"){
   if ($global:testtype -eq 1){
-    $selchek=selguis -Inputdata $caseids -instruction "Please select caseids" -errmessage "No caseid selected"
-    if(!($selchek[-1])){
+    selguis -Inputdata $caseids -instruction "Please select caseids" -errmessage "No caseid selected"
+    if(!$global:selss){
       [System.Windows.Forms.MessageBox]::Show("Fail to select the test case id, test will be stopped","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
       $continueq=0
     }else{
@@ -203,7 +203,7 @@ while ($continueq -eq "Yes"){
   if ($global:testtype -eq 3){
     $getcmdpsfile="C:\Matter_AI\cmdcollecting_tool\Matter_getauto.ps1"
     . $getcmdpsfile
-   if(!$global:webuicases){
+    if(!$global:selss){
        [System.Windows.Forms.MessageBox]::Show("Fail to get auto TC Ids","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
        $continueq=0      
     }else{
@@ -239,7 +239,6 @@ while ($continueq -eq "Yes"){
     }
 #>
 }
-
 $endtime=get-date
 $continueq = [System.Windows.Forms.MessageBox]::Show("Need Retest?", "Check", [System.Windows.Forms.MessageBoxButtons]::YesNo)
 }
