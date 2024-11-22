@@ -181,7 +181,7 @@ $starttime=get-date
 $continueq="Yes"
 while ($continueq -eq "Yes"){
   if ($global:testtype -eq 1){
-    $selchek=selgui -Inputdata $caseids -instruction "Please select caseids" -errmessage "No caseid selected"
+    $selchek=selguis -Inputdata $caseids -instruction "Please select caseids" -errmessage "No caseid selected"
     if(!($selchek[-1])){
       [System.Windows.Forms.MessageBox]::Show("Fail to select the test case id, test will be stopped","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
       $continueq=0
