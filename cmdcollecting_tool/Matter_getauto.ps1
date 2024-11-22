@@ -55,7 +55,7 @@ $sumsheetname=((import-csv "C:\Matter_AI\settings\filesettings.csv"|Where-Object
 $excelPackage = [OfficeOpenXml.ExcelPackage]::new((Get-Item $global:excelfile))
 $worksheetsum=Import-Excel $global:excelfile -WorksheetName $sumsheetname
 $columnName = ($worksheetsum[0].PSObject.Properties.Name)[[int32]$columncor-1]
-$filteredtcs = ($worksheetsum |Where-Object{$_."Test Case ID".length -gt 0}|  Where-Object {$_."$columncor" -eq $columnName})."Test Case ID"
+$filteredtcs = ($worksheetsum |Where-Object{$_."Test Case ID".length -gt 0}|  Where-Object {$_.$columnName -eq "UI-Automated"})."Test Case ID"
 $global:webuicases=selgui -Inputdata $filteredtcs -instruction "Please select caseids" -errmessage "No caseid selected"
 
 <#
