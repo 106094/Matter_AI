@@ -308,7 +308,8 @@ if ($global:testtype -eq 2){
   $logtc=(get-childitem -path "C:\Matter_AI\logs\_auto" -directory | Sort-Object LastWriteTime -Descending | Select-Object -First 1).fullname
   $settings=get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "sship"}
   $sship=($settings.split(":"))[-1]
-    $fileContent=get-content C:\Matter_AI\settings\_auto\$($global:getproject)\json.txt 
+  $projname="MatterAI_$($global:getproject)_"+(get-date -format "yyMMddHHmm")
+  $fileContent=get-content C:\Matter_AI\settings\_auto\$($global:getproject)\json.txt 
   . C:\Matter_AI\cmdcollecting_tool\download_driver.ps1
   Get-ChildItem  "C:\Matter_AI\cmdcollecting_tool\tool\WebDriver.dll" |Unblock-File 
   Add-Type -Path "C:\Matter_AI\cmdcollecting_tool\tool\WebDriver.dll"
@@ -348,8 +349,13 @@ $element = $wait.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.
     # Perform actions on the element (if it was found)
     if ($element.Displayed) {
         $element.Click()
+      }
+      else{
+        $addproject =  ($driver.FindElement([OpenQA.Selenium.By]::XPath('//span[text()="Add Project"]')))
+        start-sleep -s 2
+        $addproject.Click()
+      }
     
-    $projname="MatterAI_$($global:getproject)_"+(get-date -format "yyMMddHHmm")
     ($driver.FindElement([OpenQA.Selenium.By]::ClassName("p-inputtext"))).Clear()
     start-sleep -s 2
     ($driver.FindElement([OpenQA.Selenium.By]::ClassName("p-inputtext"))).SendKeys($projname)  #set project name
@@ -374,7 +380,7 @@ $element = $wait.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.
      start-sleep -s 10
      ($driver.FindElement([OpenQA.Selenium.By]::XPath('//span[text()="Create"]'))).click()
      start-sleep -s 5
-    } 
+    
 
      $tdRow =  ($driver.FindElement([OpenQA.Selenium.By]::XPath('//td[contains(text(),$projname)]')))
      $actions.MoveToElement($tdRow).Perform() # hover to the project
