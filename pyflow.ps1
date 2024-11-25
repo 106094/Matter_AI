@@ -504,7 +504,9 @@ $element = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Seleni
         $testername2.click()
         start-sleep -s 2
       }
-        
+       #select SDK YAML Tests   
+       ($driver.FindElement([OpenQA.Selenium.By]::XPath('//span[contains(text(),"SDK YAML Tests")]'))).click()
+        start-sleep -s 5
         #Clear Selection
         $clearbt=($driver.FindElement([OpenQA.Selenium.By]::XPath('//button[text()="Clear Selection "]')))
         start-sleep -s 2
