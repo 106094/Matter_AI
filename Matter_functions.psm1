@@ -1494,3 +1494,114 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
         $global:sels
 
      }
+
+     function webuiSelections{
+
+        Add-Type -AssemblyName System.Windows.Forms
+        
+        # Sample file list
+        $list = (Get-ChildItem -path C:\Matter_AI\logs\_auto\ -Directory).Name
+        if($list.count -eq 0){
+          $global:webuiselects="Creating a new project"
+          return
+        }
+        # Create form
+        $form = New-Object System.Windows.Forms.Form
+        $form.Text = "Project Selection"
+        $form.Size = New-Object System.Drawing.Size(400, 300)
+        $form.StartPosition = "CenterScreen"
+        
+        # Create "Create a New Project" RadioButton
+        $rbNewProject = New-Object System.Windows.Forms.RadioButton
+        $rbNewProject.Text = "Create a New Project"
+        $rbNewProject.Location = New-Object System.Drawing.Point(20, 20)
+        $rbNewProject.Size = New-Object System.Drawing.Size(200, 20)
+        
+        # Create "Use Existing Projects" RadioButton
+        $rbExistingProjects = New-Object System.Windows.Forms.RadioButton
+        $rbExistingProjects.Text = "Use Existing Projects"
+        $rbExistingProjects.Location = New-Object System.Drawing.Point(20, 50)
+        $rbExistingProjects.Size = New-Object System.Drawing.Size(200, 20)
+        
+        # Create ListBox for existing project files
+        $listBox = New-Object System.Windows.Forms.ListBox
+        $listBox.Location = New-Object System.Drawing.Point(40, 80)
+        $listBox.Size = New-Object System.Drawing.Size(300, 80)
+        $listBox.Items.AddRange($list)
+        $listBox.Enabled = $false  # Initially disabled
+        
+        # Create "Update JSON" Checkbox
+        $cbUpdateJson = New-Object System.Windows.Forms.CheckBox
+        $cbUpdateJson.Text = "Update JSON"
+        $cbUpdateJson.Location = New-Object System.Drawing.Point(40, 170)
+        $cbUpdateJson.Size = New-Object System.Drawing.Size(200, 20)
+        $cbUpdateJson.Enabled = $false  # Initially disabled
+        
+        # Create "Update XML" Checkbox
+        $cbUpdateXml = New-Object System.Windows.Forms.CheckBox
+        $cbUpdateXml.Text = "Update XML"
+        $cbUpdateXml.Location = New-Object System.Drawing.Point(40, 200)
+        $cbUpdateXml.Size = New-Object System.Drawing.Size(200, 20)
+        $cbUpdateXml.Enabled = $false  # Initially disabled
+        
+        # Create OK button
+        $btnOK = New-Object System.Windows.Forms.Button
+        $btnOK.Text = "OK"
+        $btnOK.Location = New-Object System.Drawing.Point(150, 230)
+        $btnOK.Size = New-Object System.Drawing.Size(100, 30)
+        $btnOK.Add_Click({
+            # Define button action here
+            if ($rbNewProject.Checked) {
+                #[System.Windows.Forms.MessageBox]::Show("Creating a new project...")
+                $global:webuiselects="1"
+            } elseif ($rbExistingProjects.Checked) {
+                if ($listBox.SelectedItem -ne $null) {
+                    $selectedUpdates = @()
+                    if ($cbUpdateJson.Checked) { $selectedUpdates += "JSON" }
+                    if ($cbUpdateXml.Checked) { $selectedUpdates += "XML" }
+        
+                    $global:webuiselects="Updating $($selectedUpdates -join ', ') for project: $($listBox.SelectedItem)"
+                } else {
+                    #[System.Windows.Forms.MessageBox]::Show("Please select an existing project.")
+                    return  # Exit click event without closing the form
+                }
+            } else {
+                [System.Windows.Forms.MessageBox]::Show("Please select an option.")
+                return  # Exit click event without closing the form
+            }
+            
+            # Close the form after successful action
+            $form.Close()
+          })
+        
+        # Event handlers to enable/disable controls based on the selected option
+        $rbNewProject.Add_CheckedChanged({
+            if ($rbNewProject.Checked) {
+                $listBox.Enabled = $false
+                $cbUpdateJson.Enabled = $false
+                $cbUpdateXml.Enabled = $false
+            }
+        })
+        
+        $rbExistingProjects.Add_CheckedChanged({
+            if ($rbExistingProjects.Checked) {
+                $listBox.Enabled = $true
+                $cbUpdateJson.Enabled = $true
+                $cbUpdateXml.Enabled = $true
+            }
+        })
+        
+        # Add controls to form
+        $form.Controls.Add($rbNewProject)
+        $form.Controls.Add($rbExistingProjects)
+        $form.Controls.Add($listBox)
+        $form.Controls.Add($cbUpdateJson)
+        $form.Controls.Add($cbUpdateXml)
+        $form.Controls.Add($btnOK)
+        
+        # Show form
+        $form.Add_Shown({$form.Activate()})
+        [void] $form.ShowDialog()
+        }
+        
+       

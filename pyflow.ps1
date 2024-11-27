@@ -303,13 +303,18 @@ if ($global:testtype -eq 2){
   }
 
   if ($global:testtype -eq 3){
-    
+    webuiSelections
     dutpower $global:dutcontrol    
     Add-Type -AssemblyName System.Windows.Forms
   $logtc=(get-childitem -path "C:\Matter_AI\logs\_auto" -directory | Sort-Object LastWriteTime -Descending | Select-Object -First 1).fullname
   $settings=get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "sship"}
   $sship=($settings.split(":"))[-1]
   $projname="MatterAI_"+"$($global:getproject)_"+(get-date -format "yyMMddHHmm")
+  if($global:webuiselects -like "*for project*"){
+    $projname=($global:webuiselects.split(":"))[-1]
+    $xmlupdate=($global:webuiselects.split(":"))[0] -match "XML"
+    $jsonupdate=($global:webuiselects.split(":"))[0] -match "JSON"
+  }
   $fileContent=get-content C:\Matter_AI\settings\_auto\$($global:getproject)\json.txt 
   . C:\Matter_AI\cmdcollecting_tool\download_driver.ps1
   Get-ChildItem  "C:\Matter_AI\cmdcollecting_tool\tool\WebDriver.dll" |Unblock-File 
@@ -338,7 +343,7 @@ $driver.Navigate().GoToUrl("http://$sship")
 $wait = [OpenQA.Selenium.Support.UI.WebDriverWait]::new($driver, [TimeSpan]::FromSeconds(60))
 $waitfive = [OpenQA.Selenium.Support.UI.WebDriverWait]::new($driver, [TimeSpan]::FromSeconds(5))
 $waitten = [OpenQA.Selenium.Support.UI.WebDriverWait]::new($driver, [TimeSpan]::FromSeconds(10))
-
+if($global:webuiselects -eq "1"){
 # Define a custom condition for the element's visibility using a ScriptBlock converted to a delegate
 $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.IWebElement]]{
     param ($driver)
@@ -370,11 +375,15 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
      start-sleep -s 5
      $createbt.click()
      start-sleep -s 10
+    }
+  
+  if($jsonupdate -or $xmlupdate){
+        $tdRow =  ($driver.FindElement([OpenQA.Selenium.By]::XPath('//td[contains(text(),$projname)]')))
+        $actions.MoveToElement($tdRow).Perform() # hover to the project
+         start-sleep -s 2  
 
-     $tdRow =  ($driver.FindElement([OpenQA.Selenium.By]::XPath('//td[contains(text(),$projname)]')))
-     $actions.MoveToElement($tdRow).Perform() # hover to the project
-      start-sleep -s 2
-        ($driver.FindElement([OpenQA.Selenium.By]::XPath('//i[@ptooltip="Edit"]'))).click()
+    if($jsonupdate){
+      ($driver.FindElement([OpenQA.Selenium.By]::XPath('//i[@ptooltip="Edit"]'))).click()
      start-sleep -s 5
       $textarea =  ($driver.FindElement([OpenQA.Selenium.By]::XPath('//textarea[@rows="10" and contains(@class, "p-inputtextarea")]')))
       start-sleep -s 2
@@ -383,8 +392,9 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
      Set-Clipboard -Value $fileContent
      start-sleep -s 5
      $textarea.SendKeys([OpenQA.Selenium.Keys]::Control + "v").Perform
-      start-sleep -s 5    
-   
+      start-sleep -s 5
+    }    
+   if($xmlupdate){
      ($driver.FindElement([OpenQA.Selenium.By]::XPath('//i[@class="pi pi-upload"]'))).click()  #click update
      start-sleep -s 3     
      [System.Windows.Forms.SendKeys]::SendWait("^{l}")
@@ -411,7 +421,7 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
     # Monitor the 'z-index' value until it stops changing
     $timeout = [DateTime]::Now.AddSeconds(100)  # Set a 30-second timeout
     $currentZIndex = ""
-    do{
+     do{
         try{
             # Find the element
             $element =   ($driver.FindElement([OpenQA.Selenium.By]::XPath($xpath)))
@@ -426,10 +436,12 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
         }
         Start-Sleep -s 5
     
-    }while([DateTime]::Now -lt $timeout)
-       
+     }while([DateTime]::Now -lt $timeout)
+    }  
     ($driver.FindElement([OpenQA.Selenium.By]::XPath('//span[text()="Update"]'))).click()
     Start-Sleep -s 10
+   }
+  
     # start loop
    $webv=($driver.FindElement([OpenQA.Selenium.By]::ClassName("sha-version"))).Text 
    foreach($webtc in $global:webuicases){
@@ -445,7 +457,7 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
       }
      $webtcn=$webtc.Replace(".","_")
      start-sleep -s 5
-     $tdRow =  ($driver.FindElement([OpenQA.Selenium.By]::XPath('//td[contains(text(),$projname)]')))
+     $tdRow =  ($driver.FindElement([OpenQA.Selenium.By]::XPath("//td[contains(text(),$projname)]")))
      $actions.MoveToElement($tdRow).Perform() # hover to the project
      start-sleep -s 2  
      ($driver.FindElement([OpenQA.Selenium.By]::XPath('//i[@ptooltip="Go To Test-Run"]'))).click()
@@ -567,7 +579,7 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
        #download json(report)/log
         remove-item $env:USERPROFILE\downloads\*.json -force -ea SilentlyContinue
         remove-item $env:USERPROFILE\downloads\*.log -force -ea SilentlyContinue
-        $tdRow =  ($driver.FindElement([OpenQA.Selenium.By]::XPath('//td[contains(text(),$webtcn)]')))
+        $tdRow =  ($driver.FindElement([OpenQA.Selenium.By]::XPath("//td[contains(text(),$webtcn)]")))
         $actions.MoveToElement($tdRow).Perform() # hover to the project
         start-sleep -s 1
         ($driver.FindElement([OpenQA.Selenium.By]::XPath('//i[@ptooltip="Download Report"]'))).click()
@@ -582,7 +594,7 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
         move-item -Path $dllog -Destination $tclogfd
        #download pdf
        $originalWindow = $driver.CurrentWindowHandle
-       $tdRow =  ($driver.FindElement([OpenQA.Selenium.By]::XPath('//td[contains(text(),$webtcn)]')))
+       $tdRow =  ($driver.FindElement([OpenQA.Selenium.By]::XPath("//td[contains(text(),$webtcn)]")))
        $actions.MoveToElement($tdRow).Perform() # hover to the project
        start-sleep -s 1
       
