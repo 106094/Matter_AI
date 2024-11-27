@@ -526,7 +526,7 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
         $cleartc.Click()
         start-sleep -s 10
         #select TC
-        $checktc = ($driver.FindElement([OpenQA.Selenium.By]::XPath("//label[contains(text(), '$webtc')]"))) # Locate the label with the matching text
+        #$checktc = ($driver.FindElement([OpenQA.Selenium.By]::XPath("//label[contains(text(), '$webtc')]"))) # Locate the label with the matching text
         if(-not $alltc){
          $labels = $driver.FindElements([OpenQA.Selenium.By]::XPath("//div[@class='test-name mb-10']//label"))
           foreach ($label in $labels) {
@@ -537,9 +537,9 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
         }
         $ranktc=$alltc.IndexOf($webtc)-2
        
-        $checkbox= $driver.FindElement([OpenQA.Selenium.By]::CssSelector("#p-tabpanel-2 > div > app-test-cases-list > div.test-name.mb-10 > div:nth-child($ranktc) > div > p-checkbox > div > div.p-checkbox-box"))
-        $driver.ExecuteScript("arguments[0].scrollIntoView(true);",  $checkbox)
-        $checkbox.Click()
+        $checktc= $driver.FindElement([OpenQA.Selenium.By]::CssSelector("#p-tabpanel-2 > div > app-test-cases-list > div.test-name.mb-10 > div:nth-child($ranktc) > div > p-checkbox > div > div.p-checkbox-box"))
+        $driver.ExecuteScript("arguments[0].scrollIntoView(true);",  $checktc)
+        $checktc.Click()
         start-sleep -s 10
         #start
         $startbt=($driver.FindElement([OpenQA.Selenium.By]::XPath('//button[text()="Start "]')))
