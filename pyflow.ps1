@@ -378,7 +378,7 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
     }
   
   if($jsonupdate -or $xmlupdate){
-        $tdRow =  ($driver.FindElement([OpenQA.Selenium.By]::XPath('//td[contains(text(),$projname)]')))
+        $tdRow =  ($driver.FindElement([OpenQA.Selenium.By]::XPath("//td[contains(text(),$projname)]")))
         $actions.MoveToElement($tdRow).Perform() # hover to the project
          start-sleep -s 2  
 
