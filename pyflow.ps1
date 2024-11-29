@@ -1,3 +1,4 @@
+Add-Type -AssemblyName System.Windows.Forms
 $retesttimecheck=(get-content "C:\Matter_AI\settings\config_linux.txt"|Select-String "retest.") -match "\d+"
 if($retesttimecheck){
   $retesttime= [int32]($matches[0])
@@ -303,15 +304,20 @@ if ($global:testtype -eq 2){
   }
 
   if ($global:testtype -eq 3){
-    webuiSelections
-    dutpower $global:dutcontrol    
-    Add-Type -AssemblyName System.Windows.Forms
-  $logtc=(get-childitem -path "C:\Matter_AI\logs\_auto" -directory | Sort-Object LastWriteTime -Descending | Select-Object -First 1).fullname
+    webuiSelections -projectname $global:getproject
+    if(-not $global:webuiselects){
+      exit
+    }
+    dutpower $global:dutcontrol
+    #create a log folder
+    $datetime=get-date -Format yyMMdd_HHmm
+    $logtc="C:\Matter_AI\logs\_auto\$($global:getproject)\_$($datetime)"
   $settings=get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "sship"}
   $sship=($settings.split(":"))[-1]
-  $projname="MatterAI_"+"$($global:getproject)_"+(get-date -format "yyMMddHHmm")
+  $projname="MatterAI_"+"$($global:getproject)"
+  $xmlupdate=$jsonupdate=$true
   if($global:webuiselects -like "*for project*"){
-    $projname=($global:webuiselects.split(":"))[-1]
+    $projname=($global:webuiselects.split(":"))[-1].trim()
     $xmlupdate=($global:webuiselects.split(":"))[0] -match "XML"
     $jsonupdate=($global:webuiselects.split(":"))[0] -match "JSON"
   }
@@ -336,7 +342,7 @@ if ($global:testtype -eq 2){
 # Create an Actions object
 
 $actions = New-Object OpenQA.Selenium.Interactions.Actions($driver)
-[OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($driver)
+#[OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($driver)
 #$actions = New-Object OpenQA.Selenium.Interactions.Actions($driver)
 $driver.Manage().Window.Maximize()
 $driver.Navigate().GoToUrl("http://$sship")
@@ -354,17 +360,15 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
       }
 
 })
-
     # Perform actions on the element (if it was found)
     if ($addelement.Displayed) {
         $addelement.Click()
       }
       else{
-        $addproject =  ($driver.FindElement([OpenQA.Selenium.By]::XPath('//span[text()="Add Project"]')))
-        start-sleep -s 2
+        $addproject =  ($driver.FindElement([OpenQA.Selenium.By]::XPath('//span[text()="Add Project"]')))        
         $addproject.Click()
       }
-    
+      start-sleep -s 2
     ($driver.FindElement([OpenQA.Selenium.By]::ClassName("p-inputtext"))).Clear()
     start-sleep -s 2
     ($driver.FindElement([OpenQA.Selenium.By]::ClassName("p-inputtext"))).SendKeys($projname)  #set project name
@@ -378,13 +382,47 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
     }
   
   if($jsonupdate -or $xmlupdate){
-        $tdRow =  ($driver.FindElement([OpenQA.Selenium.By]::XPath("//td[contains(text(),$projname)]")))
+    # find and hover the project
+    $dropdown =  ($driver.FindElement([OpenQA.Selenium.By]::XPath("//p-dropdown[contains(@styleclass,'p-paginator')]//span[contains(@class,'p-dropdown-trigger')]")))
+    $dropdown.Click()
+    start-sleep -s 5
+    $select20 = $driver.FindElement([OpenQA.Selenium.By]::XPath("//p-dropdownitem/li[.//span[text()='20']]"))
+    $select20.Click()
+    $paginatorButtons =  ($driver.FindElement([OpenQA.Selenium.By]::ClassName("p-paginator-pages"))).text.split("`n")
+    $maxPageNumber = 0
+    foreach ($button in $paginatorButtons) {
+      $pageNumber = [int32]$button  # Convert the button text to an integer
+      if ($pageNumber -gt $maxPageNumber) {
+          $maxPageNumber = $pageNumber  # Update the maximum page number
+      }
+     }
+     $pagenum=1
+     while($pagenum -le $maxPageNumber ){ 
+      ($driver.FindElement([OpenQA.Selenium.By]::XPath("//button[contains(@class,'p-paginator-page') and text()=$pagenum]"))).click()
+           $tdRow = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.IWebElement]]{
+          try{
+            ($driver.FindElement([OpenQA.Selenium.By]::XPath("//tr[td[contains(text(),'$projname')]]")))
+          }catch{
+            return $null
+          }
+        })
+      if ($tdRow.Displayed){
+        $driver.ExecuteScript("arguments[0].scrollIntoView(true);", $tdRow)
+        start-sleep -s 2
+        $actions = New-Object OpenQA.Selenium.Interactions.Actions($driver)
         $actions.MoveToElement($tdRow).Perform() # hover to the project
-         start-sleep -s 2  
+        break
+      }
+      else{
+      $pagenum++
+      }
+     }
+    
+     start-sleep -s 2  
+     ($driver.FindElement([OpenQA.Selenium.By]::XPath('//i[@ptooltip="Edit"]'))).click() #enter edit
+     start-sleep -s 5  
 
     if($jsonupdate){
-      ($driver.FindElement([OpenQA.Selenium.By]::XPath('//i[@ptooltip="Edit"]'))).click()
-     start-sleep -s 5
       $textarea =  ($driver.FindElement([OpenQA.Selenium.By]::XPath('//textarea[@rows="10" and contains(@class, "p-inputtextarea")]')))
       start-sleep -s 2
      $textarea.Click()
@@ -396,7 +434,7 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
     }    
    if($xmlupdate){
      ($driver.FindElement([OpenQA.Selenium.By]::XPath('//i[@class="pi pi-upload"]'))).click()  #click update
-     start-sleep -s 3     
+     start-sleep -s 5     
      [System.Windows.Forms.SendKeys]::SendWait("^{l}")
      $xmlpath=join-path (join-path "C:\Matter_AI\settings\_auto" $global:getproject) "xml"
      Set-Clipboard -Value $xmlpath
@@ -445,8 +483,9 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
     # start loop
    $webv=($driver.FindElement([OpenQA.Selenium.By]::ClassName("sha-version"))).Text 
    foreach($webtc in $global:webuicases){
-
-      if ( $global:webuicases.indexof($webtc) -ne 0){
+    $testrun=1
+    while($testrun -le $retesttime){     
+      if ( $global:webuicases.indexof($webtc) -ne 0 -or $testrun -gt 1){
         $driver.Navigate().GoToUrl("http://$sship")
         start-sleep -s 5
         dutpower $global:dutcontrol 
@@ -457,7 +496,8 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
       }
      $webtcn=$webtc.Replace(".","_")
      start-sleep -s 5
-     $tdRow =  ($driver.FindElement([OpenQA.Selenium.By]::XPath("//td[contains(text(),$projname)]")))
+     $tdRow =  ($driver.FindElement([OpenQA.Selenium.By]::XPath("//tr[td[contains(text(),'$projname')]]")))
+     $actions = New-Object OpenQA.Selenium.Interactions.Actions($driver)
      $actions.MoveToElement($tdRow).Perform() # hover to the project
      start-sleep -s 2  
      ($driver.FindElement([OpenQA.Selenium.By]::XPath('//i[@ptooltip="Go To Test-Run"]'))).click()
@@ -498,7 +538,6 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
           }catch{
             return $null
           }
-  
       })
        if($element.Displayed){
         start-sleep -s 2
@@ -524,34 +563,93 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
         #start-sleep -s 5
         # Find the corresponding checkbox by navigating to its sibling elements
         #$checkSuite = ($labelElement.FindElement([OpenQA.Selenium.By]::XPath("//div[@class='p-checkbox-box']")))
-        if($webv -like "*2a350c8*" ) {
-        $checkSuite = ($driver.FindElement([OpenQA.Selenium.By]::XPath("//*[@id='p-tabpanel-2']/div/app-test-suites-list/div[2]/div[2]/div/p-checkbox")))
-        $driver.ExecuteScript("arguments[0].scrollIntoView(true);", $checkSuite )
+        #if($webv -like "*2a350c8*" ) {
+        if($webv) {
+        try {
+          # Locate all matching label elements
+          $elements = $driver.FindElements([OpenQA.Selenium.By]::XPath("//label[text()='FirstChipToolSuite']/preceding-sibling::p-checkbox//div[@class='p-checkbox-box']"))   
+          # Iterate through the elements
+          foreach ($element in $elements) {
+              if ($element.Displayed) {
+                  Write-Output "Found a displayed element"      
+                  # Scroll into view (optional)
+                  $driver.ExecuteScript("arguments[0].scrollIntoView(true);", $element)
+      
+                  # Perform an action on the displayed element (e.g., click)
+                  $element.Click()
+                  Write-Output "Clicked on the displayed element."
+                  break  # Exit the loop after using the first displayed element
+              }
+          }
+      
+          if ($elements.Count -eq 0) {
+              Write-Output "No elements found matching the criteria."
+          }
+      
+      } catch {
+          Write-Output "An error occurred: $($_.Exception.Message)"
+      }
+      
       }
       start-sleep -s 5
       $checkSuite.Click() 
       start-sleep -s 10
-        #$cleartc = ($driver.FindElement([OpenQA.Selenium.By]::CssSelector("#p-tabpanel-7 > div > app-test-cases-list > div.test-name-master > div > p-checkbox > div > div.p-checkbox-box.p-highlight > span")))
-        if($webv -like "*2a350c8*" ) {
-        $cleartc = ($driver.FindElement([OpenQA.Selenium.By]::CssSelector("#p-tabpanel-2 > div > app-test-cases-list > div.test-name-master > div > p-checkbox > div > div.p-checkbox-box.p-highlight > span")))
-        }
+       #if($webv -like "*2a350c8*" ) {
+        if($webv) {
+         try {
+          # Locate all matching label elements
+          $elements = $driver.FindElements([OpenQA.Selenium.By]::XPath("//label[text()='Test Cases']/preceding-sibling::p-checkbox"))   
+          # Iterate through the elements
+          foreach ($element in $elements) {
+              if ($element.Displayed) {
+                  Write-Output "Found a displayed element"      
+                  # Scroll into view (optional)
+                  $driver.ExecuteScript("arguments[0].scrollIntoView(true);", $element)
+      
+                  # Perform an action on the displayed element (e.g., click)
+                  $element.Click()
+                  Write-Output "Clicked on the displayed element."
+                  break  # Exit the loop after using the first displayed element
+              }
+          }
+      
+          if ($elements.Count -eq 0) {
+              Write-Output "No elements found matching the criteria."
+          }
+      
+      } catch {
+          Write-Output "An error occurred: $($_.Exception.Message)"
+      } 
+      
+      }
         $cleartc.Click()
         start-sleep -s 10
         #select TC
-        #$checktc = ($driver.FindElement([OpenQA.Selenium.By]::XPath("//label[contains(text(), '$webtc')]"))) # Locate the label with the matching text
-        if(-not $alltc){
-         $labels = $driver.FindElements([OpenQA.Selenium.By]::XPath("//div[@class='test-name mb-10']//label"))
-          foreach ($label in $labels) {
-           if($label.Text.length -gt 0){
-           $alltc+=@($(($label.Text.split(" "))[0]))
-            }
+        try {
+          # Locate all matching label elements
+          $elements = $driver.FindElements([OpenQA.Selenium.By]::XPath("//label[contains(text(),'$webtc')]/preceding-sibling::p-checkbox"))   
+          # Iterate through the elements
+          foreach ($element in $elements) {
+              if ($element.Displayed) {
+                  Write-Output "Found a displayed element"      
+                  # Scroll into view (optional)
+                  $driver.ExecuteScript("arguments[0].scrollIntoView(true);", $element)
+      
+                  # Perform an action on the displayed element (e.g., click)
+                  $element.Click()
+                  Write-Output "Clicked on the displayed element."
+                  break  # Exit the loop after using the first displayed element
+              }
           }
-        }
-        $ranktc=$alltc.IndexOf($webtc)-2
-       
-        $checktc= $driver.FindElement([OpenQA.Selenium.By]::CssSelector("#p-tabpanel-2 > div > app-test-cases-list > div.test-name.mb-10 > div:nth-child($ranktc) > div > p-checkbox > div > div.p-checkbox-box"))
-        $driver.ExecuteScript("arguments[0].scrollIntoView(true);",  $checktc)
-        $checktc.Click()
+      
+          if ($elements.Count -eq 0) {
+              Write-Output "No elements found matching the criteria."
+          }
+      
+      } catch {
+          Write-Output "An error occurred: $($_.Exception.Message)"
+      } 
+                
         start-sleep -s 10
         #start
         $startbt=($driver.FindElement([OpenQA.Selenium.By]::XPath('//button[text()="Start "]')))
@@ -571,17 +669,20 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
         }) 
         }until($checkcomplete.displayed -or $n -gt 360)
         #save log
+        start-sleep -s 60
         if($checkcomplete.displayed){
-          start-sleep -s 10
-        $checkcomplete.Click()
+          ($driver.FindElement([OpenQA.Selenium.By]::ClassName("button-finish"))).Click()
         }
         start-sleep -s 5
        #download json(report)/log
         remove-item $env:USERPROFILE\downloads\*.json -force -ea SilentlyContinue
         remove-item $env:USERPROFILE\downloads\*.log -force -ea SilentlyContinue
-        $tdRow =  ($driver.FindElement([OpenQA.Selenium.By]::XPath("//td[contains(text(),$webtcn)]")))
-        $actions.MoveToElement($tdRow).Perform() # hover to the project
+        $tdRow =  ($driver.FindElement([OpenQA.Selenium.By]::XPath("//tr[td[contains(text(),'$webtcn')]]")))
+        $driver.ExecuteScript("arguments[0].scrollIntoView(true);", $tdRow )
         start-sleep -s 1
+        $actions = New-Object OpenQA.Selenium.Interactions.Actions($driver)
+        $actions.MoveToElement($tdRow).Perform() # hover to the project
+        start-sleep -s 5
         ($driver.FindElement([OpenQA.Selenium.By]::XPath('//i[@ptooltip="Download Report"]'))).click()
         start-sleep -s 1
         ($driver.FindElement([OpenQA.Selenium.By]::XPath('//i[@ptooltip="Download Logs"]'))).click()
@@ -594,9 +695,12 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
         move-item -Path $dllog -Destination $tclogfd
        #download pdf
        $originalWindow = $driver.CurrentWindowHandle
-       $tdRow =  ($driver.FindElement([OpenQA.Selenium.By]::XPath("//td[contains(text(),$webtcn)]")))
-       $actions.MoveToElement($tdRow).Perform() # hover to the project
+       $tdRow =  ($driver.FindElement([OpenQA.Selenium.By]::XPath("//tr[td[contains(text(),'$webtcn')]]")))
+       $driver.ExecuteScript("arguments[0].scrollIntoView(true);", $tdRow )
        start-sleep -s 1
+       $actions = New-Object OpenQA.Selenium.Interactions.Actions($driver)
+       $actions.MoveToElement($tdRow).Perform() # hover to the project
+       start-sleep -s 5
       
        ($driver.FindElement([OpenQA.Selenium.By]::XPath('//i[@ptooltip="Show Report"]'))).click()
        start-sleep -s 5
@@ -621,7 +725,7 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
        start-sleep -s 2
       [System.Windows.Forms.SendKeys]::SendWait("%{s}")
       #  close blank tab
-       try {
+   
         # Get all window handles
         $windowHandles = $driver.WindowHandles
         Write-Output "Open Window Handles: $($windowHandles -join ', ')"    
@@ -638,19 +742,38 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
         # After closing, switch to the first remaining window
         $remainingWindowHandle = $driver.WindowHandles[0]
         $driver.SwitchTo().Window($remainingWindowHandle)
-        Write-Output "Switched back to the remaining window with handle: $remainingWindowHandle"
-        ($driver.FindElement([OpenQA.Selenium.By]::XPath('//button[.//span[contains(@class, "p-dialog-header-close-icon")]]'))).click()
-       
-    } catch {
-        Write-Output "An error occurred: $($_.Exception.Message)"
-    }
-
+        ($driver.FindElement([OpenQA.Selenium.By]::XPath('//button[.//span[contains(@class, "p-dialog-header-close-icon")]]'))).click()      
+        start-sleep -s 5
+        # archieve TestCase
+        $tdRow =  ($driver.FindElement([OpenQA.Selenium.By]::XPath("//tr[td[contains(text(),'$webtcn')]]")))
+        $driver.ExecuteScript("arguments[0].scrollIntoView(true);", $tdRow )
+        $actions = New-Object OpenQA.Selenium.Interactions.Actions($driver) #unknown reason need defined again
+        $actions.MoveToElement($tdRow).Perform() # hover to the project
+        $archievebt = ($driver.FindElement([OpenQA.Selenium.By]::XPath('//i[@ng-reflect-text="Archive"]')))
+        start-sleep -s 2
+        $archievebt.click()
+        start-sleep -s 5
+        # check pass/fail
+        $testresult=(get-content $tclogfd\*.log)[-1]        
+        if($testresult -notlike "*Test Run Completed*pass*" ){
+          $tclogfdr = Join-Path  $tclogfd $testrun
+          new-item -ItemType Directory $tclogfdr | Out-Null
+          get-childitem $tclogfd\* -file  | move-item  -Destination $tclogfdr -Force
+          if ($testrun -eq 3){
+             rename-item $tclogfd -NewName "$($webtc)_Failed"
+          }
+          $testrun+=1
+        }
+        else {
+          $testrun=99
+        }
       }
       else{
         rename-item $tclogfd -NewName "$($webtc)_FailToStart"
+        $testrun=99
       }
     
-
+    }
 
 
   }
