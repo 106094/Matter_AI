@@ -1,4 +1,4 @@
-﻿
+
 param (
     [switch]$testing               
 )
@@ -203,23 +203,20 @@ while ($continueq -eq "Yes"){
   if ($global:testtype -eq 3){
     $getcmdpsfile="C:\Matter_AI\cmdcollecting_tool\Matter_getauto.ps1"
     . $getcmdpsfile
+    if($global:excelfile.length -eq 0  -or $global:excelfile -eq 0){
+      [System.Windows.Forms.MessageBox]::Show("Fail to select excel file","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
+      $continueq=0  
+    }
     if(!$global:selss){
        [System.Windows.Forms.MessageBox]::Show("Fail to get auto TC Ids","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
-       $continueq=0      
-    }else{
-      #create a log folder
-      $datetime=get-date -Format yyyyMMdd_HHmmss
-      $logtc="C:\Matter_AI\logs\_auto\$($global:getproject)_$($datetime)"
-      if(!(test-path $logtc)){
-        new-item -ItemType Directory -Path $logtc | Out-Null
-      }
+       $continueq=0
     }
   }
   if($global:testtype -eq 2){
     $data=Import-Csv  $global:csvfilename
     $selchek=selection_manual -data $data -column1 "catg" -column2 "TestCaseID"
-    if($selchek[-1] -eq 0 -or $global:sels -match "xlsx"){
-      [System.Windows.Forms.MessageBox]::Show("Fail to select the test case id, test will be stopped","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
+    if($selchek[-1] -eq 0 -or $global:sels -match "xlsx" -or (-not $global:webuiselects)){
+      [System.Windows.Forms.MessageBox]::Show("Fail to select the Project/test case id, test will be stopped","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
       $continueq=0 
     }
     else{
