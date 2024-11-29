@@ -1495,20 +1495,20 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
 
      }
 
-     function webuiSelections{
+     function webuiSelections ([string]$projectname){
 
         Add-Type -AssemblyName System.Windows.Forms
-        
+        $global:webuiselects=$null
         # Sample file list
-        $list = (Get-ChildItem -path C:\Matter_AI\logs\_auto\ -Directory).Name
+        $list = (Get-ChildItem -path C:\Matter_AI\logs\_auto\ -Directory|Where-Object{$_.name -like "*$projectname*"}).Name
         if($list.count -eq 0){
-          $global:webuiselects="Creating a new project"
+          $global:webuiselects="1"
           return
         }
         # Create form
         $form = New-Object System.Windows.Forms.Form
         $form.Text = "Project Selection"
-        $form.Size = New-Object System.Drawing.Size(400, 300)
+        $form.Size = New-Object System.Drawing.Size(400, 350)
         $form.StartPosition = "CenterScreen"
         
         # Create "Create a New Project" RadioButton
