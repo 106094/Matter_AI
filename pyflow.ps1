@@ -777,5 +777,6 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
 
 
   }
-
+  $driver.Quit()
+  Stop-Process -Name chromedriver, msedgedriver -Force -ErrorAction SilentlyContinue
   }
