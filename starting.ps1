@@ -96,6 +96,10 @@ $caseids=(import-csv C:\Matter_AI\settings\_py\py.csv).TestCaseID
 
 if ($global:testtype -eq 3){
    $getprojects=(get-childitem C:\Matter_AI\settings\_auto\ -Directory).Name
+   if (!$getprojects){
+    [System.Windows.Forms.MessageBox]::Show("Please create C:\Matter_AI\settings\_auto\<Project name> include ""json.txt"" and ""xml"" folder with xml files"  ,"Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
+    exit
+   }
    $global:getproject=selgui -Inputdata $getprojects -instruction "Please select project" -errmessage "No project selected"
  if(!($global:getproject[-1])){
      [System.Windows.Forms.MessageBox]::Show("Fail to get project","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)

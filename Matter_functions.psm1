@@ -1590,6 +1590,17 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
                 $cbUpdateXml.Enabled = $true
             }
         })
+
+        $cbUpdateJson.Add_CheckedChanged({ 
+            if ($cbUpdateJson.Checked) {
+                $cbUpdateXml.Checked = $true
+                $cbUpdateXml.Enabled = $false
+            } 
+            
+            if (!($cbUpdateJson.Checked)) {
+                 $cbUpdateXml.Enabled = $true
+            }
+        })
         
         # Add controls to form
         $form.Controls.Add($rbNewProject)
