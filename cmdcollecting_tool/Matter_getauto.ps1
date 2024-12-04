@@ -8,7 +8,6 @@ if($PSScriptRoot.length -eq 0){
   $scriptRoot=$PSScriptRoot
   }
 
-$spath="C:\Matter_AI\settings\_py"
 #reg insatll importexcel
 $chkmod=Get-Module -name importexcel
 if(!($chkmod)){
