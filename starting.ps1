@@ -211,10 +211,7 @@ while ($continueq -eq "Yes"){
       [System.Windows.Forms.MessageBox]::Show("Fail to select excel file","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
       $continueq=0  
     }
-    if(!$global:webuiselects){
-       [System.Windows.Forms.MessageBox]::Show("Fail to get auto TC Ids","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
-       $continueq=0
-    }
+
   }
   if($global:testtype -eq 2){
     $data=Import-Csv  $global:csvfilename
@@ -234,6 +231,10 @@ while ($continueq -eq "Yes"){
   }
   if($continueq){
     . C:\Matter_AI\pyflow.ps1 
+    if($global:testtype -eq 3 -and !$global:webuiselects){
+       [System.Windows.Forms.MessageBox]::Show("Fail to get Project","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
+       $continueq=0
+    }
    #create result html
     if ($global:testtype -eq 2){
       . C:\Matter_AI\resultshtml.ps1
