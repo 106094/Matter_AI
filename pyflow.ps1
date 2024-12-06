@@ -320,17 +320,9 @@ if ($global:testtype -eq 2){
   $jsonfile="C:\Matter_AI\settings\_auto\$($global:getproject)\json.txt"
 
   $fileContent=get-content $jsonfile
-  $fileContentr=$fileContent|Sort-Object {$fileContent.indexof($_)} -Descending
-  foreach($lineset in $fileContentr){
-    if($lineset.Length -gt 0){
-      if (!($lineset -match "\,")){
-        $fileContentr[$fileContentr.indexof($lineset)]=$lineset + ","
-      }
-      break
-    }
-
+  if(!($fileContent[-1] -match "\,")){
+    $fileContent[-1]=$fileContent[-1] + ","
   }
-  $fileContent=$fileContentr|Sort-Object {$fileContentr.indexof($_)} -Descending
  
   . C:\Matter_AI\cmdcollecting_tool\download_driver.ps1
   Get-ChildItem  "C:\Matter_AI\cmdcollecting_tool\tool\WebDriver.dll" |Unblock-File 
