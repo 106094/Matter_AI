@@ -325,8 +325,8 @@ if ($global:testtype -eq 2){
       $fileContent[$_]=$fileContent[$_] + ","
       #set-content -path $jsonfile -value  $fileContent     
     }
-    break
-  }     
+  }  
+  return   
   }
  
   . C:\Matter_AI\cmdcollecting_tool\download_driver.ps1

@@ -215,7 +215,7 @@ while ($continueq -eq "Yes"){
    }
    else{
     webuiSelections -projectname $global:getproject
-    if($global:testtype -eq 3 -and !$global:webuiselects){
+    if(!$global:webuiselects){
       [System.Windows.Forms.MessageBox]::Show("Fail to get Project Name (webUI)","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
       $continueq=0
    }
