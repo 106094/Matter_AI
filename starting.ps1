@@ -100,11 +100,6 @@ if ($global:testtype -eq 3){
     [System.Windows.Forms.MessageBox]::Show("Please create C:\Matter_AI\settings\_auto\<Project name> include ""json.txt"" and ""xml"" folder with xml files"  ,"Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
     exit
    }
-   $global:getproject=selgui -Inputdata $getprojects -instruction "Please select project" -errmessage "No project selected"
- if(!($global:getproject[-1])){
-     [System.Windows.Forms.MessageBox]::Show("Fail to get project","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
-     exit
- }
  }
 
 if ($global:testtype -eq 2){
@@ -211,6 +206,20 @@ while ($continueq -eq "Yes"){
       [System.Windows.Forms.MessageBox]::Show("Fail to select excel file","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
       $continueq=0  
     }
+    
+   $getprojects=(get-childitem C:\Matter_AI\settings\_auto\ -Directory).Name
+   $global:getproject=selgui -Inputdata $getprojects -instruction "Please select project" -errmessage "No project selected"
+   if(!($global:getproject[-1])){
+       [System.Windows.Forms.MessageBox]::Show("Fail to get project setting (folder)","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
+       $continueq=0 
+   }
+   else{
+    webuiSelections -projectname $global:getproject
+    if($global:testtype -eq 3 -and !$global:webuiselects){
+      [System.Windows.Forms.MessageBox]::Show("Fail to get Project Name (webUI)","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
+      $continueq=0
+   }
+  }
 
   }
   if($global:testtype -eq 2){
@@ -231,10 +240,6 @@ while ($continueq -eq "Yes"){
   }
   if($continueq){
     . C:\Matter_AI\pyflow.ps1 
-    if($global:testtype -eq 3 -and !$global:webuiselects){
-       [System.Windows.Forms.MessageBox]::Show("Fail to get Project","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
-       $continueq=0
-    }
    #create result html
     if ($global:testtype -eq 2){
       . C:\Matter_AI\resultshtml.ps1

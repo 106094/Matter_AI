@@ -304,10 +304,6 @@ if ($global:testtype -eq 2){
   }
 
   if ($global:testtype -eq 3){
-    webuiSelections -projectname $global:getproject
-    if(-not $global:webuiselects){
-      exit
-    }
     dutpower $global:dutcontrol
     #create a log folder
     $datetime=get-date -Format yyMMdd_HHmm
