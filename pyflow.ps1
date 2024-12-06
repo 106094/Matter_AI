@@ -318,16 +318,19 @@ if ($global:testtype -eq 2){
     $jsonupdate=($global:webuiselects.split(":"))[0] -match "JSON"
   }
   $jsonfile="C:\Matter_AI\settings\_auto\$($global:getproject)\json.txt"
+
   $fileContent=get-content $jsonfile
-  $fileContent.count..0|ForEach-Object{
-  if($fileContent[$_].Length -gt 0){
-    if (!($fileContent[$_] -match "\,")){
-      $fileContent[$_]=$fileContent[$_] + ","
-      #set-content -path $jsonfile -value  $fileContent     
+  $fileContentr=$fileContent|Sort-Object {$fileContent.indexof($_)} -Descending
+  foreach($lineset in $fileContentr){
+    if($lineset.Length -gt 0){
+      if (!($lineset -match "\,")){
+        $fileContentr[$fileContentr.indexof($lineset)]=$lineset + ","
+      }
+      break
     }
-  }  
-  return   
+
   }
+  $fileContent=$fileContentr|Sort-Object {$fileContentr.indexof($_)} -Descending
  
   . C:\Matter_AI\cmdcollecting_tool\download_driver.ps1
   Get-ChildItem  "C:\Matter_AI\cmdcollecting_tool\tool\WebDriver.dll" |Unblock-File 
@@ -426,12 +429,13 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
       }
      }
     }
-    hoverElement -projname $projname    
-     start-sleep -s 2  
-     ($driver.FindElement([OpenQA.Selenium.By]::XPath('//i[@ptooltip="Edit"]'))).click() #enter edit
-     start-sleep -s 5  
  
    if($xmlupdate){
+    hoverElement -projname $projname    
+    start-sleep -s 2  
+    ($driver.FindElement([OpenQA.Selenium.By]::XPath('//i[@ptooltip="Edit"]'))).click() #enter edit
+    start-sleep -s 5  
+
      ($driver.FindElement([OpenQA.Selenium.By]::XPath('//i[@class="pi pi-upload"]'))).click()  #click update
      start-sleep -s 5     
      [System.Windows.Forms.SendKeys]::SendWait("^{l}")
