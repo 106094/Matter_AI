@@ -191,6 +191,11 @@ function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int6
             $storepath=$pairsettings."paapath"
             $cmdline=$cmdline.replace("beta","beta --paa-trust-store-path $storepath --trace_decode 1")
         }
+ 
+        if($cmdline -match "\.\/chip\-tool\sinteractive\sstart"){
+            $cmdline= "./chip-tool interactive start --paa-trust-store-path /home/ubuntu/PAA/ --trace_decode 1"
+        }
+
     }   
 
 
