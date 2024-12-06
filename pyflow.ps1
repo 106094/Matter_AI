@@ -317,7 +317,18 @@ if ($global:testtype -eq 2){
     $xmlupdate=($global:webuiselects.split(":"))[0] -match "XML"
     $jsonupdate=($global:webuiselects.split(":"))[0] -match "JSON"
   }
-  $fileContent=get-content C:\Matter_AI\settings\_auto\$($global:getproject)\json.txt 
+  $jsonfile="C:\Matter_AI\settings\_auto\$($global:getproject)\json.txt"
+  $fileContent=get-content $jsonfile
+  $fileContent.count..0|ForEach-Object{
+  if($fileContent[$_].Length -gt 0){
+    if (!($fileContent[$_] -match "\,")){
+      $fileContent[$_]=$fileContent[$_] + ","
+      #set-content -path $jsonfile -value  $fileContent     
+    }
+    break
+  }     
+  }
+ 
   . C:\Matter_AI\cmdcollecting_tool\download_driver.ps1
   Get-ChildItem  "C:\Matter_AI\cmdcollecting_tool\tool\WebDriver.dll" |Unblock-File 
   Add-Type -Path "C:\Matter_AI\cmdcollecting_tool\tool\WebDriver.dll"
@@ -379,6 +390,7 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
   
   if($jsonupdate -or $xmlupdate){
     # find and hover the project
+   function hoverElement([string]$projname) {
     $dropdown =  ($driver.FindElement([OpenQA.Selenium.By]::XPath("//p-dropdown[contains(@styleclass,'p-paginator')]//span[contains(@class,'p-dropdown-trigger')]")))
     $dropdown.Click()
     start-sleep -s 5
@@ -413,21 +425,12 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
       $pagenum++
       }
      }
-    
+    }
+    hoverElement -projname $projname    
      start-sleep -s 2  
      ($driver.FindElement([OpenQA.Selenium.By]::XPath('//i[@ptooltip="Edit"]'))).click() #enter edit
      start-sleep -s 5  
-
-    if($jsonupdate){
-      $textarea =  ($driver.FindElement([OpenQA.Selenium.By]::XPath('//textarea[@rows="10" and contains(@class, "p-inputtextarea")]')))
-      start-sleep -s 2
-     $textarea.Click()
-     $textarea.Clear()
-     Set-Clipboard -Value $fileContent
-     start-sleep -s 5
-     $textarea.SendKeys([OpenQA.Selenium.Keys]::Control + "v").Perform
-      start-sleep -s 5
-    }    
+ 
    if($xmlupdate){
      ($driver.FindElement([OpenQA.Selenium.By]::XPath('//i[@class="pi pi-upload"]'))).click()  #click update
      start-sleep -s 5     
@@ -471,7 +474,45 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
         Start-Sleep -s 5
     
      }while([DateTime]::Now -lt $timeout)
+
+     ($driver.FindElement([OpenQA.Selenium.By]::XPath('//span[text()="Update"]'))).click()
+     start-sleep -s 2  
+
+
     }  
+    
+    if($jsonupdate){
+      hoverElement -projname $projname    
+      start-sleep -s 2  
+      ($driver.FindElement([OpenQA.Selenium.By]::XPath('//i[@ptooltip="Edit"]'))).click() #enter edit
+      start-sleep -s 5  
+
+      $textarea =  ($driver.FindElement([OpenQA.Selenium.By]::XPath('//textarea[@rows="10" and contains(@class, "p-inputtextarea")]')))
+      start-sleep -s 2
+     $textarea.Click()
+     $textarea.SendKeys([OpenQA.Selenium.Keys]::Control + "a").Perform
+     start-sleep -s 2
+     $textarea.SendKeys([OpenQA.Selenium.Keys]::Control + "c").Perform     
+     start-sleep -s 2
+     $settingscontent=Get-Clipboard
+     $act=0
+     $newsettings=foreach($line in $settingscontent){
+      if($line -like "*pics"": {*"){
+        $act=1
+        $fileContent
+      }
+      if($act -eq 1){
+        $line
+      }
+     }
+     Set-Clipboard -Value $newsettings
+     start-sleep -s 5
+     $textarea.Clear()
+     start-sleep -s 1
+     $textarea.SendKeys([OpenQA.Selenium.Keys]::Control + "v").Perform
+      start-sleep -s 5
+    }   
+
     ($driver.FindElement([OpenQA.Selenium.By]::XPath('//span[text()="Update"]'))).click()
     Start-Sleep -s 10
    }
