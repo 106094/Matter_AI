@@ -304,7 +304,7 @@ if ($global:testtype -eq 2){
   }
 
   if ($global:testtype -eq 3){
-    dutpower $global:dutcontrol
+    #dutpower $global:dutcontrol
     #create a log folder
     $datetime=get-date -Format yyMMdd_HHmm
     $logtc="C:\Matter_AI\logs\_auto\$($global:getproject)\_$($datetime)"
@@ -518,11 +518,11 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
    foreach($webtc in $global:webuicases){
     $testrun=1
     while($testrun -le $retesttime){     
-      if ( $global:webuicases.indexof($webtc) -ne 0 -or $testrun -gt 1){
+      #if ( $global:webuicases.indexof($webtc) -ne 0 -or $testrun -gt 1){
         $driver.Navigate().GoToUrl("http://$sship")
         start-sleep -s 5
-        dutpower $global:dutcontrol 
-      }   
+        #dutpower $global:dutcontrol 
+      #}   
       $tclogfd="$logtc\$($webtc)"
       if (!(test-path $tclogfd)){
       new-item -ItemType Directory $tclogfd -Force|Out-Null
@@ -684,6 +684,7 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
         #start
         $startbt=($driver.FindElement([OpenQA.Selenium.By]::XPath('//button[text()="Start "]')))
       if($startbt.Enabled){
+        dutpower $global:dutcontrol 
          $startbt.Click()
          start-sleep -s 60
         #wait run complete        
