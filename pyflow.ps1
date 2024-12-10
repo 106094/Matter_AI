@@ -567,7 +567,7 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
         $testername.click() 
         $element = $waitfive.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.IWebElement]]{
           try{
-            ($driver.FindElement([OpenQA.Selenium.By]::ClassName("icon-add-square")))
+            ($driver.FindElement([OpenQA.Selenium.By]::ClassName("add-new-operator")))
           }catch{
             return $null
           }
@@ -578,11 +578,8 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
         start-sleep -s 2
         $testernadd.click()
         start-sleep -s 2
-      }else{
-        start-sleep -s 2        
-        $testername2=($driver.FindElement([OpenQA.Selenium.By]::ClassName("operator-item")))
-        start-sleep -s 2
-        $testername2.click()
+      }else{     
+        ($driver.FindElement([OpenQA.Selenium.By]::ClassName("operator-item"))).click()
         start-sleep -s 2
       }
        #select SDK YAML Tests   
