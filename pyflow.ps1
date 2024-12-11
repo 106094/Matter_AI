@@ -715,7 +715,7 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
         $actions.MoveToElement($tdRow).Perform() # hover to the project
         start-sleep -s 5
         ($driver.FindElement([OpenQA.Selenium.By]::XPath('//i[@ptooltip="Download Report"]'))).click()
-        start-sleep -s 1
+        start-sleep -s 5
         ($driver.FindElement([OpenQA.Selenium.By]::XPath('//i[@ptooltip="Download Logs"]'))).click()
         do{
           start-sleep -s 1
