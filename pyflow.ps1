@@ -819,7 +819,7 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
           $tclogfdr = Join-Path  $tclogfd $testrun
           new-item -ItemType Directory $tclogfdr | Out-Null
           get-childitem $tclogfd\* -file  | move-item  -Destination $tclogfdr -Force
-          if ($testrun -eq 3){
+          if ($testrun -eq $retesttime){
              rename-item $tclogfd -NewName "$($webtc)_Failed"
           }
           $testrun+=1
