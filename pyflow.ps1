@@ -315,7 +315,7 @@ if ($global:testtype -eq 2){
   $projname="MatterAI_"+"$($global:getproject)"
   $xmlupdate=$jsonupdate=$true
   if($global:webuiselects -like "*for project*"){
-    $projname=($global:webuiselects.split(":"))[-1].trim()
+    $projname="MatterAI_"+($global:webuiselects.split(":"))[-1].trim()
     $xmlupdate=($global:webuiselects.split(":"))[0] -match "XML"
     $jsonupdate=($global:webuiselects.split(":"))[0] -match "JSON"
   }
