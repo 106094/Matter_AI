@@ -729,7 +729,7 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
         }) 
         }until($checkcomplete.displayed -or $n -gt 360)
         #save log
-        start-sleep -s 60
+        start-sleep -s 30
         if($checkcomplete.displayed){
           ($driver.FindElement([OpenQA.Selenium.By]::ClassName("button-finish"))).Click()
         }
