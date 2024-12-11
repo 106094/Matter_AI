@@ -385,7 +385,7 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
      start-sleep -s 10
     }
   
-  if($jsonupdate -or $xmlupdate){
+
     # find and hover the project
    function hoverElement([string]$projname) {
     $dropdown =  ($driver.FindElement([OpenQA.Selenium.By]::XPath("//p-dropdown[contains(@styleclass,'p-paginator')]//span[contains(@class,'p-dropdown-trigger')]")))
@@ -423,7 +423,7 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
       }
      }
     }
- 
+  if($jsonupdate -or $xmlupdate){
    if($xmlupdate){
     hoverElement -projname $projname    
     start-sleep -s 2  
@@ -525,16 +525,10 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
         start-sleep -s 5
         #dutpower $global:dutcontrol 
       #}   
-      $tclogfd="$logtc\$($webtc)"
-      if (!(test-path $tclogfd)){
-      new-item -ItemType Directory $tclogfd -Force|Out-Null
-      }
+
      $webtcn=$webtc.Replace(".","_")
      start-sleep -s 5
-     $tdRow =  ($driver.FindElement([OpenQA.Selenium.By]::XPath("//tr[td[contains(text(),'$projname')]]")))
-     $actions = New-Object OpenQA.Selenium.Interactions.Actions($driver)
-     $actions.MoveToElement($tdRow).Perform() # hover to the project
-     start-sleep -s 2  
+     hoverElement -projname $projname  
      ($driver.FindElement([OpenQA.Selenium.By]::XPath('//i[@ptooltip="Go To Test-Run"]'))).click()
       $element = $waitfive.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.IWebElement]]{
           try{
@@ -732,6 +726,10 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
         start-sleep -s 30
         if($checkcomplete.displayed){
           ($driver.FindElement([OpenQA.Selenium.By]::ClassName("button-finish"))).Click()
+          $tclogfd="$logtc\$($webtc)"
+          if (!(test-path $tclogfd)){
+          new-item -ItemType Directory $tclogfd -Force|Out-Null
+          }
         }
         start-sleep -s 5
        #download json(report)/log
