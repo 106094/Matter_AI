@@ -15,3 +15,4 @@ down_wait:14000
 up_wait:0
 downup_cycle:1
 retry:3
+groupid:1

@@ -195,6 +195,13 @@ function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int6
         if($cmdline -match "\.\/chip\-tool\sinteractive\sstart"){
             $cmdline= "./chip-tool interactive start --paa-trust-store-path /home/ubuntu/PAA/ --trace_decode 1"
         }
+        if($cmdline -match "\.\/chip\-tool\sgroups\s"){
+            $newgroupep=((get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "groupid"}).split(":"))[-1]
+            $matchlast=$cmdline -match "(.*)\b0\b(?!.*\b0\b)" 
+            if($matchlast){
+            $cmdline = $matches[1] + $newgroupep
+            }
+        }
 
     }   
 
