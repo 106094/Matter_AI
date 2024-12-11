@@ -529,7 +529,15 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
      $webtcn=$webtc.Replace(".","_")
      start-sleep -s 5
      hoverElement -projname $projname  
-     ($driver.FindElement([OpenQA.Selenium.By]::XPath('//i[@ptooltip="Go To Test-Run"]'))).click()
+     $elements=($driver.FindElement([OpenQA.Selenium.By]::XPath('//i[@ptooltip="Go To Test-Run"]'))).click()
+     foreach ($element in $elements) {
+      if ($element.Displayed) {
+          # Perform an action on the displayed element (e.g., click)
+          $element.Click()
+          break  # Exit the loop after using the first displayed element
+      }
+  }
+
       $element = $waitfive.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.IWebElement]]{
           try{
             ($driver.FindElement([OpenQA.Selenium.By]::ClassName("icon-add-square")))
