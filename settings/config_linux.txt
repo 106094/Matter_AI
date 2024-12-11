@@ -14,3 +14,4 @@ onoff_cycle:10
 down_wait:14000
 up_wait:0
 downup_cycle:1
+retry:3
