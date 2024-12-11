@@ -528,15 +528,18 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
 
      $webtcn=$webtc.Replace(".","_")
      start-sleep -s 5
-     hoverElement -projname $projname  
-     $elements=($driver.FindElement([OpenQA.Selenium.By]::XPath('//i[@ptooltip="Go To Test-Run"]'))).click()
-     foreach ($element in $elements) {
-      if ($element.Displayed) {
-          # Perform an action on the displayed element (e.g., click)
-          $element.Click()
-          break  # Exit the loop after using the first displayed element
-      }
-  }
+     hoverElement -projname $projname 
+  # JavaScript to find the correct <tr> by the <td> text and click the specific <i> element
+$script = @"
+var rows = document.querySelectorAll('tr');
+for (var i = 0; i < rows.length; i++) {
+    if (rows[i].querySelector('td.project-name') && rows[i].querySelector('td.project-name').textContent.trim() === '$projname') {
+        rows[i].querySelector('i[ptooltip="Go To Test-Run"]').click();
+        break;
+    }
+}
+"@
+$driver.ExecuteScript($script)
 
       $element = $waitfive.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.IWebElement]]{
           try{
