@@ -688,12 +688,12 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
       if($startbt.Enabled){
         dutpower $global:dutcontrol 
          $startbt.Click()
+         start-sleep -s 20
          #check retest
          $timestart=get-date
          $retryhit=0
          do{          
-         start-sleep -s 20
-         $checkretry = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.IWebElement]]{
+          $checkretry = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.IWebElement]]{
           try{
             $driver.FindElements([OpenQA.Selenium.By]::XPath("//label[contains(text(),'RETRY')]/preceding-sibling::p-radiobutton")) 
            }catch{
@@ -710,8 +710,8 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
              } 
              start-sleep -s 2             
              $timestart=get-date 
-             ($driver.FindElement([OpenQA.Selenium.By]::XPath('//span[contains(text(),"Submit")]'))).click() 
-                      
+             ($driver.FindElement([OpenQA.Selenium.By]::XPath('//span[contains(text(),"Submit")]'))).click()             
+              start-sleep -s 20
           }          
           $timepassed=(new-timespan -start $timestart -end (get-date)).TotalSeconds
          }until($timepassed -gt 90 -or $retryhit -gt $rtcount)
@@ -729,7 +729,7 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
         }) 
         }until($checkcomplete.displayed -or $n -gt 360)
         #save log
-        start-sleep -s 30
+        start-sleep -s 60
         if($checkcomplete.displayed){
           ($driver.FindElement([OpenQA.Selenium.By]::ClassName("button-finish"))).Click()
         }
