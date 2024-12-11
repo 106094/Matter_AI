@@ -309,7 +309,9 @@ if ($global:testtype -eq 2){
     $datetime=get-date -Format yyMMdd_HHmm
     $logtc="C:\Matter_AI\logs\_auto\$($global:getproject)\_$($datetime)"
   $settings=get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "sship"}
+  $settingsrt=get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "retry"}
   $sship=($settings.split(":"))[-1]
+  $rtcount=[int32]($settingsrt.split(":"))[-1]
   $projname="MatterAI_"+"$($global:getproject)"
   $xmlupdate=$jsonupdate=$true
   if($global:webuiselects -like "*for project*"){
@@ -686,7 +688,34 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
       if($startbt.Enabled){
         dutpower $global:dutcontrol 
          $startbt.Click()
-         start-sleep -s 60
+         #check retest
+         $timestart=get-date
+         $retryhit=0
+         do{          
+         start-sleep -s 20
+         $checkretry = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.IWebElement]]{
+          try{
+            $driver.FindElements([OpenQA.Selenium.By]::XPath("//label[contains(text(),'RETRY')]/preceding-sibling::p-radiobutton")) 
+           }catch{
+            return $null
+           }
+          })
+          if($checkretry.displayed){
+            $retryhit++
+            if ($retryhit -le $rtcount){              
+              $driver.FindElements([OpenQA.Selenium.By]::XPath("//label[contains(text(),'RETRY')]/preceding-sibling::p-radiobutton")).Click()
+               }
+             if ($retryhit -gt $rtcount){     
+              $driver.FindElements([OpenQA.Selenium.By]::XPath("//label[contains(text(),'CANCEL')]/preceding-sibling::p-radiobutton")).Click()
+             } 
+             start-sleep -s 2             
+             $timestart=get-date 
+             ($driver.FindElement([OpenQA.Selenium.By]::XPath('//span[contains(text(),"Submit")]'))).click() 
+                      
+          }          
+          $timepassed=(new-timespan -start $timestart -end (get-date)).TotalSeconds
+         }until($timepassed -gt 90 -or $retryhit -gt $rtcount)
+        
         #wait run complete        
         $n=0
         do{                   
