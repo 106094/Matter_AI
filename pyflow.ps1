@@ -714,7 +714,7 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
               start-sleep -s 20
           }          
           $timepassed=(new-timespan -start $timestart -end (get-date)).TotalSeconds
-         }until($timepassed -gt 90 -or $retryhit -gt $rtcount)
+         }until($timepassed -gt 150 -or $retryhit -gt $rtcount)
         
         #wait run complete        
         $n=0
