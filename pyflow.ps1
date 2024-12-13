@@ -747,8 +747,8 @@ $driver.ExecuteScript($script)
         remove-item $env:USERPROFILE\downloads\*.json -force -ea SilentlyContinue
         remove-item $env:USERPROFILE\downloads\*.log -force -ea SilentlyContinue
         $tdRows = $driver.FindElements([OpenQA.Selenium.By]::XPath("//td[contains(@class,'test-name-td') and contains(text(),$webtcn)]"))
-        $webtcn2 = $tdRows[0].Text
-        $tdRow =  ($driver.FindElement([OpenQA.Selenium.By]::XPath("//tr[td[contains(text(),'$webtcn2')]]")))
+        $webtcn = $tdRows[0].Text
+        $tdRow =  ($driver.FindElement([OpenQA.Selenium.By]::XPath("//tr[td[contains(text(),'$webtcn')]]")))
         $actions = New-Object OpenQA.Selenium.Interactions.Actions($driver)
         $actions.MoveToElement($tdRow).Perform() # hover to the project
         start-sleep -s 5
@@ -781,7 +781,7 @@ $driver.ExecuteScript($script)
        start-sleep -s 2
        [System.Windows.Forms.SendKeys]::SendWait(" ")
        start-sleep -s 5
-       Set-Clipboard -Value   $webtcn
+       Set-Clipboard -Value $webtcn
        start-sleep -s 5
        [System.Windows.Forms.SendKeys]::SendWait("^v")
        start-sleep -s 2
