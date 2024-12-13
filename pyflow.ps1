@@ -9,7 +9,7 @@ else{
 
 if ($global:testtype -eq 1){
 
-$caseids=$global:sels
+$caseids=$global:selss
 $csvdata=import-csv C:\Matter_AI\settings\_py\py.csv | Where-Object {$_.TestCaseID -in $caseids -and $_.command.length -gt 0}
 $settigns=import-csv C:\Matter_AI\settings\_py\settings.csv 
 $headers=$settigns[0].PSObject.Properties.Name
