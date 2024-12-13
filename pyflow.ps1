@@ -742,7 +742,7 @@ $driver.ExecuteScript($script)
           new-item -ItemType Directory $tclogfd -Force|Out-Null
           }
         }
-        start-sleep -s 5
+        start-sleep -s 20
        #download json(report)/log
         remove-item $env:USERPROFILE\downloads\*.json -force -ea SilentlyContinue
         remove-item $env:USERPROFILE\downloads\*.log -force -ea SilentlyContinue
