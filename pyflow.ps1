@@ -747,7 +747,7 @@ $driver.ExecuteScript($script)
         remove-item $env:USERPROFILE\downloads\*.json -force -ea SilentlyContinue
         remove-item $env:USERPROFILE\downloads\*.log -force -ea SilentlyContinue
         $tdRows = $driver.FindElements([OpenQA.Selenium.By]::XPath("//td[contains(@class,'test-name-td') and contains(text(),$webtcn)]"))
-        $webtcn = $tdRows[0].Text
+        $webtcn = $tdRows[0].Text # Get the text of the first td element
         $tdRow =  ($driver.FindElement([OpenQA.Selenium.By]::XPath("//tr[td[contains(text(),'$webtcn')]]")))
         $actions = New-Object OpenQA.Selenium.Interactions.Actions($driver)
         $actions.MoveToElement($tdRow).Perform() # hover to the project
