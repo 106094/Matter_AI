@@ -541,7 +541,7 @@ for (var i = 0; i < rows.length; i++) {
 "@
 $driver.ExecuteScript($script)
 
-      $element = $waitfive.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.IWebElement]]{
+      $element = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.IWebElement]]{
           try{
             ($driver.FindElement([OpenQA.Selenium.By]::ClassName("icon-add-square")))
           }catch{
@@ -554,7 +554,7 @@ $driver.ExecuteScript($script)
         start-sleep -s 2
         $element.Click()
       }else{
-        ($driver.FindElement([OpenQA.Selenium.By]::XPath('//span[text()="Add Test"]'))).click() # for 2nd run without add icon
+         ($driver.FindElement([OpenQA.Selenium.By]::XPath('//span[text()="Add Test"]'))).click() # for 2nd run without add icon
        }
         start-sleep -s 2
         #set project name
@@ -746,9 +746,9 @@ $driver.ExecuteScript($script)
        #download json(report)/log
         remove-item $env:USERPROFILE\downloads\*.json -force -ea SilentlyContinue
         remove-item $env:USERPROFILE\downloads\*.log -force -ea SilentlyContinue
-        $tdRow =  ($driver.FindElement([OpenQA.Selenium.By]::XPath("//tr[td[contains(text(),'$webtcn')]]")))
-        $driver.ExecuteScript("arguments[0].scrollIntoView(true);", $tdRow )
-        start-sleep -s 1
+        $tdRows = $driver.FindElements([OpenQA.Selenium.By]::XPath("//td[contains(@class,'test-name-td') and contains(text(),$webtcn)]"))
+        $webtcn2 = $tdRows[0].Text
+        $tdRow =  ($driver.FindElement([OpenQA.Selenium.By]::XPath("//tr[td[contains(text(),'$webtcn2')]]")))
         $actions = New-Object OpenQA.Selenium.Interactions.Actions($driver)
         $actions.MoveToElement($tdRow).Perform() # hover to the project
         start-sleep -s 5
