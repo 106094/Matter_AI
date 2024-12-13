@@ -752,9 +752,9 @@ $driver.ExecuteScript($script)
         $actions = New-Object OpenQA.Selenium.Interactions.Actions($driver)
         $actions.MoveToElement($tdRow).Perform() # hover to the project
         start-sleep -s 5
-        ($driver.FindElement([OpenQA.Selenium.By]::XPath('//i[@ptooltip="Download Report"]'))).click()
+        ($tdRow.FindElement([OpenQA.Selenium.By]::XPath('//i[@ptooltip="Download Report"]'))).click()
         start-sleep -s 5
-        ($driver.FindElement([OpenQA.Selenium.By]::XPath('//i[@ptooltip="Download Logs"]'))).click()
+        ($tdRow.FindElement([OpenQA.Selenium.By]::XPath('//i[@ptooltip="Download Logs"]'))).click()
         do{
           start-sleep -s 1
           $dljson=(get-childitem $env:USERPROFILE\downloads\*.json).FullName         
@@ -771,7 +771,7 @@ $driver.ExecuteScript($script)
        $actions.MoveToElement($tdRow).Perform() # hover to the project
        start-sleep -s 5
       
-       ($driver.FindElement([OpenQA.Selenium.By]::XPath('//i[@ptooltip="Show Report"]'))).click()
+       ($tdRow.FindElement([OpenQA.Selenium.By]::XPath('//i[@ptooltip="Show Report"]'))).click()
        start-sleep -s 5
        ($driver.FindElement([OpenQA.Selenium.By]::XPath('//span[text()="Print"]'))).click()
        start-sleep -s 10
