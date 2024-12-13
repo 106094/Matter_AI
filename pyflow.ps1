@@ -737,17 +737,28 @@ $driver.ExecuteScript($script)
         start-sleep -s 30
         if($checkcomplete.displayed){
           ($driver.FindElement([OpenQA.Selenium.By]::ClassName("button-finish"))).Click()
-          $tclogfd="$logtc\$($webtc)"
-          if (!(test-path $tclogfd)){
-          new-item -ItemType Directory $tclogfd -Force|Out-Null
-          }
+
         }
-        start-sleep -s 20
-       #download json(report)/log
-        remove-item $env:USERPROFILE\downloads\*.json -force -ea SilentlyContinue
-        remove-item $env:USERPROFILE\downloads\*.log -force -ea SilentlyContinue
-        $tdRows = $driver.FindElements([OpenQA.Selenium.By]::XPath("//td[contains(@class,'test-name-td') and contains(text(),'$webtcn')]"))
-        $webtcn = $tdRows[0].Text # Get the text of the first td element
+        #testcase row select to get report
+        $tdRows = $wait.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.IWebElement]]{
+            try{
+              $driver.FindElements([OpenQA.Selenium.By]::XPath("//td[contains(@class,'test-name-td') and contains(text(),'$webtcn')]"))
+            }catch{
+              return $null
+            }
+      
+         })
+          # Perform actions on the element (if it was found)
+          if ($tdRows.Displayed) {
+            $webtcn = $tdRows[0].Text # Get the text of the first td element
+             #download json(report)/log
+              $tclogfd="$logtc\$($webtc)"
+              if (!(test-path $tclogfd)){
+              new-item -ItemType Directory $tclogfd -Force|Out-Null
+              }
+              remove-item $env:USERPROFILE\downloads\*.json -force -ea SilentlyContinue
+              remove-item $env:USERPROFILE\downloads\*.log -force -ea SilentlyContinue
+               
         $tdRow =  ($driver.FindElement([OpenQA.Selenium.By]::XPath("//tr[td[contains(text(),'$webtcn')]]")))
         $actions = New-Object OpenQA.Selenium.Interactions.Actions($driver)
         $actions.MoveToElement($tdRow).Perform() # hover to the project
@@ -836,6 +847,7 @@ $driver.ExecuteScript($script)
         else {
           $testrun=99
         }
+       }
       }
       else{
         rename-item $tclogfd -NewName "$($webtc)_FailToStart"
