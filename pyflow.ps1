@@ -739,8 +739,8 @@ $driver.ExecuteScript($script)
           ($driver.FindElement([OpenQA.Selenium.By]::ClassName("button-finish"))).Click()
 
         }
-        #testcase row select to get report
-        $tdRows = $wait.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.IWebElement]]{
+        #testcase row select to get report                 
+        $tdRows = $wait.Until([System.Func[OpenQA.Selenium.IWebDriver, System.Collections.ObjectModel.ReadOnlyCollection[OpenQA.Selenium.IWebElement]]]{ 
             try{
               $driver.FindElements([OpenQA.Selenium.By]::XPath("//td[contains(@class,'test-name-td') and contains(text(),'$webtcn')]"))
             }catch{
