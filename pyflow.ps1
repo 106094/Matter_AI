@@ -850,6 +850,10 @@ $driver.ExecuteScript($script)
        }
       }
       else{
+        $tclogfd="$logtc\$($webtc)"
+        if (!(test-path $tclogfd)){
+        new-item -ItemType Directory $tclogfd -Force|Out-Null
+        }
         rename-item $tclogfd -NewName "$($webtc)_FailToStart"
         $testrun=99
       }
