@@ -681,16 +681,18 @@ $driver.ExecuteScript($script)
       
           if ($elements.Count -eq 0) {
               Write-Output "No elements found matching the criteria."
+              $noselecttc=$webtc
           }
       
       } catch {
           Write-Output "An error occurred: $($_.Exception.Message)"
+          
       } 
                 
         start-sleep -s 10
         #start
         $startbt=($driver.FindElement([OpenQA.Selenium.By]::XPath('//button[text()="Start "]')))
-      if($startbt.Enabled){
+      if($startbt.Enabled -and $noselecttc -ne $webtc){
         dutpower $global:dutcontrol 
          $startbt.Click()
          start-sleep -s 20
@@ -854,6 +856,9 @@ $driver.ExecuteScript($script)
         if (!(test-path $tclogfd)){
         new-item -ItemType Directory $tclogfd -Force|Out-Null
         }
+        $screenshot = $driver.GetScreenshot()
+        $filePath = "$tclogfd\failtostart.jpg"
+        $screenshot.SaveAsFile($filePath, [OpenQA.Selenium.ScreenshotImageFormat]::Jpeg)
         rename-item $tclogfd -NewName "$($webtc)_FailToStart"
         $testrun=99
       }
