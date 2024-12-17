@@ -81,7 +81,7 @@ foreach($csv in $csvdata){
       $k++
       $pycmd=putty_paste -cmdline "rm -f admin_storage.json && $pyline" -checkline1 "*Final result*pass*"
       $passresult=$pycmd[-1]
-      write-host "round $k"
+      write-host "round $k, $($passresult)"
     }
     $datetime=get-date -Format yyyyMMdd_HHmmss
     if ($passresult -eq 1){
