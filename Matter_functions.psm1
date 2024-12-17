@@ -319,7 +319,12 @@ $checkresult=$checklog -like "*$checkline1*"
 if($checkresult -and $checkline2.Length -gt 0){
 $checkresult=$checklog -like "*$checkline2*"
 }
-$checkresult
+if($checkresult){
+    return "1"
+}
+else{
+    return "0"
+}
 }
 
 }    

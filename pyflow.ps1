@@ -77,14 +77,14 @@ foreach($csv in $csvdata){
      #$pyline
     #
     $k=$pycmd=$passresult=0
-    while (!$passresult -and $k -lt $retesttime){
+    while ($passresult -eq 0 -and $k -lt $retesttime){
       $k++
       $pycmd=putty_paste -cmdline "rm -f admin_storage.json && $pyline" -checkline1 "*Final result*pass*"
       $passresult=$pycmd[-1]
       write-host "round $k"
     }
     $datetime=get-date -Format yyyyMMdd_HHmmss
-    if ($passresult){
+    if ($passresult -eq 1){
     copy-item C:\Matter_AI\logs\lastlog.log -Destination "$($logtc)\PASS_$($caseid)_$($datetime).log"
     }else{      
     copy-item C:\Matter_AI\logs\lastlog.log -Destination "$($logtc)\FAIL_$($caseid)_$($datetime).log"
