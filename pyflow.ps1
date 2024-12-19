@@ -20,7 +20,6 @@ $logtc=(get-childitem -path "C:\Matter_AI\logs\_py" -directory | Sort-Object Las
 foreach($csv in $csvdata){
     #$sound.Play()
     #([System.Media.SystemSounds]::Asterisk).Play()
-    dutpower $global:dutcontrol
     $caseid=($csv.TestCaseID).trim()
     $pyline=($csv.command).trim()
         #start-sleep -s 300
@@ -79,6 +78,7 @@ foreach($csv in $csvdata){
     $k=$pycmd=$passresult=0
     while ($passresult -eq "0" -and $k -lt $retesttime){
       $k++
+      dutpower $global:dutcontrol
       $pycmd=putty_paste -cmdline "rm -f admin_storage.json && $pyline" -checkline1 "*Final result*pass*"
       $passresult=$pycmd[-1]
       write-host "round $k, $($passresult)"
