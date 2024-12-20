@@ -1251,6 +1251,9 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
         if(!$sending){
             $sending=$mode
             $speed=((get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "speed"}) -split ":")[1]
+            if(!$speed){
+                $speed="115200"
+            }
             $waittime = 1000
         }       
         $port = New-Object System.IO.Ports.SerialPort
