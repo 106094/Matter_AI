@@ -12,7 +12,7 @@ $spath="C:\Matter_AI\settings\_py"
 #reg insatll importexcel
 $chkmod=Get-Module -name importexcel
 if(!($chkmod)){
-  write-host "need install importexcel"
+  ##write-host "need install importexcel"
   $PSfolder=(($env:PSModulePath).split(";")|Where-Object{$_ -match "user" -and $_ -match "WindowsPowerShell"})+"\"+"importexcel"
   $checkPSfolder=Get-ChildItem $PSfolder  -Recurse -file -Filter ImportExcel.psd1 -ErrorAction SilentlyContinue
  
@@ -30,10 +30,10 @@ if(!($chkmod)){
  
    if(test-path "$($PSfolder)\importexcel.psd1"){
     Get-ChildItem -path $PSfolder -Recurse|Unblock-File
-      Import-Module importexcel
+      Import-Module importexcel 
      
      try{ 
-      Get-Command Import-Excel
+      Get-Command Import-Excel |out-null
       } catch{
      Write-Output "importexcel Package Tool install FAILED"
         }
@@ -44,11 +44,6 @@ if(!($chkmod)){
  
 #endregion
 
-#select xlsx file
-$global:excelfile=. "C:\Matter_AI\cmdcollecting_tool\selections_xlsx.ps1"
-if($global:excelfile -eq 0){
-    exit
-}
 #reg read excel to csv
 $a=(Import-Excel $global:excelfile -WorksheetName "Python Script Command" -StartRow 2 -EndRow 1 -StartColumn 7)
 $a[-1]|export-csv $spath\settings.csv -NoTypeInformation -force

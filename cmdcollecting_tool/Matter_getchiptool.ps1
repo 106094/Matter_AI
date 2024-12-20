@@ -1,11 +1,6 @@
 Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Bypass -Force
 $shell=New-Object -ComObject shell.application
 
-$global:excelfile=. "C:\Matter_AI\cmdcollecting_tool\selections_xlsx.ps1"
-if($global:excelfile -eq 0){
-exit
- }
-
 $starttime=get-date
 
 if($PSScriptRoot.length -eq 0){
@@ -60,7 +55,7 @@ if ($global:updatechiptool -eq "Yes"){
 #region insatll importexcel
 $chkmod=Get-Module -name importexcel
 if(!($chkmod)){
-  write-host "need install importexcel"
+  ##write-host "need install importexcel"
   $PSfolder=(($env:PSModulePath).split(";")|Where-Object{$_ -match "user" -and $_ -match "WindowsPowerShell"})+"\"+"importexcel"
   $checkPSfolder=Get-ChildItem $PSfolder  -Recurse -file -Filter ImportExcel.psd1 -ErrorAction SilentlyContinue
  
@@ -79,13 +74,11 @@ if(!($chkmod)){
    if(test-path "$($PSfolder)\importexcel.psd1"){
     Get-ChildItem -path $PSfolder -Recurse|Unblock-File
       Import-Module importexcel
-      $checkcmd=Get-Command Import-Excel
-      if(!$checkcmd){
-        return 0
-        exit
-        }
- 
- 
+      try{ 
+        Get-Command Import-Excel  |out-null
+        } catch{
+       Write-Output "importexcel Package Tool install FAILED"
+         }
    }
 }
  #endregion

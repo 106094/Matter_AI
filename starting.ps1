@@ -6,20 +6,32 @@ param (
 if($testing){
   [int32]$global:testing=1
 }
+
 Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Bypass -Force;
 Add-Type -AssemblyName Microsoft.VisualBasic,System.Windows.Forms,System.Drawing
 $shell=New-Object -ComObject shell.application
 $wshell=New-Object -ComObject wscript.shell
-new-item -path C:\Matter_AI\logs\testing.log -Force|Out-Null
 Import-Module C:\Matter_AI\Matter_functions.psm1
+
+$ctcmds=import-csv C:\Matter_AI\settings\chiptoolcmds.csv
+$global:matchcmds=$ctcmds.name|Get-Unique
+$global:puttyset = @()
+
 #region check test type
-while(!$global:testtype -or ($global:testtype -ne 1 -and $global:testtype -ne 2 -and $global:testtype -ne 3)){
-  $global:testtype=read-host "Which kind of testing? 1. Python 2. Manual 3. Auto (input 1, 2 or 3) (q for quit)"
-  if($global:testtype -eq "q"){
+function ini {
+$testtype=@()
+while(!$testtype -or !$testtypeall){
+  $testtype=read-host "Which kind of testing? 1. Python 2. Manual 3. Auto (support multi-select) (q for quit)"
+  if($testtype -eq "q"){
     exit
   }
+  $testtypeall=@()
+    for($i=0; $i -lt ($testtype -join "").length; $i++){
+      $testtypeall+=@($testtype.Substring($i,1))
+    }
  }
  #endregion
+
 #region check dut contril mode
 while(!$global:dutcontrol -or ($global:dutcontrol -ne 1 -and $global:dutcontrol -ne 2 -and $global:dutcontrol -ne 3)){
   $global:dutcontrol=read-host "The DUT Reset mode is ? 1.Manual 2. Power on/off 3. Simulator switch (input 1/2/3) (q for quit)"
@@ -57,6 +69,7 @@ if (!(test-Connection "www.google.com" -count 1 -ErrorAction SilentlyContinue)) 
 #endregion
 
 #region check ssh/webui connection
+if(!$global:testing){
   $settings=get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "sship"}
   $sship=($settings.split(":"))[-1]
   #$sshusername=($settings[1].split(":"))[-1]
@@ -68,41 +81,35 @@ if (!(test-Connection "www.google.com" -count 1 -ErrorAction SilentlyContinue)) 
     exit
   }
   write-host "ssh ip $sship is connected"
-
+}
 #endregion
 
-$ctcmds=import-csv C:\Matter_AI\settings\chiptoolcmds.csv
-$global:matchcmds=$ctcmds.name|Get-Unique
-
-$timestart=get-date
-$global:puttyset = @()
 $logpath="C:\Matter_AI\logs"
 if(!(test-path $logpath)){
 new-item -Path $logpath -ItemType directory|out-null
 }
 
-if ($global:testtype -eq 1){
+#select xlsx file
+$global:excelfile=. "C:\Matter_AI\cmdcollecting_tool\selections_xlsx.ps1"
+if($global:excelfile -eq 0){
+    exit
+}
+
+if ($testtypeall -contains 1){
  $getcmdpsfile="C:\Matter_AI\cmdcollecting_tool\Matter_getpy.ps1"
    $cmdcsvfile="C:\Matter_AI\settings\_py\py.csv"
+   
+$timestart=get-date
 . $getcmdpsfile
 $checkfile=Get-ChildItem $cmdcsvfile|Where-Object{$_.LastWriteTime -gt $timestart}
 if(!$checkfile){
-    [System.Windows.Forms.MessageBox]::Show("Fail to get (update) cmd csv","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
+    [System.Windows.Forms.MessageBox]::Show("Fail to get (update) py cmd csv","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
     exit
 }
-$caseids=(import-csv C:\Matter_AI\settings\_py\py.csv).TestCaseID
-#$puttystart=1
 }
 
-if ($global:testtype -eq 3){
-   $getprojects=(get-childitem C:\Matter_AI\settings\_auto\ -Directory).Name
-   if (!$getprojects){
-    [System.Windows.Forms.MessageBox]::Show("Please create C:\Matter_AI\settings\_auto\<Project name> include ""json.txt"" and ""xml"" folder with xml files"  ,"Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
-    exit
-   }
- }
 
-if ($global:testtype -eq 2){
+if ($testtypeall -contains 2){
   $getcmdpsfile="C:\Matter_AI\cmdcollecting_tool\Matter_getchiptool.ps1"
   $global:updatechiptool = [System.Windows.Forms.MessageBox]::Show("Need update UI-Manual database?", "Check", [System.Windows.Forms.MessageBoxButtons]::YesNo, [System.Windows.Forms.MessageBoxIcon]::Question, [System.Windows.Forms.MessageBoxDefaultButton]::Button2)
   if ($global:updatechiptool -eq "Yes") {
@@ -136,6 +143,7 @@ if ($global:testtype -eq 2){
       exit
     }    
 
+ if(!$global:testing){
     #region download manual speacial settings
     $goo_link="https://docs.google.com/spreadsheets/d/19ZPA2Z6SYYtvIj9qXM0FuDASF0FaZP2xjx7jcebrJEQ/"
     $gid="1307777084"
@@ -171,16 +179,36 @@ if ($global:testtype -eq 2){
     webdownload -goo_link $goo_link -gid $gid -sv_range $sv_range -savepath $savepath -errormessage $errormessage
     #endregion
     }
+  }
 
 }
 
-$starttime=get-date
+if ($testtypeall -contains "3"){
+  $getprojects=(get-childitem C:\Matter_AI\settings\_auto\ -Directory).Name
+  if (!$getprojects){
+   [System.Windows.Forms.MessageBox]::Show("Please create C:\Matter_AI\settings\_auto\<Project name> include ""json.txt"" and ""xml"" folder with xml files"  ,"Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
+   exit
+  }
+}
+
+return $testtypeall
+}
+
 ###########################
+
+$starttime=get-date
+$testlogfile="C:\Matter_AI\logs\testing.log"
+if(test-path $testlogfile){
+  Rename-Item $testlogfile -NewName "testing_$(get-date -Format yyMMddHHmm).log" -ea silentlycontinue
+}
+new-item -path C:\Matter_AI\logs\testing.log -Force|Out-Null
 
 $continueq="Yes"
 while ($continueq -eq "Yes"){
-  if ($global:testtype -eq 1){
-    selguis -Inputdata $caseids -instruction "Please select caseids" -errmessage "No caseid selected"
+  $testtypeall=ini
+  if ($testtypeall -contains 1){
+    $caseids=(import-csv C:\Matter_AI\settings\_py\py.csv).TestCaseID
+    selguis -Inputdata $caseids -instruction "Please select Python caseids" -errmessage "No caseid selected"
     if(!$global:selss){
       [System.Windows.Forms.MessageBox]::Show("Fail to select the test case id, test will be stopped","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
       $continueq=0
@@ -192,37 +220,9 @@ while ($continueq -eq "Yes"){
         new-item -ItemType Directory -Path $logtc | Out-Null
       }
     }
-    <#
-    if($puttystart){
-    $puttystart=0
-    puttystart
-    }
-    #>
-  }
-  if ($global:testtype -eq 3){
-    $getcmdpsfile="C:\Matter_AI\cmdcollecting_tool\Matter_getauto.ps1"
-    . $getcmdpsfile
-    if($global:excelfile.length -eq 0  -or $global:excelfile -eq 0){
-      [System.Windows.Forms.MessageBox]::Show("Fail to select excel file","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
-      $continueq=0  
-    }
-    
-   $getprojects=(get-childitem C:\Matter_AI\settings\_auto\ -Directory).Name
-   $global:getproject=selgui -Inputdata $getprojects -instruction "Please select project" -errmessage "No project selected"
-   if(!($global:getproject[-1])){
-       [System.Windows.Forms.MessageBox]::Show("Fail to get project setting (folder)","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
-       $continueq=0 
-   }
-   else{
-    webuiSelections -projectname $global:getproject
-    if(!$global:webuiselects){
-      [System.Windows.Forms.MessageBox]::Show("Fail to get Project Name (webUI)","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
-      $continueq=0
-   }
   }
 
-  }
-  if($global:testtype -eq 2){
+  if($testtypeall -contains 2){
     $data=Import-Csv  $global:csvfilename
     $selchek=selection_manual -data $data -column1 "catg" -column2 "TestCaseID"
     if($selchek[-1] -eq 0 -or $global:sels -match "xlsx" ){
@@ -238,6 +238,32 @@ while ($continueq -eq "Yes"){
       }
     }
   }
+
+  if ($testtypeall -contains  3){
+   
+   $getprojects=(get-childitem C:\Matter_AI\settings\_auto\ -Directory).Name
+   $global:getproject=selgui -Inputdata $getprojects -instruction "Please select Auto project" -errmessage "No project selected"
+   if(!($global:getproject[-1])){
+       [System.Windows.Forms.MessageBox]::Show("Fail to get Auto project setting (folder)","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
+       $continueq=0 
+   }
+   else{
+     webuiSelections -projectname $global:getproject 
+    if(!$global:webuiselects){
+      [System.Windows.Forms.MessageBox]::Show("Fail to get Auto Project Name (webUI)","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
+      $continueq=0
+   }
+   else{
+    $getcmdpsfile="C:\Matter_AI\cmdcollecting_tool\Matter_getauto.ps1"
+    . $getcmdpsfile  
+   }
+
+  }
+
+  }
+ foreach($testtp in $testtypeall){
+  $global:testtype=$testtp
+ 
   if($continueq){
     . C:\Matter_AI\pyflow.ps1 
    #create result html
@@ -246,10 +272,11 @@ while ($continueq -eq "Yes"){
     }
 #>
 }
+}
 $endtime=get-date
 $continueq = [System.Windows.Forms.MessageBox]::Show("Need Retest?", "Check", [System.Windows.Forms.MessageBoxButtons]::YesNo)
 }
-  
+
 #puttyexit
 if ($global:testtype -eq 2 -and !$testing){
 $resultlog=(get-childitem "C:\Matter_AI\logs\_manual\" -directory | Sort-Object LastWriteTime -Descending | Select-Object -First 1).fullname

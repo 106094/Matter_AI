@@ -11,7 +11,7 @@ if($PSScriptRoot.length -eq 0){
 #reg insatll importexcel
 $chkmod=Get-Module -name importexcel
 if(!($chkmod)){
-  write-host "need install importexcel"
+  #write-host "need install importexcel"
   $PSfolder=(($env:PSModulePath).split(";")|Where-Object{$_ -match "user" -and $_ -match "WindowsPowerShell"})+"\"+"importexcel"
   $checkPSfolder=Get-ChildItem $PSfolder  -Recurse -file -Filter ImportExcel.psd1 -ErrorAction SilentlyContinue
  
@@ -29,10 +29,10 @@ if(!($chkmod)){
  
    if(test-path "$($PSfolder)\importexcel.psd1"){
     Get-ChildItem -path $PSfolder -Recurse|Unblock-File
-      Import-Module importexcel
+      Import-Module importexcel|out-null
      
      try{ 
-      Get-Command Import-Excel
+      Get-Command Import-Excel  |out-null
       } catch{
      Write-Output "importexcel Package Tool install FAILED"
         }
@@ -41,21 +41,16 @@ if(!($chkmod)){
    }
 }
  
-#select xlsx file
-$global:excelfile=. "C:\Matter_AI\cmdcollecting_tool\selections_xlsx.ps1"
-if($global:excelfile -eq 0){
-    exit
-}
 $excelfilename=(Get-ChildItem $global:excelfile).name
 #reg read excel to csv
 $columncor=((import-csv "C:\Matter_AI\settings\filesettings.csv"|Where-Object{$_.filename -eq $excelfilename}|Select-Object -Property webui_column_No).webui_column_No).trim()
 $sumsheetname=((import-csv "C:\Matter_AI\settings\filesettings.csv"|Where-Object{$_.filename -eq $excelfilename}|Select-Object -Property webui_page).webui_page).trim()
 #$worksheetNames = (Get-ExcelSheetInfo -Path $excelfull).Name
-$excelPackage = [OfficeOpenXml.ExcelPackage]::new((Get-Item $global:excelfile))
+#$excelPackage = [OfficeOpenXml.ExcelPackage]::new((Get-Item $global:excelfile))
 $worksheetsum=Import-Excel $global:excelfile -WorksheetName $sumsheetname
 $columnName = ($worksheetsum[0].PSObject.Properties.Name)[[int32]$columncor-1]
 $filteredtcs = ($worksheetsum |Where-Object{$_."Test Case ID".length -gt 0}|  Where-Object {$_.$columnName -eq "UI-Automated"})."Test Case ID"|Sort-Object
-$global:webuicases=selguis -Inputdata $filteredtcs -instruction "Please select caseids" -errmessage "No caseid selected"
+$global:webuicases=selguis -Inputdata $filteredtcs -instruction "Please select Auto caseids" -errmessage "No caseid selected"
 
 <#
 #endregion
