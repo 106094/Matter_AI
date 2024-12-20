@@ -213,6 +213,7 @@ while ($continueq -eq "Yes"){
       [System.Windows.Forms.MessageBox]::Show("Fail to select the test case id, test will be stopped","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
       $continueq=0
     }else{
+      $pycaseids=$global:selss
       #create a log folder
       $datetime=get-date -Format yyyyMMdd_HHmmss
       $logtc="C:\Matter_AI\logs\_py\$($datetime)"
@@ -230,6 +231,7 @@ while ($continueq -eq "Yes"){
       $continueq=0 
     }
     else{
+      $mancaseids=$global:sels
       #create a log folder
       $datetime=get-date -Format yyyyMMdd_HHmmss
       $logtc="C:\Matter_AI\logs\_manual\$($datetime)"
@@ -239,8 +241,7 @@ while ($continueq -eq "Yes"){
     }
   }
 
-  if ($testtypeall -contains  3){
-   
+  if ($testtypeall -contains  3){  
    $getprojects=(get-childitem C:\Matter_AI\settings\_auto\ -Directory).Name
    $global:getproject=selgui -Inputdata $getprojects -instruction "Please select Auto project" -errmessage "No project selected"
    if(!($global:getproject[-1])){
@@ -256,15 +257,15 @@ while ($continueq -eq "Yes"){
    else{
     $getcmdpsfile="C:\Matter_AI\cmdcollecting_tool\Matter_getauto.ps1"
     . $getcmdpsfile  
+    $autocaseids=$global:webuicases
    }
 
   }
 
   }
- foreach($testtp in $testtypeall){
-  $global:testtype=$testtp
- 
   if($continueq){
+ foreach($testtp in $testtypeall){
+  $global:testtype=$testtp 
     . C:\Matter_AI\pyflow.ps1 
    #create result html
     if ($global:testtype -eq 2){

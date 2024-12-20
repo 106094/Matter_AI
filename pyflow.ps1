@@ -9,8 +9,7 @@ else{
 
 if ($global:testtype -eq 1){
 
-$caseids=$global:selss
-$csvdata=import-csv C:\Matter_AI\settings\_py\py.csv | Where-Object {$_.TestCaseID -in $caseids -and $_.command.length -gt 0}
+$csvdata=import-csv C:\Matter_AI\settings\_py\py.csv | Where-Object {$_.TestCaseID -in $pycaseids -and $_.command.length -gt 0}
 $settigns=import-csv C:\Matter_AI\settings\_py\settings.csv 
 $headers=$settigns[0].PSObject.Properties.Name
 $sound = New-Object -TypeName System.Media.SoundPlayer
@@ -103,8 +102,8 @@ if ($global:testtype -eq 2){
   $lastcaseid=$null
   $specialsets=import-csv -path C:\Matter_AI\settings\*manual_special.csv
   $global:varhash=@()
-  $caseids=$global:sels
-  $csvdata=import-csv $global:csvfilename | Where-Object {$_.TestCaseID -in $caseids -and $_.cmd.length -gt 0}
+  #$caseids=$global:sels #replace by $mancaseids
+  $csvdata=import-csv $global:csvfilename | Where-Object {$_.TestCaseID -in $mancaseids -and $_.cmd.length -gt 0}
   #$sound = New-Object -TypeName System.Media.SoundPlayer
   #$sound.SoundLocation = "C:\Windows\Media\notify.wav"
    $paring_thread="./chip-tool pairing ble-thread node-id operationalDataset --passcode --discriminator --paa-trust-store-path paapath --trace_decode 1"
@@ -518,7 +517,7 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
   
     # start loop
    $webv=($driver.FindElement([OpenQA.Selenium.By]::ClassName("sha-version"))).Text 
-   foreach($webtc in $global:webuicases){
+   foreach($webtc in $autocaseids){
     $testrun=1
     while($testrun -le $retesttime){     
       #if ( $global:webuicases.indexof($webtc) -ne 0 -or $testrun -gt 1){
