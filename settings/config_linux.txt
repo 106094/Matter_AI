@@ -16,3 +16,4 @@ up_wait:0
 downup_cycle:1
 retry:3
 groupid:1
+speed:115200

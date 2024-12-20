@@ -1243,20 +1243,24 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
             }
             $portid=$global:comport
         }
-       
+        $speed="9600"
+        $waittime=((get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "wait" -and $_ -match $mode}) -split ":")[1] 
+        $modes=@("on","off","up","down","testcom")
+        $sendings=@("o","f","b","c","")
+        $sending=$sendings[$modes.indexof($mode.ToLower())]
+        if(!$sending){
+            $sending=$mode
+            $speed=((get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "speed"}) -split ":")[1]
+            $waittime = 1000
+        }       
         $port = New-Object System.IO.Ports.SerialPort
         $port.PortName = $portid
-        $port.BaudRate = "9600"
+        $port.BaudRate = $speed
         $port.Parity = "None"
         $port.DataBits = 8
         $port.StopBits = 1
         $port.ReadTimeout = 9000 # 9 seconds
         $port.DtrEnable = "true"
-
-        $modes=@("on","off","up","down","testcom")
-        $sendings=@("o","f","b","c","")
-        $sending=$sendings[$modes.indexof($mode.ToLower())]
-        $waittime=((get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "wait" -and $_ -match $mode}) -split ":")[1]
 
         do{
         $port.PortName = $portid    
@@ -1330,6 +1334,11 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
             dutcontrol -mode up   
           }
         }
+        if($mode -eq 4){
+              dutcontrol -mode "reboot"
+              start-sleep -s 60
+              dutcontrol -mode "chip entercommmode"            
+          }
     }
 
      function selguis ( [string[]]$Inputdata,[string]$instruction,[string]$errmessage) {
