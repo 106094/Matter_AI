@@ -263,8 +263,8 @@ while ($continueq -eq "Yes"){
   }
 
   }
-  if($continueq){
- foreach($testtp in $testtypeall){
+ if($continueq){
+  foreach($testtp in $testtypeall){
   $global:testtype=$testtp 
     . C:\Matter_AI\pyflow.ps1 
    #create result html
