@@ -11,11 +11,11 @@ if($selections){
   $global:sels =$selections
 }
 $global:csvfilename
-$global:sels 
+$mancaseids
 $htmlContent=$null
 # Import the CSV data
 $showpct=[double]((get-content C:\Matter_AI\settings\config_linux.txt|where-object {$_ -match "showpercentage"}).split(":"))[1]/100
-$csvData = Import-Csv -Path $global:csvfilename|Where-Object{$_.TestCaseID -in $global:sels}
+$csvData = Import-Csv -Path $global:csvfilename|Where-Object{$_.TestCaseID -in $mancaseids}
 $eckeys=(import-csv C:\Matter_AI\settings\report_exclude.csv).e_key|Get-Unique
 $resultlog=(get-childitem "C:\Matter_AI\logs\_manual\" -directory | Sort-Object LastWriteTime -Descending | Select-Object -First 1).fullname
 $resultpaths=Get-ChildItem $resultlog -Directory |Where-Object{$_.name -ne "html"}
