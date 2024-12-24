@@ -61,7 +61,7 @@ if(!($chkmod)){
  
  if(!($checkPSfolder)){
   New-Item -ItemType directory $PSfolder -ea SilentlyContinue|out-null
-  $A1=(Get-ChildItem "$scriptRoot\cmdcollecting_tool\tool\importexcel*.zip").fullname
+  $A1=(Get-ChildItem "$scriptRoot\tool\importexcel*.zip").fullname
   $shell.NameSpace($PSfolder).copyhere($shell.NameSpace($A1).Items(),4)
   }
  
