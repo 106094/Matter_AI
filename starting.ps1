@@ -33,7 +33,7 @@ while(!$testtype -or !$testtypeall){
  #endregion
 
 #region check dut contril mode
-while(!$global:dutcontrol -or ($global:dutcontrol -ne 1 -and $global:dutcontrol -ne 2 -and $global:dutcontrol -ne 3)){
+while(!$global:dutcontrol -or ($global:dutcontrol -ne 1 -and $global:dutcontrol -ne 2 -and $global:dutcontrol -ne 3 -and $global:dutcontrol -ne 4)){
   $global:dutcontrol=read-host "The DUT Reset mode is ? 1.Manual 2. Power on/off 3. Simulator switch 4. Command (input 1/2/3/4) (q for quit)"
   if($global:dutcontrol -eq "q"){
     exit
