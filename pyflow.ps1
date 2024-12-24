@@ -541,7 +541,7 @@ for (var i = 0; i < rows.length; i++) {
 "@
 $driver.ExecuteScript($script)
 
-      $element = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.IWebElement]]{
+      $element = $wait.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.IWebElement]]{
           try{
             ($driver.FindElement([OpenQA.Selenium.By]::ClassName("icon-add-square")))
           }catch{
@@ -551,12 +551,12 @@ $driver.ExecuteScript($script)
       })
       
       if($element.Displayed){
-        start-sleep -s 2
         $element.Click()
       }else{
+        start-sleep -s 5
          ($driver.FindElement([OpenQA.Selenium.By]::XPath('//span[text()="Add Test"]'))).click() # for 2nd run without add icon
        }
-        start-sleep -s 2
+        start-sleep -s 5
         #set project name
         $testname=($driver.FindElement([OpenQA.Selenium.By]::XPath('//input[@ng-reflect-model="UI_Test_Run"]')))
         start-sleep -s 2
@@ -834,7 +834,7 @@ $driver.ExecuteScript($script)
         $archievebt = ($driver.FindElement([OpenQA.Selenium.By]::XPath('//i[@ng-reflect-text="Archive"]')))
         start-sleep -s 2
         $archievebt.click()
-        start-sleep -s 5
+        start-sleep -s 20
         # check pass/fail
         $testresult=(get-content $tclogfd\*.log)[-1]        
         if($testresult -notlike "*Test Run Completed*pass*" ){
