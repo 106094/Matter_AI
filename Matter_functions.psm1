@@ -1262,12 +1262,15 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
         $port.Parity = "None"
         $port.DataBits = 8
         $port.StopBits = 1
-        $port.ReadTimeout = 9000 # 9 seconds
+        $port.ReadTimeout = 10000 # 10 seconds
         $port.DtrEnable = "true"
 
         do{
         $port.PortName = $portid    
         $port.open() #opens serial connection
+        if($speed -eq 115200){
+        start-sleep -s 60
+        }
         if($? -eq 0){
             add-content C:\Matter_AI\logs\testing.log -value "fail to open the serial port"
             do{
