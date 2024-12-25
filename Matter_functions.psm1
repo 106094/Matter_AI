@@ -1319,8 +1319,10 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
         $port.DtrEnable = "true"
         $port.open() #opens serial connection
 
-        $sending="reboot"
-        
+if($port.IsOpen){
+
+
+        $sending="reboot"        
         $sending2="chip"
         $sending3="chip entercommmode"
         $readport=@()
@@ -1344,7 +1346,6 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
     while ( !($readport -like "*Available heap*"))
     $readport
     write-output "open done in $([math]::round($timegap,1)) s"
-
     
      $port.WriteLine("`r") 
      $port.WriteLine($sending)     
@@ -1391,14 +1392,21 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
         
         $timegap=(New-TimeSpan -start $starttime -end (Get-date)).TotalSeconds
     }
-    while ($port.IsOpen -and $timegap -lt 10)
+    while ( !($readport -like "*Entering Matter Commissioning Mode*") -and $timegap -lt 60 )
     
       $port.Close()
-
-      
+   if($readport -like "*Entering Matter Commissioning Mode*"){
     write-output "commission done"
-    $readport
+    }
+    else{
+    write-output "commission failed"
+    }
 
+    set-content C:\Matter_AI\logs\testing_serailport.log -value "$(get-date) serial port  $portid connecting records:" -force    
+    add-content C:\Matter_AI\logs\testing_serailport.log -value "$($readport -join "`")"
+    add-content C:\Matter_AI\logs\testing_serailport.log -value "--------- End--------"
+    
+   }
      }
 
  function dutpower([int32]$mode){    
