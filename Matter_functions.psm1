@@ -1320,8 +1320,6 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
         $port.open() #opens serial connection
 
 if($port.IsOpen){
-
-
         $sending="reboot"        
         $sending2="chip"
         $sending3="chip entercommmode"
@@ -1342,9 +1340,7 @@ if($port.IsOpen){
         $readport+=@($line)
         }
         $timegap=(New-TimeSpan -start $starttime -end (Get-date)).TotalSeconds
-    }
-    while ( !($readport -like "*Available heap*"))
-    $readport
+    }while ( !($readport -like "*Available heap*"))
     write-output "open done in $([math]::round($timegap,1)) s"
     
      $port.WriteLine("`r") 
@@ -1366,10 +1362,8 @@ if($port.IsOpen){
         $timegap=(New-TimeSpan -start $starttime -end (Get-date)).TotalSeconds
     }
     while ( !($readport -like "*Provisioning succeeded*") -and $timegap -lt 60 )
-    
     write-output "reboot done"
-    $readport
-        
+
      $port.WriteLine("`r") 
      $port.WriteLine($sending2) 
      $port.WriteLine("`r")
@@ -1377,7 +1371,6 @@ if($port.IsOpen){
      $port.WriteLine($sending3) 
      $port.WriteLine("`r") 
      $starttime=Get-Date
-
     do {
         try{
         $line = $port.ReadLine()
@@ -1388,20 +1381,33 @@ if($port.IsOpen){
         Write-Host $line  
         $lastline=$line        
         $readport+=@($line)
-        }
-        
+        }        
         $timegap=(New-TimeSpan -start $starttime -end (Get-date)).TotalSeconds
-    }
-    while ( !($readport -like "*Entering Matter Commissioning Mode*") -and $timegap -lt 60 )
+    } while ( !($readport -like "*Entering Matter Commissioning Mode*") -and $timegap -lt 60 )
     
+     $starttime=Get-Date
+        do {
+        try{
+        $line = $port.ReadLine()
+        }catch{
+         $null
+        }
+        if($line -ne $lastline){        
+        Write-Host $line  
+        $lastline=$line        
+        $readport+=@($line)
+        }
+        $timegap=(New-TimeSpan -start $starttime -end (Get-date)).TotalSeconds
+    } while ( $timegap -lt 5 )
+  
       $port.Close()
+      
    if($readport -like "*Entering Matter Commissioning Mode*"){
     write-output "commission done"
     }
     else{
     write-output "commission failed"
     }
-
     set-content C:\Matter_AI\logs\testing_serailport.log -value "$(get-date) serial port  $portid connecting records:" -force    
     add-content C:\Matter_AI\logs\testing_serailport.log -value "$($readport -join "`")"
     add-content C:\Matter_AI\logs\testing_serailport.log -value "--------- End--------"
