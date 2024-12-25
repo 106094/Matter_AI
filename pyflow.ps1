@@ -695,7 +695,7 @@ $driver.ExecuteScript($script)
       if($startbt.Enabled -and $noselecttc -ne $webtc){
         dutpower $global:dutcontrol 
          if($global:dutcontrol -eq 4){
-         $checkccommision=get-contnet -path "C:\Matter_AI\logs\testing_serailport.log"
+         $checkccommision=Get-Content -path "C:\Matter_AI\logs\testing_serailport.log"
           if (!($checkccommision -like "*Entering Matter Commissioning Mode*")){
            add-content "C:\Matter_AI\logs\testing.log" -Value "DUT fail to enter commission mode"
            $driver.Quit()
