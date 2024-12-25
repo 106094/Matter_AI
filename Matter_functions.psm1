@@ -1362,9 +1362,9 @@ if($port.IsOpen){
             $readport+=@($line)
             }
             $timegap2=(New-TimeSpan -start $starttime2 -end (Get-date)).TotalSeconds
-        }while ( !($readport -like "*Provisioning succeeded*") -and $timegap2 -lt 60 )        
+        }while ( !($readport -like "*Provisioning succeeded*") -and $timegap2 -lt 90 )        
         $timegap=(New-TimeSpan -start $starttime -end (Get-date)).TotalSeconds
-    } until($readport -like "*Provisioning succeeded*" -or $timegap -lt 200)
+    } until($readport -like "*Provisioning succeeded*" -or $timegap -lt 300)
 
     if($readport -like "*Provisioning succeeded*"){    
         add-content $serailout -value "reboot done at $(get-date)"
