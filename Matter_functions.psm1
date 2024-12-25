@@ -1323,13 +1323,11 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
 
 if($port.IsOpen){
         $sending="reboot"        
-        $sending2="chip"
+        #$sending2="chip"
         $sending3="chip entercommmode"
         $readport=@()
         $line=$null
-
         $starttime=Get-Date
-        
     do {
        try{
         $line = $port.ReadLine()
@@ -1345,13 +1343,13 @@ if($port.IsOpen){
     }while ( !($readport -like "*Available heap*") -and $timegap -lt 120 )
 
     if ($readport -like "*Available heap*"){
-    write-output "open done in $([math]::round($timegap,1)) s"
-    
-    do{
+     add-content $serailout -value "open done in $([math]::round($timegap,1)) s"
+     $starttime=Get-Date
+     do{
      $port.WriteLine("`r") 
      $port.WriteLine($sending)     
      $port.WriteLine("`r")
-     $starttime=Get-Date
+     $starttime2=Get-Date
         do {
         try{
             $line = $port.ReadLine()
@@ -1363,20 +1361,19 @@ if($port.IsOpen){
             $lastline=$line        
             $readport+=@($line)
             }
-            $timegap=(New-TimeSpan -start $starttime -end (Get-date)).TotalSeconds
-        }while ( !($readport -like "*Provisioning succeeded*") -and $timegap -lt 60 )
+            $timegap2=(New-TimeSpan -start $starttime2 -end (Get-date)).TotalSeconds
+        }while ( !($readport -like "*Provisioning succeeded*") -and $timegap2 -lt 60 )        
+        $timegap=(New-TimeSpan -start $starttime -end (Get-date)).TotalSeconds
     } until($readport -like "*Provisioning succeeded*" -or $timegap -lt 200)
 
-    if($readport -like "*Provisioning succeeded*"){
-        write-output "reboot done"
-    do{
+    if($readport -like "*Provisioning succeeded*"){    
+        add-content $serailout -value "reboot done"
+    $starttime=Get-Date
+        do{
      $port.WriteLine("`r") 
-     $port.WriteLine($sending2) 
-     $port.WriteLine("`r")
-     start-sleep -s 5
      $port.WriteLine($sending3) 
      $port.WriteLine("`r") 
-     $starttime=Get-Date
+     $starttime2=Get-Date
         do {
             try{
             $line = $port.ReadLine()
@@ -1388,10 +1385,12 @@ if($port.IsOpen){
             $lastline=$line        
             $readport+=@($line)
             }        
-            $timegap=(New-TimeSpan -start $starttime -end (Get-date)).TotalSeconds
-        } while ( !($readport -like "*Entering Matter Commissioning Mode*") -and $timegap -lt 60 )
+            $timegap2=(New-TimeSpan -start $starttime2 -end (Get-date)).TotalSeconds
+        } while ( !($readport -like "*Entering Matter Commissioning Mode*") -and $timegap2 -lt 60 )
+        $timegap=(New-TimeSpan -start $starttime -end (Get-date)).TotalSeconds
     } until($readport -like "*Entering Matter Commissioning Mode*" -or $timegap -lt 200)
     
+    if($readport -like "*Entering Matter Commissioning Mode*"){    
      $starttime=Get-Date
         do {
         try{
@@ -1406,6 +1405,11 @@ if($port.IsOpen){
         }
         $timegap=(New-TimeSpan -start $starttime -end (Get-date)).TotalSeconds
         } while ( $timegap -lt 5 )
+        add-content $serailout -value "commission mode ok"
+    }
+    else{
+        add-content $serailout -value "commission mode fail"
+    }
     }
     else{
     add-content $serailout -value "reboot failed"
@@ -1417,14 +1421,6 @@ if($port.IsOpen){
     }
      $port.Close()
       
-   if($readport -like "*Entering Matter Commissioning Mode*"){
-    #write-output "commission done"
-    add-content $serailout -value "commission done"
-    }
-    else{
-    #write-output "commission failed"
-    add-content $serailout -value "commission failed"
-    }
     add-content $serailout -value "$($readport -join "`")"
     add-content $serailout -value "--------- End--------"
     
