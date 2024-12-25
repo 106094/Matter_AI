@@ -404,7 +404,7 @@ $addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Sel
      $pagenum=1
      while($pagenum -le $maxPageNumber ){ 
       ($driver.FindElement([OpenQA.Selenium.By]::XPath("//button[contains(@class,'p-paginator-page') and text()=$pagenum]"))).click()
-           $tdRow = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.IWebElement]]{
+           $tdRow = $wait.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.IWebElement]]{
           try{
             ($driver.FindElement([OpenQA.Selenium.By]::XPath("//tr[td[contains(text(),'$projname')]]")))
           }catch{
