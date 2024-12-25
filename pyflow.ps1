@@ -355,7 +355,7 @@ $waitfive = [OpenQA.Selenium.Support.UI.WebDriverWait]::new($driver, [TimeSpan]:
 $waitten = [OpenQA.Selenium.Support.UI.WebDriverWait]::new($driver, [TimeSpan]::FromSeconds(10))
 if($global:webuiselects -eq "1"){
 # Define a custom condition for the element's visibility using a ScriptBlock converted to a delegate
-$addelement = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.IWebElement]]{
+$addelement = $wait.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.IWebElement]]{
     param ($driver)
       try{
         ($driver.FindElement([OpenQA.Selenium.By]::ClassName("icon-add-square")))
