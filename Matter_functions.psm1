@@ -1364,6 +1364,7 @@ if($port.IsOpen){
     while ( !($readport -like "*Provisioning succeeded*") -and $timegap -lt 60 )
     write-output "reboot done"
 
+    do{
      $port.WriteLine("`r") 
      $port.WriteLine($sending2) 
      $port.WriteLine("`r")
@@ -1384,6 +1385,7 @@ if($port.IsOpen){
         }        
         $timegap=(New-TimeSpan -start $starttime -end (Get-date)).TotalSeconds
     } while ( !($readport -like "*Entering Matter Commissioning Mode*") -and $timegap -lt 60 )
+    } until($readport -like "*Entering Matter Commissioning Mode*" -or $timegap -lt 200)
     
      $starttime=Get-Date
         do {

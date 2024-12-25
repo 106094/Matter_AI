@@ -689,12 +689,20 @@ $driver.ExecuteScript($script)
           Write-Output "An error occurred: $($_.Exception.Message)"
           
       } 
-                
         start-sleep -s 10
         #start
         $startbt=($driver.FindElement([OpenQA.Selenium.By]::XPath('//button[text()="Start "]')))
       if($startbt.Enabled -and $noselecttc -ne $webtc){
         dutpower $global:dutcontrol 
+         if($global:dutcontrol -eq 4){
+         $checkccommision=get-contnet -path "C:\Matter_AI\logs\testing_serailport.log"
+          if (!($checkccommision -like "*Entering Matter Commissioning Mode*")){
+           add-content "C:\Matter_AI\logs\testing.log" -Value "DUT fail to enter commission mode"
+           $driver.Quit()
+            Stop-Process -Name chromedriver, msedgedriver -Force -ErrorAction SilentlyContinue
+            exit
+            }
+           }
          $startbt.Click()
          start-sleep -s 20
          #check retest
