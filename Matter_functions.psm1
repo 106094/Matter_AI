@@ -1304,10 +1304,12 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
      }
 
  function dutcmd{
+    $serailout="C:\Matter_AI\logs\testing_serailport.log"
 
- 
  $portid=((get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "serialport"}) -split ":")[1]
  $speed="115200"
+ new-item $serailout -force
+ add-content $serailout -value "$(get-date) serial port  $portid connecting records:" -force
 
         $port = New-Object System.IO.Ports.SerialPort
         $port.PortName = $portid
@@ -1340,30 +1342,33 @@ if($port.IsOpen){
         $readport+=@($line)
         }
         $timegap=(New-TimeSpan -start $starttime -end (Get-date)).TotalSeconds
-    }while ( !($readport -like "*Available heap*"))
+    }while ( !($readport -like "*Available heap*") -and $timegap -lt 120 )
+
+    if ($readport -like "*Available heap*"){
     write-output "open done in $([math]::round($timegap,1)) s"
     
+    do{
      $port.WriteLine("`r") 
      $port.WriteLine($sending)     
      $port.WriteLine("`r")
-      
      $starttime=Get-Date
-    do {
-       try{
-        $line = $port.ReadLine()
-        }catch{
-         $null
-        }      
-        if($line -ne $lastline){        
-        Write-Host $line  
-        $lastline=$line        
-        $readport+=@($line)
-        }
-        $timegap=(New-TimeSpan -start $starttime -end (Get-date)).TotalSeconds
-    }
-    while ( !($readport -like "*Provisioning succeeded*") -and $timegap -lt 60 )
-    write-output "reboot done"
+        do {
+        try{
+            $line = $port.ReadLine()
+            }catch{
+            $null
+            }      
+            if($line -ne $lastline){        
+            Write-Host $line  
+            $lastline=$line        
+            $readport+=@($line)
+            }
+            $timegap=(New-TimeSpan -start $starttime -end (Get-date)).TotalSeconds
+        }while ( !($readport -like "*Provisioning succeeded*") -and $timegap -lt 60 )
+    } until($readport -like "*Provisioning succeeded*" -or $timegap -lt 200)
 
+    if($readport -like "*Provisioning succeeded*"){
+        write-output "reboot done"
     do{
      $port.WriteLine("`r") 
      $port.WriteLine($sending2) 
@@ -1372,19 +1377,19 @@ if($port.IsOpen){
      $port.WriteLine($sending3) 
      $port.WriteLine("`r") 
      $starttime=Get-Date
-    do {
-        try{
-        $line = $port.ReadLine()
-        }catch{
-         $null
-        }
-        if($line -ne $lastline){        
-        Write-Host $line  
-        $lastline=$line        
-        $readport+=@($line)
-        }        
-        $timegap=(New-TimeSpan -start $starttime -end (Get-date)).TotalSeconds
-    } while ( !($readport -like "*Entering Matter Commissioning Mode*") -and $timegap -lt 60 )
+        do {
+            try{
+            $line = $port.ReadLine()
+            }catch{
+            $null
+            }
+            if($line -ne $lastline){        
+            Write-Host $line  
+            $lastline=$line        
+            $readport+=@($line)
+            }        
+            $timegap=(New-TimeSpan -start $starttime -end (Get-date)).TotalSeconds
+        } while ( !($readport -like "*Entering Matter Commissioning Mode*") -and $timegap -lt 60 )
     } until($readport -like "*Entering Matter Commissioning Mode*" -or $timegap -lt 200)
     
      $starttime=Get-Date
@@ -1400,19 +1405,28 @@ if($port.IsOpen){
         $readport+=@($line)
         }
         $timegap=(New-TimeSpan -start $starttime -end (Get-date)).TotalSeconds
-    } while ( $timegap -lt 5 )
-  
-      $port.Close()
-      
-   if($readport -like "*Entering Matter Commissioning Mode*"){
-    write-output "commission done"
+        } while ( $timegap -lt 5 )
     }
     else{
-    write-output "commission failed"
+    add-content $serailout -value "reboot failed"
     }
-    set-content C:\Matter_AI\logs\testing_serailport.log -value "$(get-date) serial port  $portid connecting records:" -force    
-    add-content C:\Matter_AI\logs\testing_serailport.log -value "$($readport -join "`")"
-    add-content C:\Matter_AI\logs\testing_serailport.log -value "--------- End--------"
+    }
+    else {
+    #write-output "open start failed"
+    add-content $serailout -value "open start failed"
+    }
+     $port.Close()
+      
+   if($readport -like "*Entering Matter Commissioning Mode*"){
+    #write-output "commission done"
+    add-content $serailout -value "commission done"
+    }
+    else{
+    #write-output "commission failed"
+    add-content $serailout -value "commission failed"
+    }
+    add-content $serailout -value "$($readport -join "`")"
+    add-content $serailout -value "--------- End--------"
     
    }
      }
