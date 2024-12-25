@@ -1343,7 +1343,7 @@ if($port.IsOpen){
     }while ( !($readport -like "*Available heap*") -and $timegap -lt 120 )
 
     if ($readport -like "*Available heap*"){
-     add-content $serailout -value "open done in $([math]::round($timegap,1)) s"
+     add-content $serailout -value "open done in $([math]::round($timegap,1)) s at $(get-date)"
      $starttime=Get-Date
      do{
      $port.WriteLine("`r") 
@@ -1367,13 +1367,15 @@ if($port.IsOpen){
     } until($readport -like "*Provisioning succeeded*" -or $timegap -lt 200)
 
     if($readport -like "*Provisioning succeeded*"){    
-        add-content $serailout -value "reboot done"
+        add-content $serailout -value "reboot done at $(get-date)"
+   
     $starttime=Get-Date
-        do{
-     $port.WriteLine("`r") 
-     $port.WriteLine($sending3) 
-     $port.WriteLine("`r") 
-     $starttime2=Get-Date
+    do{
+         start-sleep -s 2
+         $port.WriteLine("`r")
+         $port.WriteLine($sending3) 
+         $port.WriteLine("`r") 
+         $starttime2=Get-Date
         do {
             try{
             $line = $port.ReadLine()
@@ -1390,7 +1392,7 @@ if($port.IsOpen){
         $timegap=(New-TimeSpan -start $starttime -end (Get-date)).TotalSeconds
     } until($readport -like "*Entering Matter Commissioning Mode*" -or $timegap -lt 200)
     
-    if($readport -like "*Entering Matter Commissioning Mode*"){    
+    if($readport -like "*Entering Matter Commissioning Mode*"){
      $starttime=Get-Date
         do {
         try{
@@ -1405,19 +1407,19 @@ if($port.IsOpen){
         }
         $timegap=(New-TimeSpan -start $starttime -end (Get-date)).TotalSeconds
         } while ( $timegap -lt 5 )
-        add-content $serailout -value "commission mode ok"
+        add-content $serailout -value "commission mode ok at $(get-date)"
     }
     else{
-        add-content $serailout -value "commission mode fail"
+        add-content $serailout -value "commission mode fail at $(get-date)"
     }
     }
     else{
-    add-content $serailout -value "reboot failed"
+    add-content $serailout -value "reboot failed at $(get-date)"
     }
     }
     else {
     #write-output "open start failed"
-    add-content $serailout -value "open start failed"
+    add-content $serailout -value "open start failed at $(get-date)"
     }
      $port.Close()
       
