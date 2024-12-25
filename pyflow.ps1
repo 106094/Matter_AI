@@ -358,7 +358,8 @@ if($global:webuiselects -eq "1"){
 $addelement = $wait.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.IWebElement]]{
     param ($driver)
       try{
-        ($driver.FindElement([OpenQA.Selenium.By]::ClassName("icon-add-square")))
+        ($driver.FindElement([OpenQA.Selenium.By]::XPath('//span[text()="Add Project"]')))    
+     
       }catch{
         return $null
       }
@@ -369,7 +370,7 @@ $addelement = $wait.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Seleni
         $addelement.Click()
       }
       else{
-        $addproject =  ($driver.FindElement([OpenQA.Selenium.By]::XPath('//span[text()="Add Project"]')))        
+        $addproject = ($driver.FindElement([OpenQA.Selenium.By]::ClassName("icon-add-square")))       
         $addproject.Click()
       }
       start-sleep -s 2
@@ -543,7 +544,7 @@ $driver.ExecuteScript($script)
 
       $element = $wait.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.IWebElement]]{
           try{
-            ($driver.FindElement([OpenQA.Selenium.By]::ClassName("icon-add-square")))
+            ($driver.FindElement([OpenQA.Selenium.By]::XPath('//span[text()="Add Test"]'))).click() # for 2nd run without add icon
           }catch{
             return $null
           }
@@ -554,7 +555,7 @@ $driver.ExecuteScript($script)
         $element.Click()
       }else{
         start-sleep -s 5
-         ($driver.FindElement([OpenQA.Selenium.By]::XPath('//span[text()="Add Test"]'))).click() # for 2nd run without add icon
+        ($driver.FindElement([OpenQA.Selenium.By]::ClassName("icon-add-square")))
        }
         start-sleep -s 5
         #set project name
