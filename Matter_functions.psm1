@@ -1248,14 +1248,7 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
         $modes=@("on","off","up","down","testcom")
         $sendings=@("o","f","b","c","")
         $sending=$sendings[$modes.indexof($mode.ToLower())]
-        if(!$sending){
-            $sending=$mode
-            $speed=((get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "speed"}) -split ":")[1]
-            if(!$speed){
-                $speed="115200"
-            }
-            $waittime = 1000
-        }       
+       
         $port = New-Object System.IO.Ports.SerialPort
         $port.PortName = $portid
         $port.BaudRate = $speed
@@ -1268,9 +1261,7 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
         do{
         $port.PortName = $portid    
         $port.open() #opens serial connection
-        if($speed -eq 115200){
-        start-sleep -s 60
-        }
+
         if($? -eq 0){
             add-content C:\Matter_AI\logs\testing.log -value "fail to open the serial port"
             do{
@@ -1312,6 +1303,103 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
     
      }
 
+ function dutcmd{
+
+ 
+ $portid=((get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "serialport"}) -split ":")[1]
+ $speed="115200"
+
+        $port = New-Object System.IO.Ports.SerialPort
+        $port.PortName = $portid
+        $port.BaudRate = $speed
+        $port.Parity = "None"
+        $port.DataBits = 8
+        $port.StopBits = 1
+        $port.ReadTimeout = 100 # 0.1 seconds
+        $port.DtrEnable = "true"
+        $port.open() #opens serial connection
+
+        $sending="reboot"
+        
+        $sending2="chip"
+        $sending3="chip entercommmode"
+        $readport=@()
+        $line=$null
+
+        $starttime=Get-Date
+        
+    do {
+       try{
+        $line = $port.ReadLine()
+        }catch{
+         $null
+        }       
+        if($line -ne $lastline){        
+        Write-Host $line  
+        $lastline=$line        
+        $readport+=@($line)
+        }
+        $timegap=(New-TimeSpan -start $starttime -end (Get-date)).TotalSeconds
+    }
+    while ( !($readport -like "*Available heap*"))
+    $readport
+    write-output "open done in $([math]::round($timegap,1)) s"
+
+    
+     $port.WriteLine("`r") 
+     $port.WriteLine($sending)     
+     $port.WriteLine("`r")
+      
+     $starttime=Get-Date
+    do {
+       try{
+        $line = $port.ReadLine()
+        }catch{
+         $null
+        }      
+        if($line -ne $lastline){        
+        Write-Host $line  
+        $lastline=$line        
+        $readport+=@($line)
+        }
+        $timegap=(New-TimeSpan -start $starttime -end (Get-date)).TotalSeconds
+    }
+    while ( !($readport -like "*Provisioning succeeded*") -and $timegap -lt 60 )
+    
+    write-output "reboot done"
+    $readport
+        
+     $port.WriteLine("`r") 
+     $port.WriteLine($sending2) 
+     $port.WriteLine("`r")
+     start-sleep -s 5
+     $port.WriteLine($sending3) 
+     $port.WriteLine("`r") 
+     $starttime=Get-Date
+
+    do {
+        try{
+        $line = $port.ReadLine()
+        }catch{
+         $null
+        }
+        if($line -ne $lastline){        
+        Write-Host $line  
+        $lastline=$line        
+        $readport+=@($line)
+        }
+        
+        $timegap=(New-TimeSpan -start $starttime -end (Get-date)).TotalSeconds
+    }
+    while ($port.IsOpen -and $timegap -lt 10)
+    
+      $port.Close()
+
+      
+    write-output "commission done"
+    $readport
+
+     }
 
  function dutpower([int32]$mode){    
     if($mode -eq 1){
@@ -1341,9 +1429,7 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
           }
         }
         if($mode -eq 4){
-              dutcontrol -mode "reboot"
-              start-sleep -s 60
-              dutcontrol -mode "chip entercommmode"            
+                dutcmd        
           }
     }
 
