@@ -19,16 +19,12 @@ $global:puttyset = @()
 
 #region check test type
 function ini {
-$testtype=@()
-while(!$testtype -or !$testtypeall){
+$testtype=$dutcontrol=$null
+while(!$testtype){
   $testtype=read-host "Which kind of testing? 1. Python 2. Manual 3. Auto (support multi-select) (q for quit)"
   if($testtype -eq "q"){
     exit
   }
-  $testtypeall=@()
-    for($i=0; $i -lt ($testtype -join "").length; $i++){
-      $testtypeall+=@($testtype.Substring($i,1))
-    }
  }
  #endregion
 
@@ -95,7 +91,7 @@ if($global:excelfile -eq 0){
     exit
 }
 
-if ($testtypeall -contains 1){
+if ($testtype -match 1){
  $getcmdpsfile="C:\Matter_AI\cmdcollecting_tool\Matter_getpy.ps1"
    $cmdcsvfile="C:\Matter_AI\settings\_py\py.csv"
    
@@ -108,8 +104,7 @@ if(!$checkfile){
 }
 }
 
-
-if ($testtypeall -contains 2){
+if ($testtype -match 2){
   $getcmdpsfile="C:\Matter_AI\cmdcollecting_tool\Matter_getchiptool.ps1"
   $global:updatechiptool = [System.Windows.Forms.MessageBox]::Show("Need update UI-Manual database?", "Check", [System.Windows.Forms.MessageBoxButtons]::YesNo, [System.Windows.Forms.MessageBoxIcon]::Question, [System.Windows.Forms.MessageBoxDefaultButton]::Button2)
   if ($global:updatechiptool -eq "Yes") {
@@ -183,7 +178,7 @@ if ($testtypeall -contains 2){
 
 }
 
-if ($testtypeall -contains "3"){
+if ($testtype -match 3){
   $getprojects=(get-childitem C:\Matter_AI\settings\_auto\ -Directory).Name
   if (!$getprojects){
    [System.Windows.Forms.MessageBox]::Show("Please create C:\Matter_AI\settings\_auto\<Project name> include ""json.txt"" and ""xml"" folder with xml files"  ,"Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
@@ -191,7 +186,7 @@ if ($testtypeall -contains "3"){
   }
 }
 
-return $testtypeall
+return "$testtype,$dutcontrol"
 }
 
 ###########################
@@ -205,7 +200,14 @@ new-item -path C:\Matter_AI\logs\testing.log -Force|Out-Null
 
 $continueq="Yes"
 while ($continueq -eq "Yes"){
-  $testtypeall=ini
+  $ini=ini
+  $testtype=($ini.split(","))[0]
+   $dutcontrol=($ini.split(","))[1]
+     $testtypeall=@()
+    for($i=0; $i -lt ($testtype -join "").length; $i++){
+      $testtypeall+=@($testtype.Substring($i,1))
+    }
+
   if ($testtypeall -contains 1){
     $caseids=(import-csv C:\Matter_AI\settings\_py\py.csv).TestCaseID
     selguis -Inputdata $caseids -instruction "Please select Python caseids" -errmessage "No caseid selected"
@@ -241,7 +243,7 @@ while ($continueq -eq "Yes"){
     }
   }
 
-  if ($testtypeall -contains  3){  
+  if ($testtypeall -contains 3){  
    $getprojects=(get-childitem C:\Matter_AI\settings\_auto\ -Directory).Name
    $global:getproject=selgui -Inputdata $getprojects -instruction "Please select Auto project" -errmessage "No project selected"
    if(!($global:getproject[-1])){
