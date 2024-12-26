@@ -198,7 +198,7 @@ $bacupfolder="C:\Matter_AI\logs\log_backups"
 if(! (test-path $bacupfolder)){
   new-item -ItemType Directory -path $bacupfolder|Out-Null
 }
-if(test-path $testlogfile -and (get-content $testlogfile).Length -gt 0){
+if((test-path $testlogfile) -and (get-content $testlogfile).Length -gt 0){
   Rename-Item $testlogfile -NewName "testing_$(get-date -Format yyMMddHHmm).log" -ea silentlycontinue
   move-item "C:\Matter_AI\logs\testing_$(get-date -Format yyMMddHHmm).log" -Destination $bacupfolder
   new-item -path $testlogfile -Force|Out-Null
