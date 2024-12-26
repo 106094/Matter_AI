@@ -77,7 +77,7 @@ foreach($csv in $csvdata){
     $k=$pycmd=$passresult=0
     while ($passresult -eq "0" -and $k -lt $retesttime){
       $k++
-      dutpower $global:dutcontrol
+      dutpower $dutcontrol
       $pycmd=putty_paste -cmdline "rm -f admin_storage.json && $pyline" -checkline1 "*Final result*pass*"
       $passresult=$pycmd[-1]
       write-host "round $k, $($passresult)"
@@ -144,7 +144,7 @@ if ($global:testtype -eq 2){
       #$sound.Play()
       #([System.Media.SystemSounds]::Asterisk).Play()
  
-      dutpower $global:dutcontrol
+      dutpower $dutcontrol
    #check if putty session exist
    $puttyname=$puttyname0
     #start pairing with restest
@@ -304,7 +304,7 @@ if ($global:testtype -eq 2){
   }
 
   if ($global:testtype -eq 3){
-    #dutpower $global:dutcontrol
+    #dutpower $dutcontrol
     #create a log folder
     $datetime=get-date -Format yyMMdd_HHmm
     $logtc="C:\Matter_AI\logs\_auto\$($global:getproject)\_$($datetime)"
@@ -524,7 +524,7 @@ $addelement = $wait.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Seleni
       #if ( $global:webuicases.indexof($webtc) -ne 0 -or $testrun -gt 1){
         $driver.Navigate().GoToUrl("http://$sship")
         start-sleep -s 5
-        #dutpower $global:dutcontrol 
+        #dutpower $dutcontrol 
       #}   
 
      $webtcn=$webtc.Replace(".","_")
@@ -544,7 +544,7 @@ $driver.ExecuteScript($script)
 
       $element = $wait.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.IWebElement]]{
           try{
-            ($driver.FindElement([OpenQA.Selenium.By]::XPath('//span[text()="Add Test"]'))).click() # for 2nd run without add icon
+            ($driver.FindElement([OpenQA.Selenium.By]::XPath('//span[text()="Add Test"]'))) # for 2nd run without add icon
           }catch{
             return $null
           }
@@ -555,7 +555,7 @@ $driver.ExecuteScript($script)
         $element.Click()
       }else{
         start-sleep -s 5
-        ($driver.FindElement([OpenQA.Selenium.By]::ClassName("icon-add-square")))
+        ($driver.FindElement([OpenQA.Selenium.By]::ClassName("icon-add-square"))).click()
        }
         start-sleep -s 5
         #set project name
@@ -693,8 +693,8 @@ $driver.ExecuteScript($script)
         #start
         $startbt=($driver.FindElement([OpenQA.Selenium.By]::XPath('//button[text()="Start "]')))
       if($startbt.Enabled -and $noselecttc -ne $webtc){
-        dutpower $global:dutcontrol 
-         if($global:dutcontrol -eq 4){
+        dutpower $dutcontrol 
+         if($dutcontrol -eq 4){
          $checkccommision=Get-Content -path "C:\Matter_AI\logs\testing_serailport.log"
           if (!($checkccommision -like "*Entering Matter Commissioning Mode*")){
            add-content "C:\Matter_AI\logs\testing.log" -Value "DUT fail to enter commission mode"
