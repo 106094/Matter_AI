@@ -33,12 +33,12 @@ while(!$testtype -or !$testtypeall){
  #endregion
 
 #region check dut contril mode
-while(!$global:dutcontrol -or ($global:dutcontrol -ne 1 -and $global:dutcontrol -ne 2 -and $global:dutcontrol -ne 3 -and $global:dutcontrol -ne 4)){
-  $global:dutcontrol=read-host "The DUT Reset mode is ? 1.Manual 2. Power on/off 3. Simulator switch 4. Command (input 1/2/3/4) (q for quit)"
-  if($global:dutcontrol -eq "q"){
+while(!$dutcontrol -or ($dutcontrol -ne 1 -and $dutcontrol -ne 2 -and $dutcontrol -ne 3 -and $dutcontrol -ne 4)){
+  $dutcontrol=read-host "The DUT Reset mode is ? 1.Manual 2. Power on/off 3. Simulator switch 4. Command (input 1/2/3/4) (q for quit)"
+  if($dutcontrol -eq "q"){
     exit
   }
-  if($global:dutcontrol -ne 1){
+  if($dutcontrol -ne 1){
     $currnetset=get-content C:\Matter_AI\settings\config_linux.txt
    if (!($currnetset|Where-Object{$_ -match "serialport"})){
      $newsettings=get-content C:\Matter_Git\settings\config_linux.txt
@@ -289,6 +289,6 @@ $timepassed=New-TimeSpan -start $starttime -end $endtime
 $timegap="{0} Hours, {1} minutes, {2} seconds" -f $timepassed.Hours, $timepassed.Minutes, $timepassed.Seconds
 [System.Windows.Forms.MessageBox]::Show("Matter auto test completed in $timegap","Info",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Information)
 
-if($global:dutcontrol -ne 1){
+if($dutcontrol -ne 1){
   dutcontrol -mode "close"
 }
