@@ -1147,6 +1147,8 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
      }
     copy-item $downloadname -Destination $savepath -Force  
     Remove-Item "$ENV:UserProfile\downloads\*.csv" -force
+     start-sleep -s 2
+    (get-process -name "msedge" -ea SilentlyContinue).CloseMainWindow()|Out-Null   
     return "Download ok"
     }
     else{
@@ -1164,7 +1166,7 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
      Send-MailMessage @paramHash -Encoding utf8 -SmtpServer zimbra.allion.com.tw 
      return "Fail Download"
     }
-    start-sleep -s 5
+    start-sleep -s 2
     (get-process -name "msedge" -ea SilentlyContinue).CloseMainWindow()|Out-Null   
   }
   
