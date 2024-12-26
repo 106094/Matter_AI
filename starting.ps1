@@ -193,10 +193,23 @@ return "$testtype,$dutcontrol"
 
 $starttime=get-date
 $testlogfile="C:\Matter_AI\logs\testing.log"
-if(test-path $testlogfile){
-  Rename-Item $testlogfile -NewName "testing_$(get-date -Format yyMMddHHmm).log" -ea silentlycontinue
+$testseriallog="C:\Matter_AI\logs\testing_serailport.log"
+$bacupfolder="C:\Matter_AI\logs\log_backups"
+if(! (test-path $bacupfolder)){
+  new-item -ItemType Directory -path $bacupfolder|Out-Null
 }
-new-item -path C:\Matter_AI\logs\testing.log -Force|Out-Null
+if(test-path $testlogfile -and (get-content $testlogfile).Length -gt 0){
+  Rename-Item $testlogfile -NewName "testing_$(get-date -Format yyMMddHHmm).log" -ea silentlycontinue
+  move-item "C:\Matter_AI\logs\testing_$(get-date -Format yyMMddHHmm).log" -Destination $bacupfolder
+  new-item -path $testlogfile -Force|Out-Null
+  }
+  if((get-content $testseriallog).Length -gt 0){
+  Rename-Item $testseriallog -NewName "testing_serailport_$(get-date -Format yyMMddHHmm).log" -ea silentlycontinue
+  move-item "C:\Matter_AI\logs\testing_serailport_$(get-date -Format yyMMddHHmm).log" -Destination $bacupfolder
+  new-item -path $testseriallog -Force|Out-Null
+  }
+
+ Get-ChildItem "C:\Matter_AI\logs\*putty*.log"|where-object{$_.lastwritetime -lt $((get-date).adddays("-2"))}|Move-Item -Destination $bacupfolder
 
 $continueq="Yes"
 while ($continueq -eq "Yes"){
