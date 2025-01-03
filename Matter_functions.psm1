@@ -1481,11 +1481,12 @@ if($port.IsOpen){
           }
         }
         if($mode -eq 4){
-                dutcmd        
+                #dutcmd
+                compal_cmd     
           }
     }
 
-     function selguis ( [string[]]$Inputdata,[string]$instruction,[string]$errmessage) {
+   function selguis ( [string[]]$Inputdata,[string]$instruction,[string]$errmessage) {
 
         Add-Type -AssemblyName System.Windows.Forms
          $newFont = New-Object System.Drawing.Font("Microsoft Sans Serif", 12)
@@ -1590,7 +1591,7 @@ if($port.IsOpen){
         }
 
         
-     function selgui ( [string[]]$Inputdata,[string]$instruction,[string]$errmessage) {
+   function selgui ( [string[]]$Inputdata,[string]$instruction,[string]$errmessage) {
 
         Add-Type -AssemblyName System.Windows.Forms
         Add-Type -AssemblyName System.Drawing
@@ -1665,7 +1666,7 @@ if($port.IsOpen){
 
      }
 
-     function webuiSelections ([string]$projectname){
+   function webuiSelections ([string]$projectname){
 
         Add-Type -AssemblyName System.Windows.Forms
         $global:webuiselects=$null
@@ -1786,3 +1787,271 @@ if($port.IsOpen){
         }
         
        
+   function compal_cmd ([switch]$ending) {
+      
+  Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Bypass -Force;
+  $wshell=New-Object -ComObject wscript.shell
+  $shell=New-Object -ComObject shell.application
+    Add-Type -AssemblyName Microsoft.VisualBasic
+     Add-Type -AssemblyName System.Windows.Forms
+
+ if(!(Test-Path C:\Matter_AI\platform-tools\adb.exe -ea SilentlyContinue)){
+   start-process msedge "https://drive.usercontent.google.com/download?id=1gMy2--1i4zLNfe_XveadM_mQHd3krBPQ&export=download&authuser=0&confirm=t&uuid=bb454201-395f-4236-9410-a4da87d1e945&at=APvzH3oNZ8sm2djB_FXOLFr6DvnS:1735882409292"
+ 
+  while (!(test-path "$env:USERPROFILE\downloads\platform-tools*.zip")){
+  start-sleep -s 3
+  }
+  start-sleep -s 3
+  $A1=(Get-ChildItem "$env:USERPROFILE\downloads\platform-tools*.zip").fullname
+  $shell.NameSpace("C:\Matter_AI\").copyhere($shell.NameSpace($A1).Items(),4)
+ }
+
+$cSource = @'
+using System;
+using System.Drawing;
+using System.Runtime.InteropServices;
+using System.Windows.Forms;
+public class Clicker
+{
+//https://msdn.microsoft.com/en-us/library/windows/desktop/ms646270(v=vs.85).aspx
+[StructLayout(LayoutKind.Sequential)]
+struct INPUT
+{ 
+  public int        type; // 0 = INPUT_MOUSE,
+                          // 1 = INPUT_KEYBOARD
+                          // 2 = INPUT_HARDWARE
+  public MOUSEINPUT mi;
+}
+
+//https://msdn.microsoft.com/en-us/library/windows/desktop/ms646273(v=vs.85).aspx
+[StructLayout(LayoutKind.Sequential)]
+struct MOUSEINPUT
+{
+  public int    dx ;
+  public int    dy ;
+  public int    mouseData ;
+  public int    dwFlags;
+  public int    time;
+  public IntPtr dwExtraInfo;
+}
+
+//This covers most use cases although complex mice may have additional buttons
+//There are additional constants you can use for those cases, see the msdn page
+const int MOUSEEVENTF_MOVED      = 0x0001 ;
+const int MOUSEEVENTF_LEFTDOWN   = 0x0002 ;
+const int MOUSEEVENTF_LEFTUP     = 0x0004 ;
+const int MOUSEEVENTF_RIGHTDOWN  = 0x0008 ;
+const int MOUSEEVENTF_RIGHTUP    = 0x0010 ;
+const int MOUSEEVENTF_MIDDLEDOWN = 0x0020 ;
+const int MOUSEEVENTF_MIDDLEUP   = 0x0040 ;
+const int MOUSEEVENTF_WHEEL      = 0x0080 ;
+const int MOUSEEVENTF_XDOWN      = 0x0100 ;
+const int MOUSEEVENTF_XUP        = 0x0200 ;
+const int MOUSEEVENTF_ABSOLUTE   = 0x8000 ;
+
+const int screen_length = 0x10000 ;
+
+//https://msdn.microsoft.com/en-us/library/windows/desktop/ms646310(v=vs.85).aspx
+[System.Runtime.InteropServices.DllImport("user32.dll")]
+extern static uint SendInput(uint nInputs, INPUT[] pInputs, int cbSize);
+
+public static void LeftClickAtPoint(int x, int y)
+{
+  //Move the mouse
+  INPUT[] input = new INPUT[3];
+  input[0].mi.dx = x*(65535/System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width);
+  input[0].mi.dy = y*(65535/System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height);
+  input[0].mi.dwFlags = MOUSEEVENTF_MOVED | MOUSEEVENTF_ABSOLUTE;
+  //Left mouse button down
+  input[1].mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
+  //Left mouse button up
+  input[2].mi.dwFlags = MOUSEEVENTF_LEFTUP;
+  SendInput(3, input, Marshal.SizeOf(input[0]));
+}
+}
+'@
+try{
+  Add-Type -TypeDefinition $cSource -ReferencedAssemblies System.Windows.Forms,System.Drawing
+}
+catch{
+  Write-Output "$($_.Exception.Message)"
+}
+
+$source = @"
+using System;
+using System.Threading.Tasks;
+using System.Runtime.InteropServices;
+using System.Windows.Forms;
+namespace KeySends
+{
+    public class KeySend
+    {
+        [DllImport("user32.dll")]
+        public static extern void keybd_event(byte bVk, byte bScan, int dwFlags, int dwExtraInfo);
+        private const int KEYEVENTF_EXTENDEDKEY = 1;
+        private const int KEYEVENTF_KEYUP = 2;
+        public static void KeyDown(Keys vKey)
+        {
+            keybd_event((byte)vKey, 0, KEYEVENTF_EXTENDEDKEY, 0);
+        }
+        public static void KeyUp(Keys vKey)
+        {
+            keybd_event((byte)vKey, 0, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
+        }
+    }
+}
+"@
+Add-Type -TypeDefinition $source -ReferencedAssemblies "System.Windows.Forms"
+
+if($PSScriptRoot.length -eq 0){
+$scriptRoot="C:\Matter_AI"
+}
+else{
+$scriptRoot=$PSScriptRoot
+}
+$screen = [System.Windows.Forms.Screen]::PrimaryScreen
+#$bounds = $screen.Bounds
+$width  = $bounds.Width
+$height  =$bounds.Height
+
+$passwds=get-content "C:\Matter_AI\settings\compal_passwds.txt"
+
+$cmd1="C:\Matter_AI\platform-tools\adb.exe shell" 
+$cmd2="ping 8.8.8.8 -c 5"
+$cmd3="rm -rf /data/matter/*"
+$cmd4="./data/chip-bridge-app-android-real | tee /data/matter/log.txt"
+$cmd5="C:\Matter_AI\platform-tools\adb.exe pull /data/matter/log.txt C:\Matter_AI\logs\dutcmd\adb.log"
+
+function selectcopy ([string]$cmdlet){
+
+Start-Sleep -s 2
+  Set-Clipboard -Value $cmdlet
+  Start-Sleep -s 2
+  $wshell.SendKeys("+^{p}")
+  Start-Sleep -s 2
+  $wshell.SendKeys("^v")
+  Start-Sleep -s 2  
+  $wshell.SendKeys("{tab}")
+  Start-Sleep -s 2  
+  
+# Press the Enter key
+[KeySends.KeySend]::KeyDown([System.Windows.Forms.Keys]::Enter)
+Start-Sleep -s 0.1
+[KeySends.KeySend]::KeyUp([System.Windows.Forms.Keys]::Enter)
+ Start-Sleep -s 2
+
+ if($cmdlet -eq "select all text"){
+[KeySends.KeySend]::KeyDown([System.Windows.Forms.Keys]::Enter)
+Start-Sleep -s 0.1
+[KeySends.KeySend]::KeyUp([System.Windows.Forms.Keys]::Enter)
+}
+
+    Start-Sleep -Seconds 2
+}
+
+function sendcmd([string]$cmdline,[string]$checkbefore,[string]$checkend,[int32]$waittime,[switch]$beforelast,[switch]$endlast){
+  $n=$m=0
+   if ($waittime -eq 0){
+    $waittime=3
+    }
+    [Microsoft.VisualBasic.interaction]::AppActivate("C:\windows\system32\cmd.exe")|out-null
+    start-sleep -s 2
+    [Clicker]::LeftClickAtPoint($width/2, $height/2)
+    Start-Sleep -Seconds 2
+    if($checkbefore){
+    selectcopy -cmdlet "select all text"
+    $readline=Get-Clipboard
+    $readline=($readline|where-object{$_.length -gt 0})
+     Start-Sleep -Seconds 5
+    if($beforelast){
+    $readline=($readline)[-1]
+    }   
+
+    if($readline -like "*$checkbefore*"){
+    $n=1
+    }
+    }
+
+  if(!$checkbefore -or ($checkbefore -and $n -eq 1)){
+            Set-Clipboard -value $cmdline
+            Start-Sleep -s 5
+            $wshell.SendKeys("^v")
+            Start-Sleep -Seconds 2
+            $wshell.SendKeys("~")
+            start-sleep -s $waittime
+    
+   if($checkend){
+    selectcopy -cmdlet "select all text"
+    $readline=Get-Clipboard
+     $readline=($readline|where-object{$_.length -gt 0}) 
+     Start-Sleep -Seconds 5
+      if($endlast){
+       $readline=($readline)[-1]
+        } 
+        if($readline -like "*$checkend*"){
+        $m=1
+        }
+     }
+    }
+    
+    $checksum=[int]$n+[int]$m
+    return $checksum
+
+}
+
+function endandsavelog{
+ [Microsoft.VisualBasic.interaction]::AppActivate("C:\windows\system32\cmd.exe")|out-null
+ start-sleep -s 2
+ [Clicker]::LeftClickAtPoint($width/2, $height/2)
+ Start-Sleep -Seconds 2
+ $wshell.SendKeys("^c")
+ Start-Sleep -Seconds 2
+ selectcopy -cmdlet "select all text"
+ $selections=Get-Clipboard
+ Start-Sleep -s 5
+ $cmdlogfile=Get-ChildItem -path "C:\Matter_AI\logs\dutcmd\cmd_output*.log" -ea SilentlyContinue|Sort-Object lastwritetime|select -Last 1
+ $suffixdate=($cmdlogfile.basename).Replace("cmd_output_","")
+ if($cmdlogfile){
+ add-content $cmdlogfile -Value $selections
+ }
+ }
+
+if(!(get-process -Name WindowsTerminal -ErrorAction SilentlyContinue)){
+start-process cmd -WindowStyle Maximized
+Start-Sleep -Seconds 5
+}
+
+endandsavelog
+
+ $checklogin=sendcmd -cmdline $cmd5 -waittime 10
+ Rename-Item "C:\Matter_AI\logs\dutcmd\adb.log" -newname "adb_$($suffixdate).log" -force
+
+if ($ending){
+return
+}
+
+$datetime=get-date -Format "yyMMdd_HHmmss"
+$logpath="C:\Matter_AI\logs\dutcmd\cmd_output_$($datetime).log"
+if(!(test-path C:\Matter_AI\logs\dutcmd\)){
+new-item -ItemType Directory -path C:\Matter_AI\logs\dutcmd -Force |Out-Null
+}
+new-item -ItemType File -path $logpath|Out-Null
+
+ selectcopy -cmdlet "Clear Buffer"
+ $checklogin=sendcmd -cmdline $cmd1 -checkend "sh-3.2#" -checkbefore "C:\Users\"
+
+ if($checklogin -ne 2){
+ foreach($passwd in $passwds){
+ $checklogin=sendcmd -cmdline $passwd -checkbefore "Enter adb password" -checkend "sh-3.2#"
+ if($checklogin -eq 0 -or $checklogin -eq 2){
+  break
+  }
+  }
+  }
+
+ $checklink=sendcmd -cmdline $cmd2 -waittime 15 -checkend "0% packet loss" -checkbefore "sh-3.2#"
+ if($checklink -eq 2){
+ sendcmd -cmdline $cmd3
+ sendcmd -cmdline $cmd4
+ }
+ }
