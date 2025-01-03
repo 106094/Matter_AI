@@ -1228,7 +1228,7 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
    }
 
   function dutcontrol ([string]$mode){
-    if ($mode.length -gt 0){
+    if ($mode.length -gt 0 ){
         $portid=((get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "serialport"}) -split ":")[1]
         if(!($portid -match "\d+")){
             selectcom
@@ -1479,7 +1479,9 @@ if($port.IsOpen){
           }
         }
         if($mode -eq 4){
-                #dutcmd
+                dutcmd   
+          }
+         if($mode -eq 5){
                 compal_cmd     
           }
     }
