@@ -1,5 +1,28 @@
 
 #region windows functions
+
+Add-Type -TypeDefinition $cSource -ReferencedAssemblies System.Windows.Forms,System.Drawing
+
+Add-Type @"
+              using System;
+              using System.Runtime.InteropServices;
+              public class Window {
+                [DllImport("user32.dll")]
+                [return: MarshalAs(UnmanagedType.Bool)]
+                public static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
+                [DllImport("User32.dll")]
+                public extern static bool MoveWindow(IntPtr handle, int x, int y, int width, int height, bool redraw);
+              }
+              public struct RECT
+              {
+                public int Left;        // x position of upper-left corner
+                public int Top;         // y position of upper-left corner
+                public int Right;       // x position of lower-right corner
+                public int Bottom;      // y position of lower-right corner
+              }
+"@
+
+
 $cSource = @'
 using System;
 using System.Drawing;
@@ -11,22 +34,22 @@ public class Clicker
 [StructLayout(LayoutKind.Sequential)]
 struct INPUT
 { 
-    public int        type; // 0 = INPUT_MOUSE,
-                            // 1 = INPUT_KEYBOARD
-                            // 2 = INPUT_HARDWARE
-    public MOUSEINPUT mi;
+  public int        type; // 0 = INPUT_MOUSE,
+                          // 1 = INPUT_KEYBOARD
+                          // 2 = INPUT_HARDWARE
+  public MOUSEINPUT mi;
 }
 
 //https://msdn.microsoft.com/en-us/library/windows/desktop/ms646273(v=vs.85).aspx
 [StructLayout(LayoutKind.Sequential)]
 struct MOUSEINPUT
 {
-    public int    dx ;
-    public int    dy ;
-    public int    mouseData ;
-    public int    dwFlags;
-    public int    time;
-    public IntPtr dwExtraInfo;
+  public int    dx ;
+  public int    dy ;
+  public int    mouseData ;
+  public int    dwFlags;
+  public int    time;
+  public IntPtr dwExtraInfo;
 }
 
 //This covers most use cases although complex mice may have additional buttons
@@ -51,52 +74,26 @@ extern static uint SendInput(uint nInputs, INPUT[] pInputs, int cbSize);
 
 public static void LeftClickAtPoint(int x, int y)
 {
-    //Move the mouse
-    INPUT[] input = new INPUT[3];
-    input[0].mi.dx = x*(65535/System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width);
-    input[0].mi.dy = y*(65535/System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height);
-    input[0].mi.dwFlags = MOUSEEVENTF_MOVED | MOUSEEVENTF_ABSOLUTE;
-    //Left mouse button down
-    input[1].mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
-    //Left mouse button up
-    input[2].mi.dwFlags = MOUSEEVENTF_LEFTUP;
-    SendInput(3, input, Marshal.SizeOf(input[0]));
-}
-public static void rightClickAtPoint(int x, int y)
-{
-    //Move the mouse
-    INPUT[] input = new INPUT[3];
-    input[0].mi.dx = x*(65535/System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width);
-    input[0].mi.dy = y*(65535/System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height);
-    input[0].mi.dwFlags = MOUSEEVENTF_MOVED | MOUSEEVENTF_ABSOLUTE;
-    //Left mouse button down
-    input[1].mi.dwFlags = MOUSEEVENTF_RIGHTDOWN;
-    //Left mouse button up
-    input[2].mi.dwFlags = MOUSEEVENTF_RIGHTUP;
-    SendInput(3, input, Marshal.SizeOf(input[0]));
+  //Move the mouse
+  INPUT[] input = new INPUT[3];
+  input[0].mi.dx = x*(65535/System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width);
+  input[0].mi.dy = y*(65535/System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height);
+  input[0].mi.dwFlags = MOUSEEVENTF_MOVED | MOUSEEVENTF_ABSOLUTE;
+  //Left mouse button down
+  input[1].mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
+  //Left mouse button up
+  input[2].mi.dwFlags = MOUSEEVENTF_LEFTUP;
+  SendInput(3, input, Marshal.SizeOf(input[0]));
 }
 }
 '@
-Add-Type -TypeDefinition $cSource -ReferencedAssemblies System.Windows.Forms,System.Drawing
+try{
+  Add-Type -TypeDefinition $cSource -ReferencedAssemblies System.Windows.Forms,System.Drawing
+}
+catch{
+  Write-Output "$($_.Exception.Message)"
+}
 
-Add-Type @"
-              using System;
-              using System.Runtime.InteropServices;
-              public class Window {
-                [DllImport("user32.dll")]
-                [return: MarshalAs(UnmanagedType.Bool)]
-                public static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
-                [DllImport("User32.dll")]
-                public extern static bool MoveWindow(IntPtr handle, int x, int y, int width, int height, bool redraw);
-              }
-              public struct RECT
-              {
-                public int Left;        // x position of upper-left corner
-                public int Top;         // y position of upper-left corner
-                public int Right;       // x position of lower-right corner
-                public int Bottom;      // y position of lower-right corner
-              }
-"@
 #endregion
 
 #region putty cmd and check    
@@ -1184,7 +1181,7 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
         $global:varhash
   }
 
-        function selectcom{# Load the required .NET assembly for Windows Forms
+  function selectcom{# Load the required .NET assembly for Windows Forms
             Add-Type -AssemblyName System.Windows.Forms
             
             # Create a new form
@@ -1229,6 +1226,7 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
             $form.ShowDialog()
        
    }
+
   function dutcontrol ([string]$mode){
     if ($mode.length -gt 0){
         $portid=((get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "serialport"}) -split ":")[1]
@@ -1305,7 +1303,7 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
     
      }
 
- function dutcmd{
+  function dutcmd{
     $serailout="C:\Matter_AI\logs\testing_serailport.log"
 
  $portid=((get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "serialport"}) -split ":")[1]
@@ -1453,7 +1451,7 @@ if($port.IsOpen){
    }
      }
 
- function dutpower([int32]$mode){    
+  function dutpower([int32]$mode){    
     if($mode -eq 1){
         $InfoParams = @{
           Title = "INFORMATION"
@@ -1486,7 +1484,7 @@ if($port.IsOpen){
           }
     }
 
-   function selguis ( [string[]]$Inputdata,[string]$instruction,[string]$errmessage) {
+  function selguis ( [string[]]$Inputdata,[string]$instruction,[string]$errmessage) {
 
         Add-Type -AssemblyName System.Windows.Forms
          $newFont = New-Object System.Drawing.Font("Microsoft Sans Serif", 12)
@@ -1591,7 +1589,7 @@ if($port.IsOpen){
         }
 
         
-   function selgui ( [string[]]$Inputdata,[string]$instruction,[string]$errmessage) {
+  function selgui ( [string[]]$Inputdata,[string]$instruction,[string]$errmessage) {
 
         Add-Type -AssemblyName System.Windows.Forms
         Add-Type -AssemblyName System.Drawing
@@ -1666,7 +1664,7 @@ if($port.IsOpen){
 
      }
 
-   function webuiSelections ([string]$projectname){
+  function webuiSelections ([string]$projectname){
 
         Add-Type -AssemblyName System.Windows.Forms
         $global:webuiselects=$null
@@ -1787,7 +1785,7 @@ if($port.IsOpen){
         }
         
        
-   function compal_cmd ([switch]$ending) {
+  function compal_cmd ([switch]$ending) {
       
   Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Bypass -Force;
   $wshell=New-Object -ComObject wscript.shell
