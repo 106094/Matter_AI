@@ -1,8 +1,6 @@
 
 #region windows functions
 
-Add-Type -TypeDefinition $cSource -ReferencedAssemblies System.Windows.Forms,System.Drawing
-
 Add-Type @"
               using System;
               using System.Runtime.InteropServices;
