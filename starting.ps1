@@ -29,12 +29,12 @@ while(!$testtype){
  #endregion
 
 #region check dut contril mode
-while(!$dutcontrol -or ($dutcontrol -ne 1 -and $dutcontrol -ne 2 -and $dutcontrol -ne 3 -and $dutcontrol -ne 4)){
-  $dutcontrol=read-host "The DUT Reset mode is ? 1.Manual 2. Power on/off 3. Simulator switch 4. Command (input 1/2/3/4) (q for quit)"
+while(!$dutcontrol -or ($dutcontrol -ne 1 -and $dutcontrol -ne 2 -and $dutcontrol -ne 3 -and $dutcontrol -ne 4 -and $dutcontrol -ne 5)){
+  $dutcontrol=read-host "The DUT Reset mode is ? 1.Manual 2. Power on/off 3. Simulator switch 4. Cmd_serailport 5.Cmd_Win (input 1/2/3/4/5) (q for quit)"
   if($dutcontrol -eq "q"){
     exit
   }
-  if($dutcontrol -ne 1){
+  if($dutcontrol -ne 1 -and $dutcontrol -ne 5){
     $currnetset=get-content C:\Matter_AI\settings\config_linux.txt
    if (!($currnetset|Where-Object{$_ -match "serialport"})){
      $newsettings=get-content C:\Matter_Git\settings\config_linux.txt
