@@ -198,23 +198,23 @@ $testseriallog="C:\Matter_AI\logs\testing_serailport.log"
 $testseriallog="C:\Matter_AI\logs\dutcmd\cmd_output*.log"
 $bacupfolder="C:\Matter_AI\logs\log_backups"
 $bacupfolder2="C:\Matter_AI\logs\log_backups\dutcmd"
-if(! (test-path $bacupfolder)){
+if(! (test-path $bacupfolder -ea SilentlyContinue)){
   new-item -ItemType Directory -path $bacupfolder|Out-Null
 }
-if(! (test-path $bacupfolder2)){
+if(! (test-path $bacupfolder2 -ea SilentlyContinue)){
   new-item -ItemType Directory -path $bacupfolder2|Out-Null
 }
-if((test-path $testlogfile) -and (get-content $testlogfile).Length -gt 0){
+if((test-path $testlogfile -ea SilentlyContinue) -and (get-content $testlogfile).Length -gt 0){
   Rename-Item $testlogfile -NewName "testing_$($datesuffix).log" -ea silentlycontinue
   move-item "C:\Matter_AI\logs\testing_$($datesuffix).log" -Destination $bacupfolder
   new-item -path $testlogfile -Force|Out-Null
   }
-  if((get-content $testseriallog).Length -gt 0){
+  if((get-content $testseriallog -ea SilentlyContinue).Length -gt 0){
   Rename-Item $testseriallog -NewName "testing_serailport_$($datesuffix).log" -ea silentlycontinue
   move-item "C:\Matter_AI\logs\testing_serailport_$($datesuffix).log" -Destination $bacupfolder
   new-item -path $testseriallog -Force|Out-Null
   }
-  if(test-path $testseriallog){
+  if(test-path $testseriallog -ea SilentlyContinue){
     move-item $testseriallog -Destination $bacupfolder2
   }
 
