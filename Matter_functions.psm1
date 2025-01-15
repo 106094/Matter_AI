@@ -83,19 +83,6 @@ public static void LeftClickAtPoint(int x, int y)
   input[2].mi.dwFlags = MOUSEEVENTF_LEFTUP;
   SendInput(3, input, Marshal.SizeOf(input[0]));
 }
-public static void rightClickAtPoint(int x, int y)
-{
-    //Move the mouse
-    INPUT[] input = new INPUT[3];
-    input[0].mi.dx = x*(65535/System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width);
-    input[0].mi.dy = y*(65535/System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height);
-    input[0].mi.dwFlags = MOUSEEVENTF_MOVED | MOUSEEVENTF_ABSOLUTE;
-    //Left mouse button down
-    input[1].mi.dwFlags = MOUSEEVENTF_RIGHTDOWN;
-    //Left mouse button up
-    input[2].mi.dwFlags = MOUSEEVENTF_RIGHTUP;
-    SendInput(3, input, Marshal.SizeOf(input[0]));
-}
 }
 '@
 try{
@@ -104,32 +91,6 @@ try{
 catch{
   Write-Output "$($_.Exception.Message)"
 }
-
-$source = @"
-using System;
-using System.Threading.Tasks;
-using System.Runtime.InteropServices;
-using System.Windows.Forms;
-namespace KeySends
-{
-    public class KeySend
-    {
-        [DllImport("user32.dll")]
-        public static extern void keybd_event(byte bVk, byte bScan, int dwFlags, int dwExtraInfo);
-        private const int KEYEVENTF_EXTENDEDKEY = 1;
-        private const int KEYEVENTF_KEYUP = 2;
-        public static void KeyDown(Keys vKey)
-        {
-            keybd_event((byte)vKey, 0, KEYEVENTF_EXTENDEDKEY, 0);
-        }
-        public static void KeyUp(Keys vKey)
-        {
-            keybd_event((byte)vKey, 0, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
-        }
-    }
-}
-"@
-Add-Type -TypeDefinition $source -ReferencedAssemblies "System.Windows.Forms"
 
 #endregion
 
@@ -1843,6 +1804,7 @@ if($port.IsOpen){
   $shell.NameSpace("C:\Matter_AI\").copyhere($shell.NameSpace($A1).Items(),4)
  }
 
+
 if($PSScriptRoot.length -eq 0){
 $scriptRoot="C:\Matter_AI"
 }
@@ -1850,7 +1812,7 @@ else{
 $scriptRoot=$PSScriptRoot
 }
 $screen = [System.Windows.Forms.Screen]::PrimaryScreen
-#$bounds = $screen.Bounds
+$bounds = $screen.Bounds
 $width  = $bounds.Width
 $height  =$bounds.Height
 
@@ -1896,6 +1858,8 @@ function sendcmd([string]$cmdline,[string]$checkbefore,[string]$checkend,[int32]
     }
     [Microsoft.VisualBasic.interaction]::AppActivate("C:\windows\system32\cmd.exe")|out-null
     start-sleep -s 2
+
+
     [Clicker]::LeftClickAtPoint($width/2, $height/2)
     Start-Sleep -Seconds 2
     if($checkbefore){
@@ -1994,61 +1958,4 @@ new-item -ItemType File -path $logpath|Out-Null
  sendcmd -cmdline $cmd3
  sendcmd -cmdline $cmd4
  }
- }
-
- function pointsverift ([string]$filepath,[string]$filename,[string]$savepath,[switch]$datatype){
-    if($filename.length -eq 0 -or $filepath.Length -eq 0 ){
-        return
-    }
-    if($savepath.Length -eq 0){
-        $savepath=$filepath
-    }
-
-  $filefull=join-path $filepath $filename
-  $savefull=join-path $savepath $((Get-ChildItem $filefull).BaseName + "_table.csv")
-  $content=get-content $filefull
-    $patterns = @(
-        "(?<=Endpoint:\s*)\d+",                   # Matches standalone "0"
-        "0x[0-9a-fA-F]{4}_[0-9a-fA-F]{4}" # Matches hexadecimal with underscore format
-    )
-    $patterna = @(
-        "(?<=\[\d+\]\:\s*)\d+" 
-    )
-    $patternb = @(
-        "(?<=DeviceType\:\s*)\d+" 
-    )
-
-    $pattern2=$patterna
-    if($datatype){
-        $pattern2=$patternb
-    }
-    $dataset=@()
-   foreach($item in $content){    
-    if($item -match "Endpoint\:\s\d{1,}"){
-        $matchitems=@()
-        #start-sleep -s 300
-        foreach ($pattern in $patterns) {
-           Select-String -InputObject $item -Pattern $pattern -AllMatches |
-                       ForEach-Object {
-                        $matchitems += @($_.Matches.Value)
-                      }
-                  
-        }        
-    }
-    if($item -match "(?<=\[\d+\]\:\s*)\d+" -or $item -match "DeviceType\:"){
-          $matches = Select-String -InputObject $item -Pattern $pattern2  -AllMatches |
-                       ForEach-Object { $_.Matches.Value }
-                
-       $dataset+=[pscustomobject] @{
-        Col1=($matchitems[0]|Out-String).trim()
-        Col2=($matchitems[1]|Out-String).trim()
-        Col3=($matchitems[2]|Out-String).trim()
-        Col4=($matches|Out-String).trim()
-        }    
-    }
-
-  }
-
-  $dataset|Export-Csv -Path  $savefull -Encoding UTF8 -NoTypeInformation
-
  }
