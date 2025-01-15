@@ -408,8 +408,6 @@ C:\Matter_AI\pscp.exe -r -pwfile C:\Matter_AI\psw.txt "$sourcefile" $copyfilepat
 }
 #endregion
 
-
-
 #region WPFmessage
 Function New-WPFMessageBox {
 
@@ -1159,7 +1157,6 @@ function puttystart ([string]$puttyname) {
 
 #endregion
 
-
 function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$savepath,[string]$errormessage){
     
     Remove-Item "$ENV:UserProfile\downloads\*.csv" -force
@@ -1202,8 +1199,7 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
     }
     start-sleep -s 2
     (get-process -name "msedge" -ea SilentlyContinue).CloseMainWindow()|Out-Null   
-  }
-  
+  } 
 
   function getparameter([string]$getlastkey){       
         $lastlogcontent=get-content -path C:\Matter_AI\logs\lastlog.log|Select-Object -skip 2
@@ -1824,13 +1820,8 @@ if($port.IsOpen){
         }
         
        
-  function compal_cmd ([switch]$ending) {
-      
-  Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Bypass -Force;
-  $wshell=New-Object -ComObject wscript.shell
-  $shell=New-Object -ComObject shell.application
-    Add-Type -AssemblyName Microsoft.VisualBasic
-     Add-Type -AssemblyName System.Windows.Forms
+ function compal_cmd ([switch]$ending) {
+
 
  if(!(Test-Path C:\Matter_AI\platform-tools\adb.exe -ea SilentlyContinue)){
    start-process msedge "https://drive.usercontent.google.com/download?id=1gMy2--1i4zLNfe_XveadM_mQHd3krBPQ&export=download&authuser=0&confirm=t&uuid=bb454201-395f-4236-9410-a4da87d1e945&at=APvzH3oNZ8sm2djB_FXOLFr6DvnS:1735882409292"
@@ -1959,7 +1950,7 @@ function endandsavelog{
  }
  }
 
-if(!(get-process -Name WindowsTerminal -ErrorAction SilentlyContinue).id.Count -ne 2){
+if(!(get-process -Name cmd -ErrorAction SilentlyContinue).id.Count -eq 0){
 start-process cmd -WindowStyle Maximized
 Start-Sleep -Seconds 5
 }
@@ -1970,6 +1961,7 @@ endandsavelog
  Rename-Item "C:\Matter_AI\logs\dutcmd\adb.log" -newname "adb_$($suffixdate).log" -force
 
 if ($ending){
+get-process -name cmd -ErrorAction SilentlyContinue | stop-process
 return
 }
 
