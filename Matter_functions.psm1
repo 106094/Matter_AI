@@ -1920,7 +1920,7 @@ function endandsavelog{
  }
  }
 
-if(!(get-process -Name WindowsTerminal -ErrorAction SilentlyContinue)){
+if(!(get-process -Name WindowsTerminal -ErrorAction SilentlyContinue).id.Count -ne 2){
 start-process cmd -WindowStyle Maximized
 Start-Sleep -Seconds 5
 }
