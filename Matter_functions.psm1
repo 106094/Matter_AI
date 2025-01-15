@@ -1970,6 +1970,7 @@ endandsavelog
 
 if ($ending){
 sendcmd -cmdline "exit"
+sendcmd -cmdline "exit"
 return
 }
 
