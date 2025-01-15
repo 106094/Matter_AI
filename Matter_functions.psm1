@@ -1963,6 +1963,9 @@ Start-Sleep -Seconds 5
 endandsavelog
 
  $cmd5.Invoke()
+ 
+ $cmdlogfile=Get-ChildItem -path "C:\Matter_AI\logs\dutcmd\cmd_output*.log" -ea SilentlyContinue|Sort-Object lastwritetime|select -Last 1
+ $suffixdate=($cmdlogfile.basename).Replace("cmd_output_","")
  Rename-Item "C:\Matter_AI\logs\dutcmd\adb.log" -newname "adb_$($suffixdate).log" -force
 
 if ($ending){
