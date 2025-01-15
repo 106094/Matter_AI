@@ -83,6 +83,19 @@ public static void LeftClickAtPoint(int x, int y)
   input[2].mi.dwFlags = MOUSEEVENTF_LEFTUP;
   SendInput(3, input, Marshal.SizeOf(input[0]));
 }
+public static void rightClickAtPoint(int x, int y)
+{
+    //Move the mouse
+    INPUT[] input = new INPUT[3];
+    input[0].mi.dx = x*(65535/System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width);
+    input[0].mi.dy = y*(65535/System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height);
+    input[0].mi.dwFlags = MOUSEEVENTF_MOVED | MOUSEEVENTF_ABSOLUTE;
+    //Left mouse button down
+    input[1].mi.dwFlags = MOUSEEVENTF_RIGHTDOWN;
+    //Left mouse button up
+    input[2].mi.dwFlags = MOUSEEVENTF_RIGHTUP;
+    SendInput(3, input, Marshal.SizeOf(input[0]));
+}
 }
 '@
 try{
@@ -91,6 +104,32 @@ try{
 catch{
   Write-Output "$($_.Exception.Message)"
 }
+$source = @"
+using System;
+using System.Threading.Tasks;
+using System.Runtime.InteropServices;
+using System.Windows.Forms;
+namespace KeySends
+{
+    public class KeySend
+    {
+        [DllImport("user32.dll")]
+        public static extern void keybd_event(byte bVk, byte bScan, int dwFlags, int dwExtraInfo);
+        private const int KEYEVENTF_EXTENDEDKEY = 1;
+        private const int KEYEVENTF_KEYUP = 2;
+        public static void KeyDown(Keys vKey)
+        {
+            keybd_event((byte)vKey, 0, KEYEVENTF_EXTENDEDKEY, 0);
+        }
+        public static void KeyUp(Keys vKey)
+        {
+            keybd_event((byte)vKey, 0, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
+        }
+    }
+}
+"@
+Add-Type -TypeDefinition $source -ReferencedAssemblies "System.Windows.Forms"
+
 
 #endregion
 
