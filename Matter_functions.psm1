@@ -1852,7 +1852,11 @@ $cmd1="C:\Matter_AI\platform-tools\adb.exe shell"
 $cmd2="ping 8.8.8.8 -c 5"
 $cmd3="rm -rf /data/matter/*"
 $cmd4="./data/chip-bridge-app-android-real | tee /data/matter/log.txt"
-$cmd5="C:\Matter_AI\platform-tools\adb.exe pull /data/matter/log.txt C:\Matter_AI\logs\dutcmd\adb.log"
+$cmd5={
+&"C:\Matter_AI\platform-tools\adb.exe" pull /data/matter/log.txt C:\Matter_AI\logs\dutcmd\adb.log
+start-sleep -s 10
+}
+
 
 function selectcopy ([string]$cmdlet){
 
@@ -1888,8 +1892,6 @@ function sendcmd([string]$cmdline,[string]$checkbefore,[string]$checkend,[int32]
     }
     [Microsoft.VisualBasic.interaction]::AppActivate("C:\windows\system32\cmd.exe")|out-null
     start-sleep -s 2
-
-
     [Clicker]::LeftClickAtPoint($width/2, $height/2)
     Start-Sleep -Seconds 2
     if($checkbefore){
@@ -1939,7 +1941,8 @@ function endandsavelog{
  [Clicker]::LeftClickAtPoint($width/2, $height/2)
  Start-Sleep -Seconds 2
  $wshell.SendKeys("^c")
- Start-Sleep -Seconds 2
+ Start-Sleep -Seconds 3
+
  selectcopy -cmdlet "select all text"
  $selections=Get-Clipboard
  Start-Sleep -s 5
@@ -1957,7 +1960,7 @@ Start-Sleep -Seconds 5
 
 endandsavelog
 
- $checklogin=sendcmd -cmdline $cmd5 -waittime 10
+ $cmd5.Invoke()
  Rename-Item "C:\Matter_AI\logs\dutcmd\adb.log" -newname "adb_$($suffixdate).log" -force
 
 if ($ending){
