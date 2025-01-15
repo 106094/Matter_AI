@@ -1900,10 +1900,12 @@ function sendcmd([string]$cmdline,[string]$checkbefore,[string]$checkend,[int32]
     $readline=($readline|where-object{$_.length -gt 0})
      Start-Sleep -Seconds 5
     if($beforelast){
+    if((($readline)[-1]).length -ne 1){
     $readline=($readline)[-1]
+    }
     }   
 
-    if($readline -like "*$checkbefore*"){
+    if($readline -like "*$checkbefore*" ){
     $n=1
     }
     }
