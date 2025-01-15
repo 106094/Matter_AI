@@ -1950,7 +1950,7 @@ function endandsavelog{
  }
  }
 
-if(!(get-process -Name cmd -ErrorAction SilentlyContinue).id.Count -eq 0){
+if(!(get-process -Name cmd -ErrorAction SilentlyContinue).id.Count -eq 1){
 start-process cmd -WindowStyle Maximized
 Start-Sleep -Seconds 5
 }
