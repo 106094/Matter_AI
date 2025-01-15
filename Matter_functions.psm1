@@ -1969,7 +1969,7 @@ endandsavelog
  Rename-Item "C:\Matter_AI\logs\dutcmd\adb.log" -newname "adb_$($suffixdate).log" -force
 
 if ($ending){
-get-process -name cmd -ErrorAction SilentlyContinue | stop-process
+sendcmd -cmdline "exit"
 return
 }
 
