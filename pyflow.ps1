@@ -109,8 +109,12 @@ if ($global:testtype -eq 2){
    $paring_thread="./chip-tool pairing ble-thread node-id operationalDataset --passcode --discriminator --paa-trust-store-path paapath --trace_decode 1"
    $paring_manual="./chip-tool pairing code-wifi node-id --wifi-ssid --wifi-passphrase --manual-code --paa-trust-store-path paapath --trace_decode 1"
    $paring_ble="./chip-tool pairing ble-wifi node-id --wifi-ssid --wifi-passphrase --passcode --discriminator --paa-trust-store-path paapath --trace_decode 1"
+   $paring_onwk="./chip-tool pairing onnetwork node-id --passcode --paa-trust-store-path paapath --trace_decode 1"
    
-   if ($pairsettings."operationalDataset".length -gt 0){
+   if($pairsettings."--commissioning-method" -match "onnetwork"){
+   $paringcmd=$paring_onwk
+   }
+      if ($pairsettings."operationalDataset".length -gt 0){
     $paringcmd=$paring_thread
    }
    if(!$paringcmd -and $pairsettings."--manual-code".length -gt 0){
