@@ -1980,7 +1980,7 @@ new-item -ItemType File -path $logpath|Out-Null
  selectcopy -cmdlet "Clear Buffer"
  $checklogin=sendcmd -cmdline $cmd1 -checkend "sh-3.2#" -checkbefore ">"
 
- if($checklogin -ne 2){
+ if($checklogin -eq 1){
  foreach($passwd in $passwds){
  $checklogin=sendcmd -cmdline $passwd -checkbefore "Enter adb password" -checkend "sh-3.2#"
  if($checklogin -eq 0 -or $checklogin -eq 2){
