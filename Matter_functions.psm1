@@ -1981,7 +1981,7 @@ new-item -ItemType Directory -path C:\Matter_AI\logs\dutcmd -Force |Out-Null
 new-item -ItemType File -path $logpath|Out-Null
 
  selectcopy -cmdlet "Clear Buffer"
- $checklogin=sendcmd -cmdline $cmd1 -checkend "sh-3.2#" -checkbefore "C:\Users\"
+ $checklogin=sendcmd -cmdline $cmd1 -checkend "sh-3.2#" -checkbefore ">"
 
  if($checklogin -ne 2){
  foreach($passwd in $passwds){
