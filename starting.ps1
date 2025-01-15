@@ -303,12 +303,6 @@ $endtime=get-date
 $continueq = [System.Windows.Forms.MessageBox]::Show("Need Retest?", "Check", [System.Windows.Forms.MessageBoxButtons]::YesNo)
 }
 
-#puttyexit
-if ($testtypeall -contains 2 -and !$testing){
-$resultlog=(get-childitem "C:\Matter_AI\logs\_manual\" -directory | Sort-Object LastWriteTime -Descending | Select-Object -First 1).fullname
-$reportPath = join-path $resultlog "report.html"
-Start-Process $reportPath -ErrorAction SilentlyContinue
-}
 
 if($dutcontrol -ne 1 -and $dutcontrol -ne 5){
   dutcontrol -mode "close"
@@ -318,8 +312,15 @@ if($dutcontrol -eq 5){
   compal_cmd -ending
 }
 
+
 $timepassed=New-TimeSpan -start $starttime -end $endtime
 $timegap="{0} Hours, {1} minutes, {2} seconds" -f $timepassed.Hours, $timepassed.Minutes, $timepassed.Seconds
 [System.Windows.Forms.MessageBox]::Show("Matter auto test completed in $timegap","Info",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Information)
 
 
+#puttyexit
+if ($testtypeall -contains 2 -and !$testing){
+$resultlog=(get-childitem "C:\Matter_AI\logs\_manual\" -directory | Sort-Object LastWriteTime -Descending | Select-Object -First 1).fullname
+$reportPath = join-path $resultlog "report.html"
+Start-Process $reportPath -ErrorAction SilentlyContinue
+}
