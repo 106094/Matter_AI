@@ -222,6 +222,8 @@ for($i=$Indexfirst;$i -le $Indexlast;$i++){
           step="precondition"
           flow=($preconall|out-string).trim()
           cmd=$toolcmd
+          verify=$null
+          example=$null
           results=$results
           session=$null
           }
@@ -249,6 +251,8 @@ for($i=$Indexfirst;$i -le $Indexlast;$i++){
           step="precondition"
           flow=($preconall|out-string).trim()
           cmd=$toolcmd
+          verify=$null
+          example=$null
           results=$results          
           session=$null
           }
