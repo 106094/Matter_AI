@@ -50,6 +50,12 @@ if(test-path $TH2list){
 $a=(Import-Excel $excelfull -WorksheetName "Python Script Command" -StartRow 2 -EndRow 1 -StartColumn 7)
 $a[-1]|export-csv C:\Matter_AI\settings\_manual\settings.csv -NoTypeInformation -force
 
+#tc-filter
+$tcfilters=(import-csv "C:\Matter_AI\settings\manualcmd_Matter - TC_filter.csv")
+$matchtcs=($tcfilters|where-object{$_."matched_manual" -ne ""})."TC"
+$extra=($tcfilters|where-object{$_."extra_manual" -ne ""})."TC"
+$excludetcs=($tcfilters|where-object{$_."exclude_manual" -ne ""})."TC"
+
 #filter manual and as client and UI-Manual
 if ($global:updatechiptool -eq "Yes"){
 #region insatll importexcel
@@ -97,6 +103,9 @@ $excelPackage = [OfficeOpenXml.ExcelPackage]::new((Get-Item $excelfull))
 $worksheetsum=Import-Excel $excelfull -WorksheetName $sumsheetname
 $filteredtcs = ($worksheetsum |Where-Object{$_."Test Case ID".length -gt 0}|  Where-Object {$_."$columncor" -eq "UI-Manual" `
  -and $_."Test Case Name" -notlike "*as client*"})."Test Case ID"
+ if($extra){
+  $filteredtcs+=$extra
+ }
 $filteredsheets=$filteredtcs|foreach-object{($_.split("-"))[1]}|Get-Unique
 $filteredsheets+="Diag Log"
 $Indexfirst=($worksheetNames.trim()).IndexOf("ACE")
@@ -417,6 +426,18 @@ foreach($line in $csvcontent){
   }
 }
 $csvcontent|export-csv $csvname0 -NoTypeInformation
+if($matchtcs){  
+  foreach($matchtc in $matchtcs){
+    $csvcontent2+=$csvcontent|Where-Object{$_."TestCaseID" -match "\[$matchtc\]"}
+  }
+  $csvcontent=$csvcontent2 
+}
+if($excludetcs){
+  foreach($excludetc in $excludetcs){
+    $csvcontent=$csvcontent|Where-Object{$_."TestCaseID" -notmatch "\[$excludetc\]"}
+  }
+}
+
 $csvcontent|Where-Object{$_.cmd.length -gt 0 -and $_.results.length -eq 0 -and $_.TestCaseID -notin $TH2tcline}|export-csv $csvname -NoTypeInformation
 #endregion
 

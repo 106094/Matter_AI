@@ -50,6 +50,16 @@ $sumsheetname=((import-csv "C:\Matter_AI\settings\filesettings.csv"|Where-Object
 $worksheetsum=Import-Excel $global:excelfile -WorksheetName $sumsheetname
 $columnName = ($worksheetsum[0].PSObject.Properties.Name)[[int32]$columncor-1]
 $filteredtcs = ($worksheetsum |Where-Object{$_."Test Case ID".length -gt 0}|  Where-Object {$_.$columnName -eq "UI-Automated"})."Test Case ID"|Sort-Object
+#tc-filter
+$tcfilters=(import-csv "C:\Matter_AI\settings\manualcmd_Matter - TC_filter.csv")
+$matchtcs=($tcfilters|where-object{$_."matched_webui" -ne ""})."TC"
+$excludetcs=($tcfilters|where-object{$_."exclude_webui" -ne ""})."TC"
+if($matchtcs){
+  $filteredtcs= $filteredtcs|Where-Object{$_ -in $matchtcs} 
+}
+if($excludetcs){
+  $filteredtcs= $filteredtcs|Where-Object{ $_ -notin $excludetcs} 
+}
 $global:webuicases=selguis -Inputdata $filteredtcs -instruction "Please select Auto caseids" -errmessage "No caseid selected"
 
 <#

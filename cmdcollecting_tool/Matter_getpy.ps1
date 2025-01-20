@@ -51,10 +51,22 @@ $clnsets=((Import-Excel $global:excelfile -WorksheetName "Python Script Command"
 $clnsets1= @("Test Case ID" , "*sample command*") + $clnsets
 $clnsets2= @("TestCaseID" , "command")+ $clnsets
 $newclns=$clnsets2 -join ","
+
+
+
 Import-Excel $global:excelfile -WorksheetName "Python Script Command" -StartRow 2 |Select-Object -Property  $clnsets1 `
 |Export-Csv $spath\py0.csv -NoTypeInformation
 
 $filtercsv=import-csv  $spath\py0.csv |Where-Object{$_."Test Case ID".length -gt 0}
+$tcfilters=(import-csv "C:\Matter_AI\settings\manualcmd_Matter - TC_filter.csv")
+$matchtcs=($tcfilters|where-object{$_."matched_py" -ne ""})."TC"
+$excludetcs=($tcfilters|where-object{$_."exclude_py" -ne ""})."TC"
+if($matchtcs){
+  $filtercsv=$filtercsv|Where-Object{$_."Test Case ID" -in $matchtcs}
+}
+if($excludetcs){  
+  $filtercsv=$filtercsv|Where-Object{$_."Test Case ID" -notin $excludetcs}
+}
 $filtercsv|export-csv $spath\py0.csv -NoTypeInformation
 new-item -path $spath\py.csv -force |out-null
 add-content -path $spath\py.csv -value $newclns
