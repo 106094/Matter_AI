@@ -106,6 +106,9 @@ if(!$checkfile){
 }
 
 if ($testtype -match 2){
+  if(!$global:testing){
+    downloads -google
+    }
   $getcmdpsfile="C:\Matter_AI\cmdcollecting_tool\Matter_getchiptool.ps1"
   $global:updatechiptool = [System.Windows.Forms.MessageBox]::Show("Need update UI-Manual database?", "Check", [System.Windows.Forms.MessageBoxButtons]::YesNo, [System.Windows.Forms.MessageBoxIcon]::Question, [System.Windows.Forms.MessageBoxDefaultButton]::Button2)
   if ($global:updatechiptool -eq "Yes") {
@@ -138,10 +141,6 @@ if ($testtype -match 2){
     [System.Windows.Forms.MessageBox]::Show("Fail to get csv file","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
       exit
     }    
-
- if(!$global:testing){
-  downloads -google
-  }
 
 }
 
