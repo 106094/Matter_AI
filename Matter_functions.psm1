@@ -1999,3 +1999,62 @@ new-item -ItemType File -path $logpath|Out-Null
  sendcmd -cmdline $cmd4
  }
  }
+
+
+ function alarmmsg([string]$msg){
+    $InfoParams = @{
+        Title = "INFORMATION"
+        TitleFontSize = 22
+        ContentFontSize = 30
+        TitleBackground = 'LightSkyBlue'
+        ContentTextForeground = 'Red'
+        ButtonType = 'OK'
+        ButtonTextForeground = "Blue"
+          }
+       New-WPFMessageBox @InfoParams -Content $msg
+
+}
+
+function downloads([switch]$google){
+  
+    if($google){
+
+    #region download manual speacial settings
+    $goo_link="https://docs.google.com/spreadsheets/d/19ZPA2Z6SYYtvIj9qXM0FuDASF0FaZP2xjx7jcebrJEQ/"
+    $gid="1307777084"
+    $sv_range="A1:N1000"
+    $savepath="C:\Matter_AI\settings\"
+    $errormessage="matter manual set download failed"
+    $checkdownload=webdownload -goo_link $goo_link -gid $gid -sv_range $sv_range -savepath $savepath -errormessage $errormessage
+     if($checkdownload -match "fail"){      
+          alarmmsg "Please login in authorized google account at edge first"
+        exit
+    }
+    #endregion
+
+    #region download TC_filter settings
+    $goo_link="https://docs.google.com/spreadsheets/d/19ZPA2Z6SYYtvIj9qXM0FuDASF0FaZP2xjx7jcebrJEQ/"
+    $gid="808739996"
+    $sv_range="A1:I1000"
+    $savepath="C:\Matter_AI\settings\"
+    $errormessage="matter TC_filter download failed"
+    $checkdownload=webdownload -goo_link $goo_link -gid $gid -sv_range $sv_range -savepath $savepath -errormessage $errormessage
+    #endregion
+
+    if(!(test-path "C:\Matter_AI\settings\chip-tool_clustercmd - id_list.csv")){
+      if(test-path "C:\Matter_AI\settings\chip-tool_clustercmd*.csv"){
+      remove-item "C:\Matter_AI\settings\chip-tool_clustercmd*.csv" -ErrorAction SilentlyContinue
+      }
+    #region download manual endpoint referance
+    $goo_link="https://docs.google.com/spreadsheets/d/1-vSsxIMLxcSibvRLyez-SJD0ZfF-Su7aVUCV2bUJuWk/"
+    $gid="1082391814"
+    $sv_range="A1:E7000"
+    $savepath="C:\Matter_AI\settings\"
+    $errormessage="matter endpoint referance download failed"
+    webdownload -goo_link $goo_link -gid $gid -sv_range $sv_range -savepath $savepath -errormessage $errormessage
+    #endregion
+    }
+
+    }
+    
+}
