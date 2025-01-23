@@ -1202,7 +1202,7 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
   } 
 
   function getparameter([string]$getlastkey){       
-        $lastlogcontent=get-content -path C:\Matter_AI\logs\lastlog.log|Select-Object -skip 2
+        $lastlogcontent=get-content -path C:\Matter_AI\logs\lastlog.log|Where-Object{$_.length -gt 0}|Select-Object -skip 2
         $getlastkey=$getlastkey.replace("[","\[").replace("]","\]")
         $matchvalue= ([regex]::Match(($lastlogcontent -match $getlastkey), "$getlastkey(.*)").Groups[1].value).tostring().trim()
         $matchvalue=(($matchvalue.replace("[","")).replace("]","")).replace(",","")
