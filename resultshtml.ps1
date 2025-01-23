@@ -126,7 +126,11 @@ $htmlContent += "</tr></thead><tbody>"
       $matchedlines=@()
       $k++
       $logdata=get-content $log |Where-Object{$_.length -gt 0}| Select-Object -skip 2
-      $checkitems = $csv.example.split("`n")|Where-Object{$_.trim().length -gt 0}|Sort-Object|Get-Unique
+       $newcsv=  ($csv.example).replace($ekey," ")
+         foreach($ekey in $eckeys){
+             $newcsv=  $newcsv.replace($ekey," ")
+          }
+           $checkitems = $newcsv.split("`n")|Where-Object{$_.trim().length -gt 2}|Sort-Object|Get-Unique
       if($checkitems){     
         $passmatch=@()
         foreach ($checkitem in $checkitems){
@@ -152,9 +156,9 @@ $htmlContent += "</tr></thead><tbody>"
           $totalc=$splitchecjs.count
           $splitchecjs|ForEach-Object{
             $checkkit1=$_.trim()
-              $newcheckit=$checkkit1.replace("[","\[").replace("]","\]").replace(")","\)").replace("(","\(").replace(":","\:").replace("{","\{").replace("}","\}").replace("""","")
+              $newcheckit=$checkkit1.replace("[","\[").replace("]","\]").replace(")","\)").replace("(","\(").replace(":","\:").replace("{","\{").replace("}","\}").replace("""","").replace(",","\,")
               #if($logline -like "*$newcheckit*"){
-                if($logline -match "(^|\s|)\b$newcheckit($|\s|\b)" ){
+                 if($logline -match "(^|\s|\b)$newcheckit($|\s|\b)" ){
                 $match2++
                 $maxdcm2=[math]::round($match2/$totalc,3)   
                 if($maxdcm2 -gt $maxdcm){
@@ -212,7 +216,7 @@ $htmlContent += "</tr></thead><tbody>"
         $cmd=($($csv.cmd) -split "`n")[$k-1]
     
         if($k -gt 1){
-          #$varify=$example="Å™"
+          #$varify=$example="¬Å¬™"
           $varify=$example="(same as last one)"
         }
 
