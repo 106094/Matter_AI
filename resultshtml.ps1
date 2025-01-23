@@ -126,7 +126,11 @@ $htmlContent += "</tr></thead><tbody>"
       $matchedlines=@()
       $k++
       $logdata=get-content $log |Where-Object{$_.length -gt 0}| Select-Object -skip 2
-      $checkitems = $csv.example.split("`n")|Where-Object{$_.trim().length -gt 0}|Sort-Object|Get-Unique
+       $newcsv=  ($csv.example).replace($ekey," ")
+         foreach($ekey in $eckeys){
+             $newcsv=  $newcsv.replace($ekey," ")
+          }
+           $checkitems = $newcsv.split("`n")|Where-Object{$_.trim().length -gt 2}|Sort-Object|Get-Unique
       if($checkitems){     
         $passmatch=@()
         foreach ($checkitem in $checkitems){
