@@ -162,8 +162,17 @@ function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int6
          $laststring= [regex]::Escape($lastword)
          }
         $maxid=(@($endpoint,$destid)|Measure-Object -maximum).maximum
-        $patterns="\s+(\S+)"*$maxid
-        $pattern = "$laststring$($patterns)"
+         #check duplicated
+         $dupcheck=$cmdline|select-string -pattern $laststring -AllMatches
+         $dupcount=($dupcheck.Matches.count)
+         if ($dupcount -gt 1){
+            [int]$maxid+=$dupcount-1
+            [int]$endpoint+=$dupcount-1
+            [int]$destid+=[int]($dupcount-1)
+         }
+
+         $patterns="\s+(\S+)"*$maxid
+         $pattern = "$laststring$($patterns)"
 
         if ($matchline){
             $matchData = @()  # Array to store match information
