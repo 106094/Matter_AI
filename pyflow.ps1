@@ -193,7 +193,7 @@ if ($global:testtype -eq 2){
              $getlastkey=$special."lastlog_keyword"
              $paraname=$special."para_name"             
              $newwaittime=[int64]$special."waittime"
-               if($method -match "replace"){
+               #if($method -match "replace"){
                  $keyword=$special."cmd_keyword"
                  $replaceby=$special."replace"
                  if($replaceby -match "var\:"){
@@ -203,7 +203,7 @@ if ($global:testtype -eq 2){
                  if($replaceby -match "py\:"){
                   $paraname=$replaceby.replace("py:","")
                   $replaceby=$pairsettings."$paraname"
-                }
+                #}
                  $pyline = $pyline.replace($keyword, $replaceby)
                 }                           
                 if($method -match "skip"){
