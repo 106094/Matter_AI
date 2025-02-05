@@ -206,7 +206,9 @@ if ($global:testtype -eq 2){
                   $paraname=$replaceby.replace("py:","")
                   $replaceby=$pairsettings."$paraname"
                 }
+                if($replaceby.length -gt 0){
                  $pyline = $pyline.replace($keyword, $replaceby)
+                }
                 }                           
                 if($method -match "skip"){
                   $runflag=0
@@ -272,9 +274,11 @@ if ($global:testtype -eq 2){
                $paraname=$replaceby.replace("py:","")
                $replaceby=$pairsettings."$paraname"
              }
+             if($replaceby.length -gt 0){
               $pyline = $pyline.replace($keyword, $replaceby)
              }
-             
+             }
+
           $pycmd=putty_paste -cmdline "$pyline" -check_sec $waittime -manual
           $lastlogcontent=get-content -path C:\Matter_AI\logs\lastlog.log
           
