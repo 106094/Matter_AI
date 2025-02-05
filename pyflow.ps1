@@ -261,6 +261,20 @@ if ($global:testtype -eq 2){
               }
           }
           if($runflag -eq 1){
+            if($keyword.length -gt 0){
+              $keyword=$special."cmd_keyword"
+              $replaceby=$special."replace"
+              if($replaceby -match "var\:"){
+                $paraname=$replaceby.replace("var:","")
+                $replaceby=($global:varhash|Where-Object{$_.para_name -eq $paraname})."setvalue"
+              }
+              if($replaceby -match "py\:"){
+               $paraname=$replaceby.replace("py:","")
+               $replaceby=$pairsettings."$paraname"
+             }
+              $pyline = $pyline.replace($keyword, $replaceby)
+             }
+             
           $pycmd=putty_paste -cmdline "$pyline" -check_sec $waittime -manual
           $lastlogcontent=get-content -path C:\Matter_AI\logs\lastlog.log
           
