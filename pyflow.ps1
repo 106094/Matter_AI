@@ -196,8 +196,6 @@ if ($global:testtype -eq 2){
              $keyword=$special."cmd_keyword"
              $replaceby=$special."replace"
                if($keyword.length -gt 0){
-                 $keyword=$special."cmd_keyword"
-                 $replaceby=$special."replace"
                  if($replaceby -match "var\:"){
                    $paraname=$replaceby.replace("var:","")
                    $replaceby=($global:varhash|Where-Object{$_.para_name -eq $paraname})."setvalue"
@@ -246,7 +244,7 @@ if ($global:testtype -eq 2){
                     new-item -ItemType File -Path $logtcstep | Out-Null
                     add-content -path $logtcstep -Value $lastlogcontent
                     if ($getlastkey.Length -gt 0){
-                      getparameter -getlastkey $getlastkey
+                      getparameter -getlastkey $getlastkey -paraname $paraname
                       Write-Output "add var before"                     
                      }
                   }
@@ -264,8 +262,6 @@ if ($global:testtype -eq 2){
           }
           if($runflag -eq 1){
             if($keyword.length -gt 0){
-              $keyword=$special."cmd_keyword"
-              $replaceby=$special."replace"
               if($replaceby -match "var\:"){
                 $paraname=$replaceby.replace("var:","")
                 $replaceby=($global:varhash|Where-Object{$_.para_name -eq $paraname})."setvalue"
@@ -291,7 +287,7 @@ if ($global:testtype -eq 2){
           add-content -path $logtcstep -Value $lastlogcontent
 
           if ($getlastkey.Length -gt 0){
-           getparameter -getlastkey $getlastkey
+           getparameter -getlastkey $getlastkey -paraname $paraname
            Write-Output "add var"
           }
 
@@ -304,6 +300,19 @@ if ($global:testtype -eq 2){
             #$puttysesstion=$addcmd.puttysesstion
             $waittime=[int64]$addcmd.waittime
             #$pycmd=putty_paste -cmdline "$addcmdaf" -puttyname $puttysesstion -check_sec $waittime -manual
+            if($keyword.length -gt 0){
+              if($replaceby -match "var\:"){
+                $paraname=$replaceby.replace("var:","")
+                $replaceby=($global:varhash|Where-Object{$_.para_name -eq $paraname})."setvalue"
+              }
+              if($replaceby -match "py\:"){
+               $paraname=$replaceby.replace("py:","")
+               $replaceby=$pairsettings."$paraname"
+             }
+             if($replaceby.length -gt 0){
+              $addcmdaf = $addcmdaf.replace($keyword, $replaceby)
+             }
+             } 
             $pycmd=putty_paste -cmdline "$addcmdaf" -check_sec $waittime -manual -puttyname $puttyname
             $lastlogcontent=get-content -path C:\Matter_AI\logs\lastlog.log
             $datetime2=get-date -Format yyyyMMdd_HHmmss
@@ -314,7 +323,7 @@ if ($global:testtype -eq 2){
             new-item -ItemType File -Path $logtcstep | Out-Null
             add-content -path $logtcstep -Value $lastlogcontent
             if ($getlastkey.Length -gt 0){
-              getparameter -getlastkey $getlastkey
+              getparameter -getlastkey $getlastkey -paraname $paraname
               Write-Output "add var after"
              }
            }

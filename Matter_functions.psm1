@@ -1210,17 +1210,20 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
     (get-process -name "msedge" -ea SilentlyContinue).CloseMainWindow()|Out-Null   
   } 
 
-  function getparameter([string]$getlastkey){       
+  function getparameter([string]$getlastkey,[string]$paraname){
+      
         $lastlogcontent=get-content -path C:\Matter_AI\logs\lastlog.log|Where-Object{$_.length -gt 0}|Select-Object -skip 2
-        $getlastkey=$getlastkey.replace("[","\[").replace("]","\]")
-        $matchvalue= ([regex]::Match(($lastlogcontent -match $getlastkey), "$getlastkey(.*)").Groups[1].value).tostring().trim()
-        $matchvalue=(($matchvalue.replace("[","")).replace("]","")).replace(",","")
-        #$matchvalue= (($lastlogcontent|Select-String -Pattern "($getlastkey).*" -AllMatches |  ForEach-Object {$_.matches.value}).split($getlastkey))[-1].trim()
-        $global:varhash+=@([PSCustomObject]@{           
-         para_name = $paraname
-         setvalue = $matchvalue
-        })      
-        $global:varhash
+        $getlastkey2=$getlastkey.replace("[","\[").replace("]","\]").replace(":","\:")
+        $matchvalues=($lastlogcontent|Select-String -Pattern "($getlastkey2).*" -AllMatches |  ForEach-Object {$_.matches.value})
+        $matchvalue=((($matchvalues[-1]).replace("[","")).replace("]","")).replace(",","").replace($getlastkey,"")
+        if($matchvalue.length -eq 0){
+            $global:varhash+=@([PSCustomObject]@{           
+                para_name = $paraname
+                setvalue = $matchvalue
+               })      
+               $global:varhash
+        }
+
   }
 
   function selectcom{# Load the required .NET assembly for Windows Forms
