@@ -192,8 +192,10 @@ if ($global:testtype -eq 2){
              $newputtyname=$special."diff_session"
              $getlastkey=$special."lastlog_keyword"
              $paraname=$special."para_name"             
-             $newwaittime=[int64]$special."waittime"
-               #if($method -match "replace"){
+             $newwaittime=[int64]$special."waittime"             
+             $keyword=$special."cmd_keyword"
+             $replaceby=$special."replace"
+               if($keyword.length -gt 0){
                  $keyword=$special."cmd_keyword"
                  $replaceby=$special."replace"
                  if($replaceby -match "var\:"){
@@ -203,7 +205,7 @@ if ($global:testtype -eq 2){
                  if($replaceby -match "py\:"){
                   $paraname=$replaceby.replace("py:","")
                   $replaceby=$pairsettings."$paraname"
-                #}
+                }
                  $pyline = $pyline.replace($keyword, $replaceby)
                 }                           
                 if($method -match "skip"){
