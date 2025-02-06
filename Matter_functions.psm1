@@ -141,6 +141,11 @@ function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int6
         $lastword=$endpoint=$destid=$endpoint=$null
         $eplists=import-csv "C:\Matter_AI\settings\chip-tool_clustercmd - id_list.csv"
         $splitcmd=($cmdline.replace("./chip-tool ","")).split(" ")|where-object{$_.Length -gt 0}
+        #checkif  attribute with ''
+        if ($cmdline -match "'([^']*)'") {
+            $attribute ="'"+ $matches[1]+"'"
+                $cmdline=$cmdline.replace($attribute,"att1") # for lack after id   
+        }
         #check if matched chiptool cmd
         $matchline=$eplists|Where-Object{$_.name -eq $splitcmd[0] -and $_.command -eq $splitcmd[1] -and $_.attribute -eq $splitcmd[2]}
         if($matchline){
@@ -162,11 +167,6 @@ function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int6
          $dupcheck=$cmdline|select-string -pattern "\b$laststring\b" -AllMatches
          $dupcount=($dupcheck.Matches.count)
 
-        #checkif  attribute with ''
-        if ($cmdline -match "'([^']*)'") {
-            $attribute ="'"+ $matches[1]+"'"
-                $cmdline=$cmdline.replace($attribute,"att1") # for lack after id   
-        }
          $cmdline1=""
          $cmdline2=$cmdline
          if ($dupcount -gt 1){
