@@ -143,8 +143,7 @@ function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int6
         $splitcmd=($cmdline.replace("./chip-tool ","")).split(" ")|where-object{$_.Length -gt 0}
         #checkif  attribute with ''
         if ($cmdline -match "'([^']*)'") {
-            $attribute ="'"+ $matches[1]+"'"
-                $cmdline=$cmdline.replace($attribute,"att1") # for lack after id   
+            $attribute ="'"+ $matches[1]+"'"  
         }
         #check if matched chiptool cmd
         $matchline=$eplists|Where-Object{$_.name -eq $splitcmd[0] -and $_.command -eq $splitcmd[1] -and $_.attribute -eq $splitcmd[2]}
@@ -181,7 +180,9 @@ function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int6
         if ($matchline){
             $matchData = @()  # Array to store match information
             $matches = [regex]::Match($cmdline2 +" abcd efgh 1234", "$pattern") # for lack after id
-
+             if($attribute){
+                $matches = [regex]::Match($cmdline2.replace($attribute,"att1") +" abcd efgh 1234", "$pattern") # for lack after id
+             }
                 if ($matches.Success) {
                     foreach ($match in $matches.Groups) {
                         $matchInfo = [PSCustomObject]@{
