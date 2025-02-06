@@ -191,7 +191,7 @@ if ($global:testtype -eq 2){
              $method=$special."method"
              $newputtyname=$special."diff_session"
              $getlastkey=$special."lastlog_keyword"
-             $paraname=$special."para_name"             
+             $setparaname=$special."para_name"             
              $newwaittime=[int64]$special."waittime"             
              $keyword=$special."cmd_keyword"
              $replaceby=$special."replace"
@@ -244,7 +244,7 @@ if ($global:testtype -eq 2){
                     new-item -ItemType File -Path $logtcstep | Out-Null
                     add-content -path $logtcstep -Value $lastlogcontent
                     if ($getlastkey.Length -gt 0){
-                      getparameter -getlastkey $getlastkey -paraname $paraname
+                      getparameter -getlastkey $getlastkey -paraname $setparaname
                       Write-Output "add var before"                     
                      }
                   }
@@ -287,7 +287,7 @@ if ($global:testtype -eq 2){
           add-content -path $logtcstep -Value $lastlogcontent
 
           if ($getlastkey.Length -gt 0){
-           getparameter -getlastkey $getlastkey -paraname $paraname
+           getparameter -getlastkey $getlastkey -paraname $setparaname
            Write-Output "add var"
           }
 
@@ -323,7 +323,7 @@ if ($global:testtype -eq 2){
             new-item -ItemType File -Path $logtcstep | Out-Null
             add-content -path $logtcstep -Value $lastlogcontent
             if ($getlastkey.Length -gt 0){
-              getparameter -getlastkey $getlastkey -paraname $paraname
+              getparameter -getlastkey $getlastkey -paraname $setparaname
               Write-Output "add var after"
              }
            }
