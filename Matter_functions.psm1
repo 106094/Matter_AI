@@ -141,10 +141,6 @@ function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int6
         $lastword=$endpoint=$destid=$endpoint=$null
         $eplists=import-csv "C:\Matter_AI\settings\chip-tool_clustercmd - id_list.csv"
         $splitcmd=($cmdline.replace("./chip-tool ","")).split(" ")|where-object{$_.Length -gt 0}
-        #checkif  attribute with ''
-        if ($cmdline -match "'([^']*)'") {
-            $attribute ="'"+ $matches[1]+"'"
-        }
         #check if matched chiptool cmd
         $matchline=$eplists|Where-Object{$_.name -eq $splitcmd[0] -and $_.command -eq $splitcmd[1] -and $_.attribute -eq $splitcmd[2]}
         if($matchline){
@@ -163,23 +159,29 @@ function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int6
          }
         $maxid=(@($endpoint,$destid)|Measure-Object -maximum).maximum
          #check duplicated
-         $dupcheck=$cmdline|select-string -pattern $laststring -AllMatches
+         $dupcheck=$cmdline|select-string -pattern "\b$laststring\b" -AllMatches
          $dupcount=($dupcheck.Matches.count)
+
+        #checkif  attribute with ''
+        if ($cmdline -match "'([^']*)'") {
+            $attribute ="'"+ $matches[1]+"'"
+                $cmdline=$cmdline.replace($attribute,"att1") # for lack after id   
+        }
+         $cmdline1=""
+         $cmdline2=$cmdline
          if ($dupcount -gt 1){
-            [int]$maxid+=$dupcount-1
-            [int]$endpoint+=$dupcount-1
-            [int]$destid+=[int]($dupcount-1)
+            $startindex=$dupcheck.Matches[-1].Index
+            $cmdline1=$cmdline.Substring(1,$startindex-1)
+            $cmdline2=$cmdline.Substring($startindex,$cmdline.Length-$startindex)
          }
 
          $patterns="\s+(\S+)"*$maxid
-         $pattern = "$laststring$($patterns)"
+         $pattern = "\b$laststring\b$($patterns)"
 
         if ($matchline){
             $matchData = @()  # Array to store match information
-            $matches = [regex]::Match($cmdline +" abcd efgh 1234", $pattern) # for lack after id
-            if($attribute){
-                $matches = [regex]::Match( $cmdline.replace($attribute,"att1") +" abcd efgh 1234", $pattern) # for lack after id   
-            }
+            $matches = [regex]::Match($cmdline2 +" abcd efgh 1234", "$pattern") # for lack after id
+
                 if ($matches.Success) {
                     foreach ($match in $matches.Groups) {
                         $matchInfo = [PSCustomObject]@{
@@ -191,7 +193,7 @@ function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int6
                     }
                 }
         
-          if($destid.trim().length -gt 0){
+          if(($destid|out-string).trim().length -gt 0){
              $destnodeid= $matchData[$destid].Value
              $puttynamedest="session$($destnodeid)"
            }
@@ -206,21 +208,23 @@ function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int6
                 $numberIndex = $matchData[$endpoint].Index
                 $numberLength = $matchData[$endpoint].Length
                 if($endpid0 -and $endpid0 -ne 0 -and $matched -eq 0){
-                $cmdline = $cmdline.Substring(0, $numberIndex) + $endpid0 + $cmdline.Substring($numberIndex + $numberLength)   
+                $cmdline2 = $cmdline2.Substring(0, $numberIndex) + $endpid0 + $cmdline2.Substring($numberIndex + $numberLength)   
                 }          
                 if($endpid1 -and $endpid1 -ne 1 -and $matched -eq 1){
-                $cmdline = $cmdline.Substring(0, $numberIndex) + $endpid1 + $cmdline.Substring($numberIndex + $numberLength)   
+                $cmdline2 = $cmdline2.Substring(0, $numberIndex) + $endpid1 + $cmdline2.Substring($numberIndex + $numberLength)   
                 } 
                 if($endpid2 -and $endpid2 -ne 2 -and $matched -eq 2){
-                    $cmdline = $cmdline.Substring(0, $numberIndex) + $endpid2 + $cmdline.Substring($numberIndex + $numberLength)   
+                    $cmdline2 = $cmdline2.Substring(0, $numberIndex) + $endpid2 + $cmdline2.Substring($numberIndex + $numberLength)   
                 } 
                 if($endpid3 -and $endpid3 -ne 3 -and $matched -eq 3){
-                    $cmdline = $cmdline.Substring(0, $numberIndex) + $endpid3 + $cmdline.Substring($numberIndex + $numberLength)   
+                    $cmdline2 = $cmdline2.Substring(0, $numberIndex) + $endpid3 + $cmdline2.Substring($numberIndex + $numberLength)   
                 } 
               }
             }
           }
         }
+       $cmdline = $cmdline1+$cmdline2
+
        #replace hardcode
         if($cmdline -like "*pairing*" -and $cmdline -like "*gamma*"){
             $pairsettings=import-csv C:\Matter_AI\settings\_manual\settings.csv
@@ -1214,8 +1218,11 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
       
         $lastlogcontent=get-content -path C:\Matter_AI\logs\lastlog.log|Where-Object{$_.length -gt 0}|Select-Object -skip 2
         $getlastkey2=$getlastkey.replace("[","\[").replace("]","\]").replace(":","\:")
-        $matchvalues=($lastlogcontent|Select-String -Pattern "($getlastkey2).*" -AllMatches |  ForEach-Object {$_.matches.value})
-        $matchvalue=((($matchvalues[-1]).replace("[","")).replace("]","")).replace(",","").replace($getlastkey,"")
+        $matchvalues=($lastlogcontent|Select-String -Pattern "\b($getlastkey2).*" -AllMatches |  ForEach-Object {$_.matches.value})
+        if($matchvalues.count -gt 1){
+            $matchvalue=$matchvalues[-1]
+        }
+        $matchvalue=(((($matchvalue).replace("[","")).replace("]","")).replace(",","").replace($getlastkey,"")|out-string).trim()
         if($matchvalue.length -eq 0){
             $global:varhash+=@([PSCustomObject]@{           
                 para_name = $paraname
