@@ -244,7 +244,7 @@ if ($global:testtype -eq 2){
                     new-item -ItemType File -Path $logtcstep | Out-Null
                     add-content -path $logtcstep -Value $lastlogcontent
                     if ($getlastkey.Length -gt 0){
-                      getparameter -getlastkey $getlastkey -paraname $setparaname
+                      getparameter -getlastkey $getlastkey -setparaname $setparaname
                       Write-Output "add var before"                     
                      }
                   }
@@ -287,7 +287,7 @@ if ($global:testtype -eq 2){
           add-content -path $logtcstep -Value $lastlogcontent
 
           if ($getlastkey.Length -gt 0){
-           getparameter -getlastkey $getlastkey -paraname $setparaname
+           getparameter -getlastkey $getlastkey -setparaname $setparaname
            Write-Output "add var"
           }
 
@@ -323,7 +323,7 @@ if ($global:testtype -eq 2){
             new-item -ItemType File -Path $logtcstep | Out-Null
             add-content -path $logtcstep -Value $lastlogcontent
             if ($getlastkey.Length -gt 0){
-              getparameter -getlastkey $getlastkey -paraname $setparaname
+              getparameter -getlastkey $getlastkey -setparaname $setparaname
               Write-Output "add var after"
              }
            }
