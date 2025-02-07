@@ -224,7 +224,7 @@ function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int6
             }
           }
         }
-       $cmdline = $cmdline1+$cmdline2
+       $cmdline = $cmdline1+" "+ $cmdline2
 
        #replace hardcode
         if($cmdline -like "*pairing*" -and $cmdline -like "*gamma*"){
