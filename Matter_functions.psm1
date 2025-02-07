@@ -170,7 +170,7 @@ function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int6
          $cmdline2=$cmdline
          if ($dupcount -gt 1){
             $startindex=$dupcheck.Matches[-1].Index
-            $cmdline1=$cmdline.Substring(1,$startindex-1)
+            $cmdline1=$cmdline.Substring(0,$startindex-1)
             $cmdline2=$cmdline.Substring($startindex,$cmdline.Length-$startindex)
          }
 
@@ -1215,7 +1215,7 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
     (get-process -name "msedge" -ea SilentlyContinue).CloseMainWindow()|Out-Null   
   } 
 
-  function getparameter([string]$getlastkey,[string]$paraname){
+  function getparameter([string]$getlastkey,[string]$setparaname){
       
         $lastlogcontent=get-content -path C:\Matter_AI\logs\lastlog.log|Where-Object{$_.length -gt 0}|Select-Object -skip 2
         $getlastkey2=$getlastkey.replace("[","\[").replace("]","\]").replace(":","\:")
@@ -1226,7 +1226,7 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
         $matchvalue=(((($matchvalue).replace("[","")).replace("]","")).replace(",","").replace($getlastkey,"")|out-string).trim()
         if($matchvalue.length -eq 0){
             $global:varhash+=@([PSCustomObject]@{           
-                para_name = $paraname
+                para_name = $setparaname
                 setvalue = $matchvalue
                })      
                $global:varhash
