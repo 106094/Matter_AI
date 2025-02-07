@@ -1224,7 +1224,7 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
             $matchvalue=$matchvalues[-1]
         }
         $matchvalue=(((($matchvalue).replace("[","")).replace("]","")).replace(",","").replace($getlastkey,"")|out-string).trim()
-        if($matchvalue.length -eq 0){
+        if($matchvalue.length -ne 0){
             $global:varhash+=@([PSCustomObject]@{           
                 para_name = $setparaname
                 setvalue = $matchvalue
