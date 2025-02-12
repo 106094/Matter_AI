@@ -103,7 +103,7 @@ if ($global:testtype -eq 2){
   $specialsets=import-csv -path C:\Matter_AI\settings\*manual_special.csv
   $global:varhash=@()
   #$caseids=$global:sels #replace by $mancaseids
-  $csvdata=import-csv $global:csvfilename | Where-Object {$_.TestCaseID -in $mancaseids -and $_.cmd.length -gt 0}
+  $csvdata=import-csv $global:csvfilename | Where-Object {$_.TestCaseID -in $mancaseids -and $_.cmd.length -gt 0 -and !($_.pics_check -match "0")}
   #$sound = New-Object -TypeName System.Media.SoundPlayer
   #$sound.SoundLocation = "C:\Windows\Media\notify.wav"
    $paring_thread="./chip-tool pairing ble-thread node-id operationalDataset --passcode --discriminator --paa-trust-store-path paapath --trace_decode 1"
