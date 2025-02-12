@@ -127,6 +127,7 @@ if ($global:testtype -eq 2){
   foreach($csv in $csvdata){
     $caseid0=$csv.TestCaseID
     $stepid=$csv.step
+    $substepid=$csv.substep
     $puttyname0=$csv.session
     $pattern = 'TC-\w+-\d+\.\d+'
     $caseid = $null
@@ -136,7 +137,7 @@ if ($global:testtype -eq 2){
      $check=$caseid0 -match $pattern
     }
     $caseid = ($matches[0].replace(" ","")).trim()
-    $pylines=($csv.cmd).split("`n")
+    $pyline=$csv.cmd
 
     if($lastcaseid -ne $caseid){
         $lastcaseid=$caseid
@@ -176,17 +177,14 @@ if ($global:testtype -eq 2){
     }
     #start step cmd if connected pass
     if ($pairresult){ #test
-      $k=0
-      foreach($pyline in $pylines){
         $runflag=1
         $getlastkey=$null
         $addcmdall=@()
-        $k++
         $puttyname=$puttyname0
-          $waittime= [int64]($specialsets|Where-Object{$_.source -eq $excelfilename -and $_.TC -eq $caseid0 -and $_.step.trim() -eq $stepid -and $_.cmdline -eq $k -and $_.method -eq "waittime"}).waittime
-          $specialset=$specialsets|Where-Object{$_.source -eq $excelfilename -and $_.TC -eq $caseid0 -and $_.step.trim() -eq $stepid -and $_.cmdline -eq $k}
+          $waittime= [int64]($specialsets|Where-Object{$_.source -eq $excelfilename -and $_.TC -eq $caseid0 -and $_.step.trim() -eq $stepid -and $_.substep -eq $substepid -and $_.method -eq "waittime"}).waittime
+          $specialset=$specialsets|Where-Object{$_.source -eq $excelfilename -and $_.TC -eq $caseid0 -and $_.step.trim() -eq $stepid -and $_.substep -eq $substepid}
           if ($specialset){
-           foreach($special in $specialset){ 
+           foreach($special in $specialset){
              $puttyname=$puttyname0
              $method=$special."method"
              $newputtyname=$special."diff_session"
@@ -233,13 +231,13 @@ if ($global:testtype -eq 2){
                   $addcmd=$special."add_cmd"
                    #check if putty session exist
                   if($method -match "add_before"){
-                    $waittime=[int64]$special."waittime"
+                    $waittime=[int64]($special."waittime")
                     $pycmd=putty_paste -cmdline "$addcmd" -check_sec $waittime -manual -puttyname $puttyname
                     $lastlogcontent=get-content -path C:\Matter_AI\logs\lastlog.log
                     $datetime2=get-date -Format yyyyMMdd_HHmmss
-                    $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid)-$($k)_$($method).log"
+                    $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid)-$($substepid)_$($method).log"
                     if( $global:puttylogname.length -gt 0){
-                      $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid)-$($k)_$($method)_$($global:puttylogname).log"
+                      $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid)-$($substepid)_$($method)_$($global:puttylogname).log"
                     }                     
                     new-item -ItemType File -Path $logtcstep | Out-Null
                     add-content -path $logtcstep -Value $lastlogcontent
@@ -279,9 +277,9 @@ if ($global:testtype -eq 2){
           $lastlogcontent=get-content -path C:\Matter_AI\logs\lastlog.log
           
           $datetime2=get-date -Format yyyyMMdd_HHmmss
-          $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid)-$($k).log"
+          $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid)-$($substepid).log"
           if($global:puttylogname.length -gt 0){
-            $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid)-$($k)_$($global:puttylogname).log"
+            $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid)-$($substepid)_$($global:puttylogname).log"
           }    
           new-item -ItemType File -Path $logtcstep | Out-Null
           add-content -path $logtcstep -Value $lastlogcontent
@@ -293,9 +291,7 @@ if ($global:testtype -eq 2){
 
          ## add after cmd
          if($addcmdall){
-          $k=0
-           foreach ($addcmd in $addcmdall){
-            $k++
+          foreach ($addcmd in $addcmdall){
             $addcmdaf=$addcmd.addcmdaf
             #$puttysesstion=$addcmd.puttysesstion
             $waittime=[int64]$addcmd.waittime
@@ -316,9 +312,9 @@ if ($global:testtype -eq 2){
             $pycmd=putty_paste -cmdline "$addcmdaf" -check_sec $waittime -manual -puttyname $puttyname
             $lastlogcontent=get-content -path C:\Matter_AI\logs\lastlog.log
             $datetime2=get-date -Format yyyyMMdd_HHmmss
-            $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid)-$($k)_$($method).log"
+            $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid)-$($substepid)_$($method).log"
             if($global:puttylogname.length -gt 0){
-              $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid)-$($k)_$($method)_$($global:puttylogname).log"
+              $logtcstep="$tclogfd\$($datetime2)_$($caseid)_$($stepid)-$($substepid)_$($method)_$($global:puttylogname).log"
             }
             new-item -ItemType File -Path $logtcstep | Out-Null
             add-content -path $logtcstep -Value $lastlogcontent
@@ -330,7 +326,7 @@ if ($global:testtype -eq 2){
          }
        }
    
-    }
+    
     }  #test
               
   }
