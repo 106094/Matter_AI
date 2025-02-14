@@ -348,7 +348,7 @@ if($stepcount -eq $totalstep){
   `;
   break;
 '@
-  if($passcount+$nacount+$nscount -eq $totalstep){
+  if($passcount -eq $totalstep-$nacount-$nscount){
     rename-item  $fullpath -NewName "$($tcname)_PASS" -ErrorAction SilentlyContinue
     $tcresult="<span class='pass'>Pass</span>"
   }
@@ -356,11 +356,15 @@ if($stepcount -eq $totalstep){
     rename-item  $fullpath -NewName "$($tcname)_FAIL" -ErrorAction SilentlyContinue 
     $tcresult="<span class='fail'>Fail</span>"
   }
+  $passrate=[math]::round(($passcount/($totalstep-$nacount-$nscount))*100,"0")
+  $passsum="$("$passcount")"+" ($passrate%)"
+  $failrate=[math]::round(($failcount/($totalstep-$nacount-$nscount))*100,"0")
+  $failsum="$("$failcount")"+" ($failrate%)"
   $tableContent += @"
 <tr>
 <td><a href="#" onclick="toggleSubTable('$tcname'); return false;">$tcname</a></td>
-<td style="text-align: center;">$passcount</td>
-<td style="text-align: center;">$failcount</td>
+<td style="text-align: center;">$passsum</td>
+<td style="text-align: center;">$failsum</td>
 <td style="text-align: center;">$nacount</td>
 <td style="text-align: center;">$nscount</td>
 <td style="text-align: center;">$totalstep</td>
