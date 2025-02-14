@@ -134,7 +134,8 @@ function toggleSubTable(id) {
 }
 </script>
 <body>
-    <h2>$resultlog</h2>
+    <div id="top"></div>
+    <h1>$resultlog</h1>
     <table>
     <thead>
       <tr>
@@ -156,14 +157,14 @@ foreach($resultpath in $resultpaths){
   $tcname=($resultpath.name).replace("_FAIL","").replace("_PASS","")
   $htmlsub+=@"
   case '$tcname':
-  
+
 "@
   $htmlsub+=@'
     content = `
     <table class="subtable">
     </tr><tbody>
 '@
-      $headers=@("caseid","step","#","cmd","runcmd","logs","varify","checks (green words)","result","ref")
+      $headers=@("caseid","step","#","cmd","runcmd","logs","varify","checks (green words)","result","pics")
       foreach ($header in $headers) {
         $htmlsub += "<th>$header</th>"
           }
@@ -179,6 +180,17 @@ foreach($resultpath in $resultpaths){
     $stepcount++
     $tcstep=$csv.step
     $tcsubstep=$csv.substep
+    $picscheck=@()
+    $pics=($csv.pics).split("`n")
+    $picssupport=($csv.pics_check).split("`n")
+    $picscount=$pics.split("`n").count
+    if($csv.pics.length -gt 0){
+    for($i=0;$i -lt $picscount;$i++){
+      $picscheck+=($pics[$i]|out-string).trim()+" (" +($picssupport[$i]|out-string).trim()+")"
+    }
+    }
+   $picschecks=($picscheck -join "<BR>")
+
     $logcontent=(get-childitem $fullpath -Recurse -file |Where-Object{!($_.Name -like "*0pairing*") -and  $_.name -like "*_$($tcstep)-$($tcsubstep)*.log"}|Sort-Object LastWriteTime).FullName
     $realcmd="-"
     $tdlog="-"
@@ -301,25 +313,24 @@ foreach($resultpath in $resultpaths){
       $failcount+=1
       $resulthtmk="<span class='fail'>Fail</span>"
     }
-
-
     $htmlsub += "<tr>"
     $htmlsub += "<td class='top-align' style='width: 5%;'>$($tcname)</td>"
     $htmlsub += "<td class='top-align' style='width: 4%;'>$($tcstep)</td>"
     $htmlsub += "<td class='top-align' style='width: 1%;'>$($tcsubstep)</td>"      
     $htmlsub += "<td class='top-align' style='width: 8%;'>$($cmd)</td>"          
     $htmlsub += "<td class='top-align' style='width: 8%;'>$($realcmd)</td>"
-    $htmlsub += "<td class='top-align' style='width: 30%;'>$($tdlog)</td>"
+    $htmlsub += "<td class='top-align' style='width: 24%;'>$($tdlog)</td>"
     $htmlsub += "<td class='top-align' style='width: 18%;'>$($varify)</td>"
     $htmlsub+= "<td class='top-align' style='width: 18%;'>$($example)</td>"
-    $htmlsub += "<td class='top-align' style='width: 4%;'>$($passresult)</td>"      
-    $htmlsub += "<td class='top-align' style='width: 4%;'></td>"
+    $htmlsub += "<td class='top-align' style='width: 4%;'>$($resulthtmk)</td>"            
+    $htmlsub += "<td class='top-align' style='width: 6%;'>$($picschecks)</td>"
     $htmlsub += "</tr>"
 
 if($stepcount -eq $totalstep){
   $htmlsub += @'
   </tbody>
   </table>
+  <p style="text-align: left; margin-left: 20px;"><a href="#top">[Go to Top]</a></p>
   `;
   break;
 '@
@@ -351,6 +362,8 @@ if($stepcount -eq $totalstep){
 
 # Close the table and HTML structure
 $tableContent += @"
+</tbody>
+</table>
 <div id="subTableContainer" data-active="">
 </div>
 </body>
