@@ -12,7 +12,7 @@ if($selections){
 }
 $global:csvfilename
 $mancaseids
-$htmlContent=$null
+$htmlContentmain=$tableContent=$htmlsub=$casecontent=$null
 # Import the CSV data
 $showpct=[double]((get-content C:\Matter_AI\settings\config_linux.txt|where-object {$_ -match "showpercentage"}).split(":"))[1]/100
 $csvData = Import-Csv -Path $global:csvfilename|Where-Object{$_.TestCaseID -in $mancaseids}
@@ -29,7 +29,7 @@ $checktcfile=Get-ChildItem $resultlog -File -Recurse|where-object{$_.name -like 
 if($checktcfile.count -gt 0){
 # Start building the HTML content
 # Start building the HTML content with enhanced CSS for text wrapping
-$htmlContent = @"
+$htmlContentmain = @"
 <!DOCTYPE html>
 <html>
 <head>
@@ -73,26 +73,79 @@ $htmlContent = @"
           display: none;
           overflow: hidden;
         }
+        .subtable {
+          margin-top: 10px;
+          border: 1px solid gray;
+          border-collapse: collapse;
+        }
+        .subtable td {
+          border: 1px solid gray;
+          padding: 5px;
+        }
+        /* Container for the subtable is hidden by default */
+        #subTableContainer {
+          display: none;
+          margin-top: 20px;
+        }
+        /* Styling for Pass and Fail */
+        .pass {
+          color: green;
+          font-weight: bold;
+        }
+        .fail {
+          background-color: red;
+          color: white;
+          font-weight: bold;
+          padding: 5px;
+          display: inline-block;
+        }
+        .na {
+          background-color: grey;
+          color: white;
+          font-weight: bold;
+          padding: 5px;
+          display: inline-block;
+        }
     </style>
 </head>
 <script>
-  function toggleCollapsible(element) {
-    // Toggle active class for the clicked element
-    element.classList.toggle("active");
-
-    // Get the next sibling element (the collapsible content)
-    var content = element.nextElementSibling;
-
-    // Toggle the display of the content
-    if (content.style.display === "block") {
-      content.style.display = "none";
-    } else {
-      content.style.display = "block";
+function toggleSubTable(id) {
+  const container = document.getElementById('subTableContainer');
+  // If the same subtable is already open, toggle (hide) it.
+  if (container.getAttribute('data-active') === id) {
+    container.style.display = 'none';
+    container.setAttribute('data-active', '');
+    container.innerHTML = '';
+  } else {
+    // Otherwise, show the container and update its content.
+    container.style.display = 'block';
+    container.setAttribute('data-active', id);
+    
+    // Set subtable content based on the clicked id.
+    let content = '';
+    switch (id) {
+      #casecontent
+        break;
+      default:
+        content = '';
     }
+    container.innerHTML = content;
   }
+}
 </script>
 <body>
     <h2>$resultlog</h2>
+    <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Pass</th>
+        <th>Fail</th>
+        <th>NA</th>
+        <th>Result</th>
+      </tr>
+    </thead>
+    <tbody>
 
 "@
 
@@ -100,31 +153,54 @@ $htmlContent = @"
 
 foreach($resultpath in $resultpaths){
   $fullpath=$resultpath.fullname
-  $tcname=$resultpath.name
-$htmlContent += @"
-<a class="collapsible" href="javascript:void(0)" onclick="toggleCollapsible(this)">$tcname</a>
-  <div class="content">
-    <p>
-      <table width="100%">
-       <thead>
-        <tr>
+  $tcname=($resultpath.name).replace("_FAIL","").replace("_PASS","")
+  $htmlsub+=@"
+  case '$tcname':
+  
 "@
-      $headers=@("caseid","step","#","cmd","logs","varify","checks (green words)","result","ref")
+  $htmlsub+=@'
+    content = `
+    <table class="subtable">
+    </tr><tbody>
+'@
+      $headers=@("caseid","step","#","cmd","runcmd","logs","varify","checks (green words)","result","ref")
       foreach ($header in $headers) {
-      $htmlContent += "<th>$header</th>"
+        $htmlsub += "<th>$header</th>"
           }
     
-$htmlContent += "</tr></thead><tbody>"
 
   $csvfilter=$csvData|Where-Object{$_.TestCaseID -like "*$tcname*"}
-  foreach($csv in $csvfilter){    
+  $totalstep=$csvfilter.step.count
+  $stepcount=0
+  $passcount=0
+  $nacount=0
+  $failcount=0
+  foreach($csv in $csvfilter){
+    $stepcount++
     $tcstep=$csv.step
-    $logcontent=(get-childitem $fullpath -Recurse -file |Where-Object{!($_.Name -like "*0pairing*") -and  $_.name -like "*_$($tcstep)-*.log"}|Sort-Object LastWriteTime).FullName
-    $k=0
+    $tcsubstep=$csv.substep
+    $logcontent=(get-childitem $fullpath -Recurse -file |Where-Object{!($_.Name -like "*0pairing*") -and  $_.name -like "*_$($tcstep)-$($tcsubstep)*.log"}|Sort-Object LastWriteTime).FullName
+    $realcmd="-"
+    $tdlog="-"
+    $varify = $csv.verify.split("`n")|foreach-object{
+      $newline=$_  + "<br>"
+      $newline
+      }
+      $example = $csv.example.split("`n")|foreach-object{
+        if($_.trim().length -gt 0){
+          $newline=$_ + "<br>"
+          $newline
+        }
+      }
+     $cmd=$csv.cmd
+     $passresult="N/A"
+     $linec=0
+     $logcount=$logcontent.count
     foreach($log in $logcontent){
+      $linec++
       $tdlog=@()
       $matchedlines=@()
-      $k++
+      $realcmd=((get-content $log|Where-Object{$_.length -gt 0})[1]|Out-String).trim()
       $logdata=get-content $log |Where-Object{$_.length -gt 0}| Select-Object -skip 2
        $newcsv=  ($csv.example).replace($ekey," ")
          foreach($ekey in $eckeys){
@@ -202,23 +278,7 @@ $htmlContent += "</tr></thead><tbody>"
           $newline
              }
              #>
-        $varify = $csv.verify.split("`n")|foreach-object{
-        $newline=$_  + "<br>"
-        $newline
-        }
-        $example = $csv.example.split("`n")|foreach-object{
-          if($_.trim().length -gt 0){
-            $newline=$_ + "<br>"
-            $newline
-          }
-        }
 
-        $cmd=($($csv.cmd) -split "`n")[$k-1]
-    
-        if($k -gt 1){
-          #$varify=$example="ª"
-          $varify=$example="(same as last one)"
-        }
 
         $passresult="Failed"
         if($checkitems.count -eq 0){
@@ -227,39 +287,81 @@ $htmlContent += "</tr></thead><tbody>"
         if(($passmatch|where-object{$_.matched -eq "1"}).matched.count -eq $checkitems.count -and $checkitems.count -gt 0){
           $passresult="Passed"
         }
+    }
+    
+    if($passresult -eq "Passed"){
+      $passcount+=1
+      $resulthtmk="<span class='pass'>Pass</span>"
+    }
+    if($passresult -eq "N/A"){
+      $nacount+=1
+      $resulthtmk="<span class='na'>N/A</span>"
+    }
+    if($passresult -eq "Failed"){
+      $failcount+=1
+      $resulthtmk="<span class='fail'>Fail</span>"
+    }
 
-      $htmlContent += "<tr>"
-      $htmlContent += "<td class='top-align' style='width: 5%;'>$($tcname)</td>"
-      $htmlContent += "<td class='top-align' style='width: 4%;'>$($csv.step)</td>"
-      $htmlContent += "<td class='top-align' style='width: 1%;'>$($k)</td>"      
-      $htmlContent += "<td class='top-align' style='width: 10%;'>$($cmd)</td>"
-      $htmlContent += "<td class='top-align' style='width: 36%;'>$($tdlog)</td>"
-      $htmlContent += "<td class='top-align' style='width: 18%;'>$($varify)</td>"
-      $htmlContent += "<td class='top-align' style='width: 18%;'>$($example)</td>"
-      $htmlContent += "<td class='top-align' style='width: 4%;'>$($passresult)</td>"      
-      $htmlContent += "<td class='top-align' style='width: 4%;'></td>"
-      $htmlContent += "</tr>"
-    }    
+
+    $htmlsub += "<tr>"
+    $htmlsub += "<td class='top-align' style='width: 5%;'>$($tcname)</td>"
+    $htmlsub += "<td class='top-align' style='width: 4%;'>$($tcstep)</td>"
+    $htmlsub += "<td class='top-align' style='width: 1%;'>$($tcsubstep)</td>"      
+    $htmlsub += "<td class='top-align' style='width: 8%;'>$($cmd)</td>"          
+    $htmlsub += "<td class='top-align' style='width: 8%;'>$($realcmd)</td>"
+    $htmlsub += "<td class='top-align' style='width: 30%;'>$($tdlog)</td>"
+    $htmlsub += "<td class='top-align' style='width: 18%;'>$($varify)</td>"
+    $htmlsub+= "<td class='top-align' style='width: 18%;'>$($example)</td>"
+    $htmlsub += "<td class='top-align' style='width: 4%;'>$($passresult)</td>"      
+    $htmlsub += "<td class='top-align' style='width: 4%;'></td>"
+    $htmlsub += "</tr>"
+
+if($stepcount -eq $totalstep){
+  $htmlsub += @'
+  </tbody>
+  </table>
+  `;
+  break;
+'@
+  if($passcount+$nacount -eq $logcount){
+    $tcnametalbe="PASS"
+    rename-item  $fullpath -NewName "$($tcname)_PASS" -ErrorAction SilentlyContinue
+    $tcresult="<span class='pass'>Pass</span>"
   }
-$htmlContent += @"
- </tbody>
- </table>
- </p>
- </div>
- 
+  else{
+    $tcnametalbe="Fail"
+    rename-item  $fullpath -NewName "$($tcname)_FAIL" -ErrorAction SilentlyContinue 
+    $tcresult="<span class='fail'>Fail</span>"
+  }
+  $tableContent += @"
+<tr>
+<td><a href="#" onclick="toggleSubTable('$tcname'); return false;">$tcname</a></td>
+<td>$passcount</td>
+<td>$nacount</td>
+<td>$failcount</td>
+<td>$tcresult</td>
+</tr>
 "@
+}
+
+  }
+  $casecontent+=$htmlsub
+
   }
 
 # Close the table and HTML structure
-$htmlContent += @"
+$tableContent += @"
+<div id="subTableContainer" data-active="">
+</div>
 </body>
 </html>
 "@
 
-# Path where you want to save the HTML report
-
 # Output the HTML content to the file
-$htmlContent | Out-File -FilePath $reportPath -Encoding UTF8
+
+$htmlContent=$htmlContentmain -replace "#casecontent",$casecontent
+$htmlContent+=$tableContent
+$htmlContent| Out-File -FilePath $reportPath -Encoding UTF8
 
 }
 # Open the HTML report (optional)
