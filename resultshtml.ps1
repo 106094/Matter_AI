@@ -139,13 +139,13 @@ function toggleSubTable(id) {
     <table>
     <thead>
       <tr>
-        <th>ID</th>
-        <th>Pass</th>
-        <th>Fail</th>
-        <th>NA</th>
-        <th>Not Support</th>
-        <th>Total</th>
-        <th>Result</th>
+        <th style="text-align: center;">ID</th>
+        <th style="text-align: center;">Pass</th>
+        <th style="text-align: center;">Fail</th>
+        <th style="text-align: center;">NA</th>
+        <th style="text-align: center;">Not Support</th>
+        <th style="text-align: center;">Total</th>
+        <th style="text-align: center;">Result</th>
       </tr>
     </thead>
     <tbody>
