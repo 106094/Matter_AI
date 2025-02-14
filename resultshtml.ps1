@@ -143,6 +143,8 @@ function toggleSubTable(id) {
         <th>Pass</th>
         <th>Fail</th>
         <th>NA</th>
+        <th>Not Support</th>
+        <th>Total</th>
         <th>Result</th>
       </tr>
     </thead>
@@ -175,12 +177,18 @@ foreach($resultpath in $resultpaths){
   $stepcount=0
   $passcount=0
   $nacount=0
+  $nscount=0
   $failcount=0
   foreach($csv in $csvfilter){
+    
     $stepcount++
     $tcstep=$csv.step
     $tcsubstep=$csv.substep
+    $passresult="Failed"
     $picscheck=@()
+    if(($csv.pics_check) -match "0"){
+      $passresult="Not Support"
+     }     
     $pics=($csv.pics).split("`n")
     $picssupport=($csv.pics_check).split("`n")
     $picscount=$pics.split("`n").count
@@ -205,7 +213,6 @@ foreach($resultpath in $resultpaths){
         }
       }
      $cmd=$csv.cmd
-     $passresult="N/A"
      $linec=0
      $logcount=$logcontent.count
     foreach($log in $logcontent){
@@ -213,6 +220,9 @@ foreach($resultpath in $resultpaths){
       $tdlog=@()
       $matchedlines=@()
       $realcmd=((get-content $log|Where-Object{$_.length -gt 0})[1]|Out-String).trim()
+      if($realcmd -match "\#"){
+        $realcmd=($realcmd.split("#")[1]).trim()
+      }
       $logdata=get-content $log |Where-Object{$_.length -gt 0}| Select-Object -skip 2
        $newcsv=  ($csv.example).replace($ekey," ")
          foreach($ekey in $eckeys){
@@ -292,7 +302,7 @@ foreach($resultpath in $resultpaths){
              #>
 
 
-        $passresult="Failed"
+        
         if($checkitems.count -eq 0){
           $passresult="N/A"
         }
@@ -308,6 +318,10 @@ foreach($resultpath in $resultpaths){
     if($passresult -eq "N/A"){
       $nacount+=1
       $resulthtmk="<span class='na'>N/A</span>"
+    }
+    if($passresult -eq "Not Support"){
+      $nscount+=1
+      $resulthtmk="<span class='na'>Not Support</span>"
     }
     if($passresult -eq "Failed"){
       $failcount+=1
@@ -334,23 +348,23 @@ if($stepcount -eq $totalstep){
   `;
   break;
 '@
-  if($passcount+$nacount -eq $logcount){
-    $tcnametalbe="PASS"
+  if($passcount+$nacount+$nscount -eq $totalstep){
     rename-item  $fullpath -NewName "$($tcname)_PASS" -ErrorAction SilentlyContinue
     $tcresult="<span class='pass'>Pass</span>"
   }
   else{
-    $tcnametalbe="Fail"
     rename-item  $fullpath -NewName "$($tcname)_FAIL" -ErrorAction SilentlyContinue 
     $tcresult="<span class='fail'>Fail</span>"
   }
   $tableContent += @"
 <tr>
 <td><a href="#" onclick="toggleSubTable('$tcname'); return false;">$tcname</a></td>
-<td>$passcount</td>
-<td>$nacount</td>
-<td>$failcount</td>
-<td>$tcresult</td>
+<td style="text-align: center;">$passcount</td>
+<td style="text-align: center;">$failcount</td>
+<td style="text-align: center;">$nacount</td>
+<td style="text-align: center;">$nscount</td>
+<td style="text-align: center;">$totalstep</td>
+<td style="text-align: center;">$tcresult</td>
 </tr>
 "@
 }
