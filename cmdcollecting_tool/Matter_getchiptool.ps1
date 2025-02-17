@@ -279,9 +279,9 @@ for($i=$Indexfirst;$i -le $Indexlast;$i++){
       $pics.split("(").split("&").split(" ").trim()|ForEach-Object{
         if($_ -match "\."){
           $picsnames+=@($_)
-          $pics_check="0"           
+          $pics_check="1"           
           if( $_ -in $picexclusions){
-            $pics_check="1"  
+            $pics_check="0"  
           }
           $pics_checks+=@($pics_check)
            }
