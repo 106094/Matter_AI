@@ -348,6 +348,14 @@ if($stepcount -eq $totalstep){
   `;
   break;
 '@
+
+if($totalstep-$nacount-$nscount -eq 0){
+  $newfoldername="$($tcname)_NA"  
+  $tcresult="<span class='pass'>N/A</span>"
+  $passsum="-"
+  $failsum="-"
+}
+else{
   if($passcount -eq $totalstep-$nacount-$nscount){
     $newfoldername="$($tcname)_PASS"
     $tcresult="<span class='pass'>Pass</span>"
@@ -356,13 +364,14 @@ if($stepcount -eq $totalstep){
     $newfoldername="$($tcname)_FAIL"
     $tcresult="<span class='fail'>Fail</span>"
   }
-  rename-item  $fullpath -NewName $newfoldername -ErrorAction SilentlyContinue 
-  $htmlsub=$htmlsub -replace "thelinkfolder" , $newfoldername
-  
   $passrate=[math]::round(($passcount/($totalstep-$nacount-$nscount))*100,"0")
   $passsum="$("$passcount")"+" ($passrate%)"
   $failrate=[math]::round(($failcount/($totalstep-$nacount-$nscount))*100,"0")
   $failsum="$("$failcount")"+" ($failrate%)"
+}
+  rename-item  $fullpath -NewName $newfoldername -ErrorAction SilentlyContinue 
+  $htmlsub=$htmlsub -replace "thelinkfolder" , $newfoldername
+  
   $tableContent += @"
 <tr>
 <td><a href="#" onclick="toggleSubTable('$tcname'); return false;">$tcname</a></td>
