@@ -284,7 +284,7 @@ foreach($resultpath in $resultpaths){
         
         $linkfile=(get-childitem $log).name
         $linkfolder=((get-childitem $log).Directory).Name
-        $tdlog = "<a href='$linkfolder/$linkfile' target='_blank'>checklog</a><br>"
+        $tdlog = "<a href='thelinkfolder/$linkfile' target='_blank'>checklog</a><br>"
         $matchedlines| foreach-object{
           $newline=$_
           if($_ -like "*CHIP:*"){
@@ -349,13 +349,16 @@ if($stepcount -eq $totalstep){
   break;
 '@
   if($passcount -eq $totalstep-$nacount-$nscount){
-    rename-item  $fullpath -NewName "$($tcname)_PASS" -ErrorAction SilentlyContinue
+    $newfoldername="$($tcname)_PASS"
     $tcresult="<span class='pass'>Pass</span>"
   }
   else{
-    rename-item  $fullpath -NewName "$($tcname)_FAIL" -ErrorAction SilentlyContinue 
+    $newfoldername="$($tcname)_FAIL"
     $tcresult="<span class='fail'>Fail</span>"
   }
+  rename-item  $fullpath -NewName $newfoldername -ErrorAction SilentlyContinue 
+  $htmlsub=$htmlsub -replace "thelinkfolder" , $newfoldername
+  
   $passrate=[math]::round(($passcount/($totalstep-$nacount-$nscount))*100,"0")
   $passsum="$("$passcount")"+" ($passrate%)"
   $failrate=[math]::round(($failcount/($totalstep-$nacount-$nscount))*100,"0")
