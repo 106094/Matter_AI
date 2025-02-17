@@ -41,6 +41,7 @@ $excelfull=$excelfile.FullName
 
 #$excelfiles=get-childitem "C:\Matter_AI\settings\_docs\*TestPlanVerificationSteps_Auto.xlsx"
 $csvname0="C:\Matter_AI\settings\_manual\manualcmd_"+$excelfile.basename.replace("TestPlanVerificationSteps_Auto","")+"0.csv"
+$csvname1="C:\Matter_AI\settings\_manual\manualcmd_"+$excelfile.basename.replace("TestPlanVerificationSteps_Auto","")+"1.csv"
 $csvname="C:\Matter_AI\settings\_manual\manualcmd_"+$excelfile.basename.replace("TestPlanVerificationSteps_Auto","")+".csv"
 $TH2list="C:\Matter_AI\settings\_manual\TH2_TClist_"+$excelfile.basename.replace("TestPlanVerificationSteps_Auto","")+".txt"
 if(test-path $TH2list){
@@ -53,7 +54,7 @@ $a[-1]|export-csv C:\Matter_AI\settings\_manual\settings.csv -NoTypeInformation 
 #tc-filter
 $tcfilters=(import-csv "C:\Matter_AI\settings\manualcmd_Matter - TC_filter.csv")
 $matchtcs=($tcfilters|where-object{$_."matched_manual" -ne ""})."TC"
-$extra=($tcfilters|where-object{$_."extra_manual" -ne ""})."TC"
+$extratcs=($tcfilters|where-object{$_."extra_manual" -ne ""})."TC"
 $excludetcs=($tcfilters|where-object{$_."exclude_manual" -ne ""})."TC"
 
 #filter manual and as client and UI-Manual
@@ -148,7 +149,8 @@ for($i=$Indexfirst;$i -le $Indexlast;$i++){
       $tcstep=$null
       $numbercol=$null
       $cmdcol=$null
-      $results=$null
+      $picsnames=$null
+      $pics_checks=$null
       $precon=$null
       $mergerow=$null
       $preconall=@()
@@ -220,11 +222,13 @@ for($i=$Indexfirst;$i -le $Indexlast;$i++){
           catg= $sheetname
           TestCaseID=$tcline
           step="precondition"
-          flow=($preconall|out-string).trim()
+          substep=1
           cmd=$toolcmd
-          verify=$null
-          example=$null
-          results=$results
+          verify=$null          
+          flow=($preconall|out-string).trim()
+          example=$null          
+          pics=$picsnames
+          pics_check=$pics_checks
           session=$null
           }
         $precol=$null
@@ -232,6 +236,7 @@ for($i=$Indexfirst;$i -le $Indexlast;$i++){
 
     }
     
+    #for TC-DA-1.8 special format
     if($content -match "\#" -and $content -match "Cert\sDescription"){
       $picscol=$picscol2=$null
       ForEach($col in $colproperty){
@@ -249,11 +254,13 @@ for($i=$Indexfirst;$i -le $Indexlast;$i++){
           catg= $sheetname
           TestCaseID=$tcline
           step="precondition"
-          flow=($preconall|out-string).trim()
+          substep=1
           cmd=$toolcmd
           verify=$null
           example=$null
-          results=$results          
+          flow=($preconall|out-string).trim()          
+          pics=$picsnames
+          pics_check=$pics_checks
           session=$null
           }
         $precol=$null
@@ -266,17 +273,24 @@ for($i=$Indexfirst;$i -le $Indexlast;$i++){
       $tcstep=$content.$numbercol
       $picsmerge=($sheetpackage.Cells[$row, $picscol2]).merge  
       #$stepmerge=($worksheet.Cells[$row, $numbercol2]).merge
-      $results=$null
+      $picsnames=$pics_checks=$null
       if($pics.length -ne 0){
       #check if PICS not support and if merged cell
       $pics.split("(").split("&").split(" ").trim()|ForEach-Object{
+        if($_ -match "\."){
+          $picsnames+=@($_)
+          $pics_check="0"           
           if( $_ -in $picexclusions){
-            $results+=@($_)
+            $pics_check="1"  
           }
-          }
-          if($results){
-            $results=$results -join "`n"
-            $lastresult=$results
+          $pics_checks+=@($pics_check)
+           }
+           }
+          if($picsnames){
+            $picsnames=($picsnames|out-string).trim()
+            $lastpicsnames=$picsnames
+            $pics_checks= ($pics_checks|out-string).trim()
+            $lastpics_checks=$pics_checks
           }
           if(!$mergerow){ #find the 1st merged cell
             $mergerow=$row
@@ -287,15 +301,18 @@ for($i=$Indexfirst;$i -le $Indexlast;$i++){
       }else{
         if(!($picsmerge)){
           $mergerow=$null
-          $lastresult=$results
+          $lastpicsnames=$picsnames
+          $lastpics_checks=$pics_checks
         }      
         else{
           if(!$mergerow){ #find the 1st merged cell which is empty
             $mergerow=$row
-            $lastresult=$results
+            $lastpicsnames=$picsnames
+            $lastpics_checks=$pics_checks
           }
           else{
-            $results=$lastresult
+            $picsnames=$lastpicsnames
+            $pics_checks=$lastpics_checks
           }         
           
          }
@@ -327,11 +344,13 @@ for($i=$Indexfirst;$i -le $Indexlast;$i++){
             catg= $sheetname
             TestCaseID=$tcline
             step=$tcstep
+            substep=1
             cmd=$toolcmd
             verify=$null
             example=$example
             flow=$tccmd
-            results=$results
+            pics=$picsnames
+            pics_check=$pics_checks
             session=$null
             }
          }
@@ -344,21 +363,32 @@ for($i=$Indexfirst;$i -le $Indexlast;$i++){
    }
   }
 
-$outputcsv|export-csv $csvname -NoTypeInformation
+$outputcsv|export-csv $csvname0 -NoTypeInformation
 
 #region extract cmd
 
-$csvcontent=import-csv $csvname
-
+$csvcontent=import-csv $csvname0
+$newcsvcontent=@()
 foreach($line in $csvcontent){
-  if($line.results.length -eq 0){
+  $stepnew=$null
+  $newcsvcontent+=@($line)
+  $tcnow=$line.TestCaseID
+  $stepnow=$line.step
+  $substepnew=($newcsvcontent|Where-Object{$_.TestCaseID -eq $tcnow -and ($_.step.split("."))[0] -eq $stepnow}).substep.count
+  if($substepnew -gt 1){
+    $stepnew="$($stepnow).$($substepnew)"
+  }
+ # if(!($line.pics_check  -like "*0*")){
    $cmd=$null
    $sessioncheck=$($line.flow) -match "\sTH_CR\d+"
    if($sessioncheck){
-   $line.session=$matches[0].trim()
+    ($newcsvcontent[-1]).session=$matches[0].trim()
    }
-    $splitcontent=$line.flow.split("`n")|Where-Object{$_.length -gt 0}
-
+   
+   $stepexample=($line.example).split("`n")
+    $splitcontent=($line.flow).split("`n")|Where-Object{$_.length -gt 0}
+      $linec=0
+    $splitline=@()
     ForEach($splitct in $splitcontent){
       if(!($splitct -match "\sTH_CR\d+") -and !($splitct -match "\sobtained\sfrom\s") -and !($splitct -match "\son\sTH1")){
       $toolcmd=0
@@ -388,8 +418,9 @@ foreach($line in $csvcontent){
                if($newcmd -match "\("){
                   $newcmd=($newcmd.split("("))[0].trim()
                }
-             $cmd+=@($newcmd)             
-           $toolcmd=1 
+             $cmd+=@($newcmd)
+             $splitline+=@($linec)
+           $toolcmd=1
           break
           }
         }
@@ -400,50 +431,71 @@ foreach($line in $csvcontent){
       }
      }
     }
+    $linec++
    }
+
    if($cmd){
-      $line.cmd=($cmd|Out-String).trim()
-      $p=0
+    $cmdcount=0
+    foreach($cmdx in $cmd){
+      $stepes=@()    
       $verifying=$null
-      $verifying=$line.flow.split("`n")|ForEach-Object{
+         if($cmd.count -eq 1 -or ($cmdcount -eq $cmd.count -1) ){
+        $lineend=$splitcontent.count -1
+      }
+      else{
+        $lineend=$splitline[$cmdcount+1] -1
+      }
+      $cmdflow= $splitcontent[($splitline[$cmdcount])..($lineend)]
+      foreach($stepe in $stepexample){
+          #The [ character is a special character that begins a character set
+          $steper=$stepe -replace '\[', '[[]'
+        if(($cmdflow|out-string) -like "*$steper*"){         
+          $stepes+=@($stepe)
+        }
+      }     
+      $stepex=$stepes -join "`n"
+      #region varify wordings
+      $p=0
+      $verifying=$cmdflow|ForEach-Object{
        if($_ -like "*verify*"){
             $p=9999
         }
         $p++
         if($p -gt 9999 -and $_.length -gt 0 -and $_ -notlike "*CHIP:*"){
           $recordflag=$true
-          foreach($cmd1 in $cmd){
-            $cmd3=$cmd1.replace("[","*").replace("]","*")
+            $cmd3=$cmdx.replace("[","*").replace("]","*")
             if($_ -like "*$cmd3*"){
              $recordflag=$false
             }
-          }
           if($recordflag){
             $_
           }
        }
      }
-     if($verifying){
-      $line.verify=($verifying|Out-String).trim()
-    }
-   }
-  }
-}
-$csvcontent|export-csv $csvname0 -NoTypeInformation
-if($matchtcs){  
-  foreach($matchtc in $matchtcs){
-    $csvcontent2+=$csvcontent|Where-Object{$_."TestCaseID" -match "\[$matchtc\]"}
-  }
-  $csvcontent=$csvcontent2 
-}
-if($excludetcs){
-  foreach($excludetc in $excludetcs){
-    $csvcontent=$csvcontent|Where-Object{$_."TestCaseID" -notmatch "\[$excludetc\]"}
-  }
-}
 
-$csvcontent|Where-Object{$_.cmd.length -gt 0 -and $_.results.length -eq 0 -and $_.TestCaseID -notin $TH2tcline}|export-csv $csvname -NoTypeInformation
-#endregion
+    #endregion
+
+    if($cmdcount -gt 0){
+      $addline=$line|Select-Object *
+      $newcsvcontent+=$addline
+     }
+     if($stepnew){
+      $newcsvcontent[-1].step=$stepnew
+     }
+     $newcsvcontent[-1].substep=$cmdcount+1
+     $newcsvcontent[-1].cmd=($cmdx|Out-String).trim()
+     $newcsvcontent[-1].example=($stepex|Out-String).trim()
+     $newcsvcontent[-1].flow=($cmdflow|Out-String).trim()
+     if($verifying){
+       $newcsvcontent[-1].verify=($verifying|Out-String).trim()
+      }
+
+    $cmdcount++
+    }
+  }
+ 
+}
+$newcsvcontent| export-csv $csvname1 -NoTypeInformation
 
 $timegap=(new-timespan -start $starttime -end (get-date)).Minutes
 $timegap2=(new-timespan -start $starttime -end (get-date)).Seconds
@@ -451,6 +503,26 @@ $timegap2=(new-timespan -start $starttime -end (get-date)).Seconds
 $checktime=[System.Windows.Forms.MessageBox]::Show("Collecting done. It took $timegap min $timegap2 sec","Info",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Information)
 
 }
+#endregion
+
+#region filter
+$csvcontent=Import-Csv $csvname1
+$csvcontentnew=@()
+$filters=$matchtcs+$extratcs
+foreach($filter in $filters){
+  $csvcontentnew+=$csvcontent|Where-Object{$_."TestCaseID" -match "\[$filter\]"}
+}
+
+if($excludetcs){
+  foreach($excludetc in $excludetcs){
+    $csvcontentnew=$csvcontentnew|Where-Object{$_."TestCaseID" -notmatch "\[$excludetc\]"}
+  }
+}
+
+$csvcontentnew|Where-Object{$_.cmd.length -gt 0 -and $_.results.length -eq 0 -and $_.TestCaseID -notin $TH2tcline} |export-csv $csvname -NoTypeInformation
+#endregion
+
+
 $csvname
 #pause
 #endregion
