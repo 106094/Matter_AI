@@ -283,7 +283,7 @@ foreach($resultpath in $resultpaths){
         $htmllog=$reportPathlog+"\"+(get-childitem $log).name
         
         $linkfile=(get-childitem $log).name
-        $linkfolder=((get-childitem $log).Directory).Name
+        #$linkfolder=((get-childitem $log).Directory).Name
         $tdlog = "<a href='thelinkfolder/$linkfile' target='_blank'>checklog</a><br>"
         $matchedlines| foreach-object{
           $newline=$_
