@@ -67,11 +67,14 @@ $htmlContentmain = @"
         .active, .collapsible:hover {
           background-color: #d9e2f2;
         }
-
         .content {
           padding: 0 18px;
           display: none;
           overflow: hidden;
+        }
+        .highlight {
+          background-color: #e6ff99;
+          font-weight: bold;
         }
         .subtable {
           margin-top: 10px;
@@ -215,6 +218,7 @@ foreach($resultpath in $resultpaths){
      $cmd=$csv.cmd
      $linec=0
      $logcount=$logcontent.count
+     $cmdhighlight=$false
     foreach($log in $logcontent){
       $linec++
       $tdlog=@()
@@ -223,6 +227,14 @@ foreach($resultpath in $resultpaths){
       if($realcmd -match "\#"){
         $realcmd=($realcmd.split("#")[1]).trim()
       }
+       $checkdouble=($realcmd.split(" ")|Sort-Object|Get-Unique).count -eq ($realcmd.split(" ")).count/2
+        if($checkdouble){
+          $realcmd=(($realcmd.split(" "))|Select-Object -first (($realcmd.split(" ")).count/2)) -join " "
+        }
+        if($realcmd.trim() -ne $cmd.trim()){
+          $cmdhighlight=$true
+        }
+      
       $logdata=get-content $log |Where-Object{$_.length -gt 0}| Select-Object -skip 2
        $newcsv=  ($csv.example).replace($ekey," ")
          foreach($ekey in $eckeys){
@@ -331,8 +343,13 @@ foreach($resultpath in $resultpaths){
     $htmlsub += "<td class='top-align' style='width: 5%;'>$($tcname)</td>"
     $htmlsub += "<td class='top-align' style='width: 4%;'>$($tcstep)</td>"
     $htmlsub += "<td class='top-align' style='width: 1%;'>$($tcsubstep)</td>"      
-    $htmlsub += "<td class='top-align' style='width: 8%;'>$($cmd)</td>"          
-    $htmlsub += "<td class='top-align' style='width: 8%;'>$($realcmd)</td>"
+    $htmlsub += "<td class='top-align' style='width: 8%;'>$($cmd)</td>"       
+    if($cmdhighlight){
+    $htmlsub += "<td class='top-align highlight' style='width: 8%;'>$($realcmd)</td>"
+    }
+    else{   
+      $htmlsub += "<td class='top-align' style='width: 8%;'>$($realcmd)</td>"
+    }
     $htmlsub += "<td class='top-align' style='width: 24%;'>$($tdlog)</td>"
     $htmlsub += "<td class='top-align' style='width: 18%;'>$($varify)</td>"
     $htmlsub+= "<td class='top-align' style='width: 18%;'>$($example)</td>"
