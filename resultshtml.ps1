@@ -159,7 +159,7 @@ function toggleSubTable(id) {
 
 foreach($resultpath in $resultpaths){
   $fullpath=$resultpath.fullname
-  $tcname=($resultpath.name).replace("_FAIL","").replace("_PASS","")
+  $tcname=($resultpath.name).replace("_FAIL","").replace("_PASS","").replace("_NA","")
   $htmlsub+=@"
   case '$tcname':
 
