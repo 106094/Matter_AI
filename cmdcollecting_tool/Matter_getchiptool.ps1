@@ -508,7 +508,7 @@ $checktime=[System.Windows.Forms.MessageBox]::Show("Collecting done. It took $ti
 #region filter
 $csvcontent=Import-Csv $csvname1
 $csvcontentnew=@()
-$filters=$matchtcs+$extratcs
+$filters=($matchtcs+$extratcs)|Sort-Object|Get-Unique
 foreach($filter in $filters){
   $csvcontentnew+=$csvcontent|Where-Object{$_."TestCaseID" -match "\[$filter\]"}
 }
