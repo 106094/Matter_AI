@@ -78,7 +78,7 @@ foreach($csv in $csvdata){
     while ($passresult -eq "0" -and $k -lt $retesttime){
       $k++
       dutpower $dutcontrol
-      $pycmd=putty_paste -cmdline "rm -f admin_storage.json && $pyline" -checkline1 "*Final result*pass*"
+      $pycmd=putty_paste -cmdline "rm -f admin_storage.json && $pyline" -checkline1 "*Final result*pass*" -puttyname "py"
       $passresult=$pycmd[-1]
       write-host "round $k, $($passresult)"
     }
@@ -163,7 +163,7 @@ if ($global:testtype -eq 2){
     $logpair="$tclogfd\$($datetime2)_$($caseid)_0pairing.log"    
     new-item -ItemType File -Path $logpair | Out-Null
         $k=$pairresult=0
-        putty_paste -cmdline "rm -rf /tmp/chip_*" -skipcheck
+        putty_paste -cmdline "rm -rf /tmp/chip_*" -skipcheck -puttyname "99"
         while (!$pairresult -and $k -lt $retesttime){
           $k++
           $pairresult=putty_paste -cmdline "$paringcmd" -checkline1 "Device commissioning completed with success" -puttyname "99"

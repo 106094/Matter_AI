@@ -102,7 +102,7 @@ $worksheetNames = (Get-ExcelSheetInfo -Path $excelfull).Name
 
 $excelPackage = [OfficeOpenXml.ExcelPackage]::new((Get-Item $excelfull))
 $worksheetsum=Import-Excel $excelfull -WorksheetName $sumsheetname
-$filteredtcs = ($worksheetsum |Where-Object{$_."Test Case ID".length -gt 0}|  Where-Object {$_."$columncor" -eq "UI-Manual" `
+$filteredtcs = ($worksheetsum |Where-Object{$_."Test Case ID".length -gt 0}|  Where-Object {($_."$columncor" -eq "UI-Manual" -or $_."$columncor" -eq "UI-Semi-automated") `
  -and $_."Test Case Name" -notlike "*as client*"})."Test Case ID"
  if($extra){
   $filteredtcs+=$extra

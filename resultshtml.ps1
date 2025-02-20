@@ -16,6 +16,8 @@ $htmlContentmain=$tableContent=$htmlsub=$casecontent=$null
 # Import the CSV data
 $showpct=[double]((get-content C:\Matter_AI\settings\config_linux.txt|where-object {$_ -match "showpercentage"}).split(":"))[1]/100
 $csvData = Import-Csv -Path $global:csvfilename|Where-Object{$_.TestCaseID -in $mancaseids}
+$specialsets=import-csv -path C:\Matter_AI\settings\*manual_special.csv
+         
 $eckeys=(import-csv C:\Matter_AI\settings\report_exclude.csv).e_key|Get-Unique
 $resultlog=(get-childitem "C:\Matter_AI\logs\_manual\" -directory | Sort-Object LastWriteTime -Descending | Select-Object -First 1).fullname
 $resultpaths=Get-ChildItem $resultlog -Directory |Where-Object{$_.name -ne "html"}
@@ -174,7 +176,6 @@ foreach($resultpath in $resultpaths){
         $htmlsub += "<th>$header</th>"
           }
     
-
   $csvfilter=$csvData|Where-Object{$_.TestCaseID -like "*$tcname*"}
   $totalstep=$csvfilter.step.count
   $stepcount=0
@@ -187,6 +188,8 @@ foreach($resultpath in $resultpaths){
     $stepcount++
     $tcstep=$csv.step
     $tcsubstep=$csv.substep
+    $csvexample = $csv.example
+    $specialset=$specialsets|Where-Object{$_.source -eq $excelfilename -and $_.TC -eq  $csv.TestCaseID -and $_.step.trim() -eq $tcstep -and $_.substep -eq $tcsubstep}   
     $passresult="Failed"
     $picscheck=@()
     if(($csv.pics_check) -match "0"){
@@ -209,12 +212,6 @@ foreach($resultpath in $resultpaths){
       $newline=$_  + "<br>"
       $newline
       }
-      $example = $csv.example.split("`n")|foreach-object{
-        if($_.trim().length -gt 0){
-          $newline=$_ + "<br>"
-          $newline
-        }
-      }
      $cmd=$csv.cmd
      $linec=0
      $logcount=$logcontent.count
@@ -223,6 +220,38 @@ foreach($resultpath in $resultpaths){
       $linec++
       $tdlog=@()
       $matchedlines=@()
+       #get example replacements
+      if ($csvexample.length -gt 0 -and $specialset -and $specialset.lastlog_keyword.length -gt 0 -and $specialset.para_name.Length -gt 0){
+          $logreviews=get-content $logcontent
+          $getlastkey2="$(($specialset.lastlog_keyword).replace(":","\:").replace("[","\[").replace("]","\]"))"
+          $checkkeymatch=($logreviews|Select-String -Pattern "\b($getlastkey2).*" -AllMatches |  ForEach-Object {$_.matches.value})
+          $checkexmatch=($csvexample|Select-String -Pattern "\b($getlastkey2).*" -AllMatches |  ForEach-Object {$_.matches.value})
+           if($checkkeymatch.count -gt 1){
+                $keymatch=$checkkeymatch[-1]
+            }
+            else{
+              $keymatch=$checkkeymatch
+            }
+            $keymatch=(((($keymatch).replace("[","")).replace("]","")).replace(",","").replace(($specialset.lastlog_keyword),"")|out-string).trim()
+           if($checkexmatch.count -gt 1){
+              $exmatch=$checkexmatch[-1]
+             }
+            else{
+              $exmatch=$checkexmatch
+             }
+             $exmatch=(((($exmatch).replace("[","")).replace("]","")).replace(",","").replace(($specialset.lastlog_keyword),"")|out-string).trim()
+      if($exmatch.Length -gt 0 -and $keymatch.Length -gt 0){
+      $csvexample=$csvexample.replace($exmatch,$keymatch)
+       }
+       }
+       
+       $example = $csvexample.split("`n")|foreach-object{
+        if($_.trim().length -gt 0){
+          $newline=$_ + "<br>"
+          $newline
+        }
+      }
+
       $realcmd=((get-content $log|Where-Object{$_.length -gt 0})[1]|Out-String).trim()
       if($realcmd -match "\#"){
         $realcmd=($realcmd.split("#")[1]).trim()
@@ -236,7 +265,7 @@ foreach($resultpath in $resultpaths){
         }
       
       $logdata=get-content $log |Where-Object{$_.length -gt 0}| Select-Object -skip 2
-       $newcsv=  ($csv.example).replace($ekey," ")
+       $newcsv=  ($csvexample).replace($ekey," ")
          foreach($ekey in $eckeys){
              $newcsv=  $newcsv.replace($ekey," ")
           }
@@ -312,9 +341,6 @@ foreach($resultpath in $resultpaths){
           $newline
              }
              #>
-
-
-        
         if($checkitems.count -eq 0){
           $passresult="N/A"
         }
