@@ -173,10 +173,10 @@ if ($global:testtype -eq 2){
 
     }
     if($global:testing -eq 1){
-      $pairresult="passed"  #test
+      $pairresult=1  #test
     }
     #start step cmd if connected pass
-    if ($pairresult -match "passed"){ 
+    if ($pairresult -eq 1){ 
         $runflag=1
         $getlastkey=$null
         $addcmdall=@()
