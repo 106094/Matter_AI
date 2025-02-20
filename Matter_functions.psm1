@@ -357,11 +357,10 @@ $lastword=$checkend[-1]
 $newlogline=(get-content $logfile).count -2
 $alllog=get-content $logfile
 $checklog=$alllog[$lastlogline..$newlogline]
-set-content C:\Matter_AI\logs\lastlog.log -Value $checklog -Force
 if($line1 -ne 0){
     $checklog=$checklog[$line1]
-    set-content C:\Matter_AI\logs\lastlog_check.log -Value $checklog -Force
     }
+set-content C:\Matter_AI\logs\lastlog.log -Value $checklog -Force
 if($checkline1.Length -gt 0){
 $checkresult=$checklog -like "*$checkline1*"
 if($checkresult){
