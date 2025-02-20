@@ -366,22 +366,27 @@ if($checkline1.Length -gt 0){
 $checkresult=$checklog -like "*$checkline1*"
 if($checkresult){
   $checkresults+=@("check $($checkline1) passed")
+  $resultchecks=1
 }
 else{
     $checkresults+=@("check $($checkline1) failed")
+    $resultchecks=0
 }
 if($checkline2.Length -gt 0){
     $checkresult=$checklog -like "*$checkline2*"
     if($checkresult){
         $checkresults+=@("check $($checkline2) passed")
+        $resultcheck2=1
       }
       else{
           $checkresults+=@("check $($checkline2) failed")
+          $resultcheck2=0
       }
+      $resultchecks=$resultchecks*$resultcheck2
     }
     $checkresultsall=$checkresults -join "; "
     add-content C:\Matter_AI\logs\testing.log -value $checkresultsall
-    return $checkresultsall
+    return $resultchecks
 }
 
 }    
