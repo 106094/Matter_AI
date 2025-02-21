@@ -163,10 +163,10 @@ if ($global:testtype -eq 2){
     $logpair="$tclogfd\$($datetime2)_$($caseid)_0pairing.log"    
     new-item -ItemType File -Path $logpair | Out-Null
         $k=$pairresult=0
-        putty_paste -cmdline "rm -rf /tmp/chip_*" -skipcheck -puttyname "99"
+        putty_paste -cmdline "rm -rf /tmp/chip_*" -skipcheck
         while (!$pairresult -and $k -lt $retesttime){
           $k++
-          $pairresult=putty_paste -cmdline "$paringcmd" -checkline1 "Device commissioning completed with success" -puttyname "99"
+          $pairresult=putty_paste -cmdline "$paringcmd" -checkline1 "Device commissioning completed with success"
           add-content -path $logpair -Value (get-content -path C:\Matter_AI\logs\lastlog.log )
           write-host "round $k"
         }
