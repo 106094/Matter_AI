@@ -1152,9 +1152,9 @@ function puttystart ([string]$puttyname) {
        
        if($global:testtype -eq 1){
         $global:failmsg=$null
-        putty_paste -cmdline "sudo -s" -skipcheck
-        putty_paste -cmdline $pskey  -skipcheck
-        putty_paste -cmdline "docker ps -a" -skipcheck
+        putty_paste -cmdline "sudo -s" -skipcheck 
+        putty_paste -cmdline $pskey  -skipcheck 
+        putty_paste -cmdline "docker ps -a" -skipcheck 
         $idlogin=get-content "C:\Matter_AI\logs\lastlog.log" 
         $checkmatch=$idlogin -match "\/bin\/bash"
         if($checkmatch){

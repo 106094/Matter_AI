@@ -8,14 +8,13 @@ else{
 }
 
 if ($global:testtype -eq 1){
-
 $csvdata=import-csv C:\Matter_AI\settings\_py\py.csv | Where-Object {$_.TestCaseID -in $pycaseids -and $_.command.length -gt 0}
 $settigns=import-csv C:\Matter_AI\settings\_py\settings.csv 
 $headers=$settigns[0].PSObject.Properties.Name
 $sound = New-Object -TypeName System.Media.SoundPlayer
 $sound.SoundLocation = "C:\Windows\Media\notify.wav"
 $logtc=(get-childitem -path "C:\Matter_AI\logs\_py" -directory | Sort-Object LastWriteTime -Descending | Select-Object -First 1).fullname
-
+$global:puttyset = @()
 foreach($csv in $csvdata){
     #$sound.Play()
     #([System.Media.SystemSounds]::Asterisk).Play()
@@ -78,7 +77,7 @@ foreach($csv in $csvdata){
     while ($passresult -eq "0" -and $k -lt $retesttime){
       $k++
       dutpower $dutcontrol
-      $pycmd=putty_paste -cmdline "rm -f admin_storage.json && $pyline" -checkline1 "*Final result*pass*" -puttyname "py"
+      $pycmd=putty_paste -cmdline "rm -f admin_storage.json && $pyline" -checkline1 "*Final result*pass*"
       $passresult=$pycmd[-1]
       write-host "round $k, $($passresult)"
     }
@@ -102,6 +101,7 @@ if ($global:testtype -eq 2){
   $lastcaseid=$null
   $specialsets=import-csv -path C:\Matter_AI\settings\*manual_special.csv
   $global:varhash=@()
+  $global:puttyset = @()
   #$caseids=$global:sels #replace by $mancaseids
   $csvdata=import-csv $global:csvfilename | Where-Object {$_.TestCaseID -in $mancaseids -and $_.cmd.length -gt 0 -and !($_.pics_check -match "0")}
   #$sound = New-Object -TypeName System.Media.SoundPlayer
