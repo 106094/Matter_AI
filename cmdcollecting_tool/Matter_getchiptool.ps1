@@ -107,7 +107,7 @@ $filteredtcs = ($worksheetsum |Where-Object{$_."Test Case ID".length -gt 0}|  Wh
  if($extra){
   $filteredtcs+=$extra
  }
-$filteredsheets=$filteredtcs|foreach-object{($_.split("-"))[1]}|Get-Unique
+$filteredsheets=$filteredtcs|foreach-object{($_.split("-"))[1]}|Sort-Object|Get-Unique
 $filteredsheets+="Diag Log"
 $Indexfirst=($worksheetNames.trim()).IndexOf("ACE")
 $Indexlast=($worksheetNames.trim()).IndexOf("WNCV")
