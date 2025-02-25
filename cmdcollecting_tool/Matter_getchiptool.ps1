@@ -54,7 +54,7 @@ $a[-1]|export-csv C:\Matter_AI\settings\_manual\settings.csv -NoTypeInformation 
 #tc-filter
 $tcfilters=(import-csv "C:\Matter_AI\settings\manualcmd_Matter - TC_filter.csv")
 $matchtcs=($tcfilters|where-object{$_."matched_manual" -ne ""})."TC"
-$extratcs=($tcfilters|where-object{$_."extra_manual" -ne ""})."TC"
+#$extratcs=($tcfilters|where-object{$_."extra_manual" -ne ""})."TC"
 #$excludetcs=($tcfilters|where-object{$_."exclude_manual" -ne ""})."TC"
 
 #filter manual and as client and UI-Manual
@@ -508,7 +508,8 @@ $checktime=[System.Windows.Forms.MessageBox]::Show("Collecting done. It took $ti
 #region filter
 $csvcontent=Import-Csv $csvname1
 $csvcontentnew=@()
-$filters=($matchtcs+$extratcs)|Sort-Object|Get-Unique
+#$filters=($matchtcs+$extratcs)|Sort-Object|Get-Unique
+$filters=$matchtcs|Sort-Object|Get-Unique
 foreach($filter in $filters){
   $csvcontentnew+=$csvcontent|Where-Object{$_."TestCaseID" -match "\[$filter\]"}
 }
