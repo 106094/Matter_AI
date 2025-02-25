@@ -1224,8 +1224,7 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
      Send-MailMessage @paramHash -Encoding utf8 -SmtpServer zimbra.allion.com.tw 
      return "Fail Download"
     }
-    start-sleep -s 2
-    (get-process -name "msedge" -ea SilentlyContinue).CloseMainWindow()|Out-Null   
+
   } 
 
   function getparameter([string]$getlastkey,[string]$setparaname){
@@ -2064,6 +2063,8 @@ function downloads([switch]$google){
     $checkdownload=webdownload -goo_link $goo_link -gid $gid -sv_range $sv_range -savepath $savepath -errormessage $errormessage
      if($checkdownload -match "fail"){      
           alarmmsg "Please login in authorized google account at edge first"
+          start-sleep -s 2
+          (get-process -name "msedge" -ea SilentlyContinue).CloseMainWindow()|Out-Null   
         exit
     }
     #endregion
@@ -2101,5 +2102,8 @@ function downloads([switch]$google){
     }
 
     }
+
+    start-sleep -s 2
+    (get-process -name "msedge" -ea SilentlyContinue).CloseMainWindow()|Out-Null   
     
 }
