@@ -49,7 +49,7 @@ $sumsheetname=((import-csv "C:\Matter_AI\settings\manualcmd_Matter - filesetting
 #$excelPackage = [OfficeOpenXml.ExcelPackage]::new((Get-Item $global:excelfile))
 $worksheetsum=Import-Excel $global:excelfile -WorksheetName $sumsheetname
 $columnName = ($worksheetsum[0].PSObject.Properties.Name)[[int32]$columncor-1]
-$filteredtcs = ($worksheetsum |Where-Object{$_."Test Case ID".length -gt 0}|  Where-Object {$_.$columnName -eq "UI-Automated"})."Test Case ID"|Sort-Object
+$filteredtcs = ($worksheetsum |Where-Object{$_."Test Case ID".length -gt 0}|  Where-Object {$_.$columnName -eq "UI-Automated" -or $_.$columnName -eq "Verification Step Document"})."Test Case ID"|Sort-Object
 #tc-filter
 $tcfilters=(import-csv "C:\Matter_AI\settings\manualcmd_Matter - TC_filter.csv")
 $matchtcs=($tcfilters|where-object{$_."matched_webui" -ne ""})."TC"
