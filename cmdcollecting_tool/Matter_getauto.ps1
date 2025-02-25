@@ -43,8 +43,8 @@ if(!($chkmod)){
  
 $excelfilename=(Get-ChildItem $global:excelfile).name
 #reg read excel to csv
-$columncor=((import-csv "C:\Matter_AI\settings\filesettings.csv"|Where-Object{$_.filename -eq $excelfilename}|Select-Object -Property webui_column_No).webui_column_No).trim()
-$sumsheetname=((import-csv "C:\Matter_AI\settings\filesettings.csv"|Where-Object{$_.filename -eq $excelfilename}|Select-Object -Property webui_page).webui_page).trim()
+$columncor=((import-csv "C:\Matter_AI\settings\manualcmd_Matter - filesettings.csv"|Where-Object{$_.filename -eq $excelfilename}|Select-Object -Property webui_column_No).webui_column_No).trim()
+$sumsheetname=((import-csv "C:\Matter_AI\settings\manualcmd_Matter - filesettings.csv"|Where-Object{$_.filename -eq $excelfilename}|Select-Object -Property webui_page).webui_page).trim()
 #$worksheetNames = (Get-ExcelSheetInfo -Path $excelfull).Name
 #$excelPackage = [OfficeOpenXml.ExcelPackage]::new((Get-Item $global:excelfile))
 $worksheetsum=Import-Excel $global:excelfile -WorksheetName $sumsheetname
@@ -53,13 +53,15 @@ $filteredtcs = ($worksheetsum |Where-Object{$_."Test Case ID".length -gt 0}|  Wh
 #tc-filter
 $tcfilters=(import-csv "C:\Matter_AI\settings\manualcmd_Matter - TC_filter.csv")
 $matchtcs=($tcfilters|where-object{$_."matched_webui" -ne ""})."TC"
-$excludetcs=($tcfilters|where-object{$_."exclude_webui" -ne ""})."TC"
+#$excludetcs=($tcfilters|where-object{$_."exclude_webui" -ne ""})."TC"
 if($matchtcs){
   $filteredtcs= $filteredtcs|Where-Object{$_ -in $matchtcs} 
 }
+<#
 if($excludetcs){
   $filteredtcs= $filteredtcs|Where-Object{ $_ -notin $excludetcs} 
 }
+#>
 $global:webuicases=selguis -Inputdata $filteredtcs -instruction "Please select Auto caseids" -errmessage "No caseid selected"
 
 <#

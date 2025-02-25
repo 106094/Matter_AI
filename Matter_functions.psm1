@@ -1139,8 +1139,8 @@ function puttystart ([string]$puttyname) {
        $pskey=($settings[2].split(":"))[-1]
        #$sshpath=($settings[3].split(":"))[-1]
        $fname=(Get-ChildItem $global:excelfile).name
-       $sshpath=(import-csv C:\Matter_AI\settings\filesettings.csv|Where-Object{$_.filename -eq $fname}).python_path
-       $sshpathmanual=(import-csv C:\Matter_AI\settings\filesettings.csv|Where-Object{$_.filename -eq $fname}).manual_path
+       $sshpath=(import-csv "C:\Matter_AI\settings\manualcmd_Matter - filesettings.csv"|Where-Object{$_.filename -eq $fname}).python_path
+       $sshpathmanual=(import-csv "C:\Matter_AI\settings\manualcmd_Matter - filesettings.csv"|Where-Object{$_.filename -eq $fname}).manual_path
        $wshell = New-Object -ComObject WScript.Shell
        $wshell.AppActivate($puttypid)
        start-sleep -s 5
@@ -2066,6 +2066,15 @@ function downloads([switch]$google){
           alarmmsg "Please login in authorized google account at edge first"
         exit
     }
+    #endregion
+
+    #region download file settings
+    $goo_link="https://docs.google.com/spreadsheets/d/19ZPA2Z6SYYtvIj9qXM0FuDASF0FaZP2xjx7jcebrJEQ/"
+    $gid="868865222"
+    $sv_range="A1:G100"
+    $savepath="C:\Matter_AI\settings\"
+    $errormessage="matter file settings download failed"
+    $checkdownload=webdownload -goo_link $goo_link -gid $gid -sv_range $sv_range -savepath $savepath -errormessage $errormessage
     #endregion
 
     #region download TC_filter settings

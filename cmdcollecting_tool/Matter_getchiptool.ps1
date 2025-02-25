@@ -55,7 +55,7 @@ $a[-1]|export-csv C:\Matter_AI\settings\_manual\settings.csv -NoTypeInformation 
 $tcfilters=(import-csv "C:\Matter_AI\settings\manualcmd_Matter - TC_filter.csv")
 $matchtcs=($tcfilters|where-object{$_."matched_manual" -ne ""})."TC"
 $extratcs=($tcfilters|where-object{$_."extra_manual" -ne ""})."TC"
-$excludetcs=($tcfilters|where-object{$_."exclude_manual" -ne ""})."TC"
+#$excludetcs=($tcfilters|where-object{$_."exclude_manual" -ne ""})."TC"
 
 #filter manual and as client and UI-Manual
 if ($global:updatechiptool -eq "Yes"){
@@ -95,8 +95,8 @@ if(!($chkmod)){
   $matchcmds=$ctcmds.name|Get-Unique
   #endregion
 #reg read excel to csv
-$columncor=((import-csv "C:\Matter_AI\settings\filesettings.csv"|Where-Object{$_.filename -eq ($excelfile).name}|Select-Object -Property manual_column_title).manual_column_title).trim()
-$sumsheetname=((import-csv "C:\Matter_AI\settings\filesettings.csv"|Where-Object{$_.filename -eq ($excelfile).name}|Select-Object -Property manual_page).manual_page).trim()
+$columncor=((import-csv "C:\Matter_AI\settings\manualcmd_Matter - filesettings.csv"|Where-Object{$_.filename -eq ($excelfile).name}|Select-Object -Property manual_column_title).manual_column_title).trim()
+$sumsheetname=((import-csv "C:\Matter_AI\settings\manualcmd_Matter - filesettings.csv"|Where-Object{$_.filename -eq ($excelfile).name}|Select-Object -Property manual_page).manual_page).trim()
 $worksheetNames = (Get-ExcelSheetInfo -Path $excelfull).Name
 #$sumsheetname=$worksheetNames|Where-Object{$_ -match "cert_repo"}
 
@@ -513,11 +513,13 @@ foreach($filter in $filters){
   $csvcontentnew+=$csvcontent|Where-Object{$_."TestCaseID" -match "\[$filter\]"}
 }
 
+<#
 if($excludetcs){
   foreach($excludetc in $excludetcs){
     $csvcontentnew=$csvcontentnew|Where-Object{$_."TestCaseID" -notmatch "\[$excludetc\]"}
   }
 }
+#>
 
 $csvcontentnew|Where-Object{$_.cmd.length -gt 0 -and $_.results.length -eq 0 -and $_.TestCaseID -notin $TH2tcline} |export-csv $csvname -NoTypeInformation
 #endregion
