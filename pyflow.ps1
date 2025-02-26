@@ -587,6 +587,19 @@ $driver.ExecuteScript($script)
         ($driver.FindElement([OpenQA.Selenium.By]::ClassName("icon-add-square"))).click()
        }
         start-sleep -s 5
+        #click certification mode
+        $regbutton = $wait.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.IWebElement]]{
+          try{
+            ($driver.FindElement([OpenQA.Selenium.By]::XPath('//span[text()="Regular Mode"]'))) # for 2nd run without add icon
+          }catch{
+            return $null
+          }
+      })
+      
+        if($regbutton.Displayed){
+          $regbutton.Click()
+          start-sleep -s 5
+        }
         #set project name
         $testname=($driver.FindElement([OpenQA.Selenium.By]::XPath('//input[@ng-reflect-model="UI_Test_Run"]')))
         start-sleep -s 2
@@ -623,9 +636,9 @@ $driver.ExecuteScript($script)
        ($driver.FindElement([OpenQA.Selenium.By]::XPath('//span[contains(text(),"SDK YAML Tests")]'))).click()
         start-sleep -s 5
         #Clear Selection
-        $clearbt=($driver.FindElement([OpenQA.Selenium.By]::XPath('//button[text()="Clear Selection "]')))
-        $clearbt.Click() 
-        start-sleep -s 10
+          $clearbt=($driver.FindElement([OpenQA.Selenium.By]::XPath('//button[text()="Clear Selection "]')))
+          $clearbt.Click() 
+          start-sleep -s 10
         #$labelElement = ($driver.FindElement([OpenQA.Selenium.By]::XPath("//label[text()='FirstChipToolSuite']")))
         #start-sleep -s 5
         # Find the corresponding checkbox by navigating to its sibling elements
