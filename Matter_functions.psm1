@@ -2081,7 +2081,7 @@ function downloads([switch]$google){
     #region download TC_filter settings
     $goo_link="https://docs.google.com/spreadsheets/d/19ZPA2Z6SYYtvIj9qXM0FuDASF0FaZP2xjx7jcebrJEQ/"
     $gid="808739996"
-    $sv_range="A1:I1000"
+    $sv_range="A1:E1000"
     $savepath="C:\Matter_AI\settings\"
     $errormessage="matter TC_filter download failed"
     $checkdownload=webdownload -goo_link $goo_link -gid $gid -sv_range $sv_range -savepath $savepath -errormessage $errormessage
