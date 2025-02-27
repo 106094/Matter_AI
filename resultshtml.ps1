@@ -252,17 +252,26 @@ foreach($resultpath in $resultpaths){
         }
       }
 
-      $realcmd=((get-content $log|Where-Object{$_.length -gt 0})[1]|Out-String).trim()
-      if($realcmd -match "\#"){
-        $realcmd=($realcmd.split("#")[1]).trim()
+      $realcmd=(((((get-content $log|Where-Object{$_.length -gt 0})[0]|Out-String).trim()).split("#"))[1]|Out-String).trim()
+      $halflen=($realcmd.length-1)/2
+      $split1=$realcmd.substring(0,$halflen)
+      $split2=$realcmd.substring($halflen+1,$halflen)
+      if($split1 -eq $split2){
+        $realcmd=$split1
       }
-       $checkdouble=($realcmd.split(" ")|Sort-Object|Get-Unique).count -eq ($realcmd.split(" ")).count/2
-        if($checkdouble){
-          $realcmd=(($realcmd.split(" "))|Select-Object -first (($realcmd.split(" ")).count/2)) -join " "
+      else{
+        $realcmd=((get-content $log|Where-Object{$_.length -gt 0})[1]|Out-String).trim()
+        if($realcmd -match "\#"){
+          $realcmd=($realcmd.split("#")[1]).trim()
         }
-        if($realcmd.trim() -ne $cmd.trim()){
-          $cmdhighlight=$true
-        }
+         $checkdouble=($realcmd.split(" ")|Sort-Object|Get-Unique).count -eq ($realcmd.split(" ")).count/2
+          if($checkdouble){
+            $realcmd=(($realcmd.split(" "))|Select-Object -first (($realcmd.split(" ")).count/2)) -join " "
+          }
+          if($realcmd.trim() -ne $cmd.trim()){
+            $cmdhighlight=$true
+          }
+      }
       
       $logdata=get-content $log |Where-Object{$_.length -gt 0}| Select-Object -skip 2
        $newcsv=  ($csvexample).replace($ekey," ")
