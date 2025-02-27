@@ -276,7 +276,6 @@ foreach($resultpath in $resultpaths){
       }
       
       $logdata=get-content $log |Where-Object{$_.length -gt 0}| Select-Object -skip $skipline
-      $tcstep
        $newcsv=  ($csvexample).replace($ekey," ")
          foreach($ekey in $eckeys){
              $newcsv=  $newcsv.replace($ekey," ")
