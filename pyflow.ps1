@@ -746,7 +746,21 @@ $driver.ExecuteScript($script)
             }
            }
          $startbt.Click()
-         start-sleep -s 20
+         start-sleep -s 2
+         $checkcomm = $waitten.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Selenium.IWebElement]]{
+          try{
+            $driver.FindElements([OpenQA.Selenium.By]::XPath("//label[contains(text(),'DONE')]/preceding-sibling::p-radiobutton")) 
+           }catch{
+            return $null
+           }
+          })
+          if($checkcomm.displayed){
+            $checkcomm.Click()
+            start-sleep -s 1
+            ($driver.FindElement([OpenQA.Selenium.By]::XPath('//span[contains(text(),"Submit")]'))).click()             
+            start-sleep -s 10
+          }
+         start-sleep -s 10
          #check retest
          $timestart=get-date
          $retryhit=0
