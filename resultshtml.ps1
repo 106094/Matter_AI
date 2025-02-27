@@ -258,8 +258,10 @@ foreach($resultpath in $resultpaths){
       $split2=$realcmd.substring($halflen+1,$halflen)
       if($split1 -eq $split2){
         $realcmd=$split1
+        $skipline=1
       }
       else{
+        $skipline=2
         $realcmd=((get-content $log|Where-Object{$_.length -gt 0})[1]|Out-String).trim()
         if($realcmd -match "\#"){
           $realcmd=($realcmd.split("#")[1]).trim()
@@ -273,7 +275,8 @@ foreach($resultpath in $resultpaths){
           }
       }
       
-      $logdata=get-content $log |Where-Object{$_.length -gt 0}| Select-Object -skip 2
+      $logdata=get-content $log |Where-Object{$_.length -gt 0}| Select-Object -skip $skipline
+      $tcstep
        $newcsv=  ($csvexample).replace($ekey," ")
          foreach($ekey in $eckeys){
              $newcsv=  $newcsv.replace($ekey," ")
@@ -305,8 +308,9 @@ foreach($resultpath in $resultpaths){
           $splitchecjs|ForEach-Object{
             $checkkit1=$_.trim()
               $newcheckit=$checkkit1.replace("[","\[").replace("]","\]").replace(")","\)").replace("(","\(").replace(":","\:").replace("{","\{").replace("}","\}").replace("""","").replace(",","\,")
+              $newcheckit2=$newcheckit+","
               #if($logline -like "*$newcheckit*"){
-                 if($logline -match "(^|\s|\b)$newcheckit($|\s|\b)" ){
+                 if($logline -match "(^|\s|\b)$newcheckit($|\s|\b)" -or $logline -match "(^|\s|\b)$newcheckit2(|$|\s|\b)"){
                 $match2++
                 $maxdcm2=[math]::round($match2/$totalc,3)   
                 if($maxdcm2 -gt $maxdcm){
