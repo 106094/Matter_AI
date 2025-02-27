@@ -184,7 +184,6 @@ foreach($resultpath in $resultpaths){
   $nscount=0
   $failcount=0
   foreach($csv in $csvfilter){
-    
     $stepcount++
     $tcstep=$csv.step
     $tcsubstep=$csv.substep
