@@ -97,6 +97,10 @@ $htmlContentmain = @"
           color: green;
           font-weight: bold;
         }
+        .xfail {
+          color: red;
+          font-weight: bold;
+        }
         .fail {
           background-color: red;
           color: white;
@@ -219,6 +223,7 @@ foreach($resultpath in $resultpaths){
       $linec++
       $tdlog=@()
       $matchedlines=@()
+      $passexaples=$failexaples=@()
        #get example replacements
       if ($csvexample.length -gt 0 -and $specialset -and $specialset.lastlog_keyword.length -gt 0 -and $specialset.para_name.Length -gt 0){
           $logreviews=get-content $logcontent
@@ -242,15 +247,7 @@ foreach($resultpath in $resultpaths){
       if($exmatch.Length -gt 0 -and $keymatch.Length -gt 0){
       $csvexample=$csvexample.replace($exmatch,$keymatch)
        }
-       }
-       
-       $example = $csvexample.split("`n")|foreach-object{
-        if($_.trim().length -gt 0){
-          $newline=$_ + "<br>"
-          $newline
-        }
-      }
-
+       }             
       $realcmd=(((((get-content $log|Where-Object{$_.length -gt 0})[0]|Out-String).trim()).split("#"))[1]|Out-String).trim()
       $halflen=($realcmd.length-1)/2
       $split1=$realcmd.substring(0,$halflen)
@@ -279,7 +276,7 @@ foreach($resultpath in $resultpaths){
          foreach($ekey in $eckeys){
              $newcsv=  $newcsv.replace($ekey," ")
           }
-           $checkitems = $newcsv.split("`n")|Where-Object{$_.trim().length -gt 2}|Sort-Object|Get-Unique
+           $checkitems = ($newcsv.split("`n")|Where-Object{$_.trim().length -gt 2}).trim()|Sort-Object|Get-Unique
       if($checkitems){     
         $passmatch=@()
         foreach ($checkitem in $checkitems){
@@ -307,8 +304,9 @@ foreach($resultpath in $resultpaths){
             $checkkit1=$_.trim()
               $newcheckit=$checkkit1.replace("[","\[").replace("]","\]").replace(")","\)").replace("(","\(").replace(":","\:").replace("{","\{").replace("}","\}").replace("""","").replace(",","\,")
               $newcheckit2=$newcheckit+","
+              $newcheckit3=$newcheckit.replace("\:","") # for [DMG] without ":"
               #if($logline -like "*$newcheckit*"){
-                 if($logline -match "(^|\s|\b)$newcheckit($|\s|\b)" -or $logline -match "(^|\s|\b)$newcheckit2(|$|\s|\b)"){
+                 if($logline -match "(^|\s|\b)$newcheckit($|\s|\b)" -or $logline -match "(^|\s|\b)$newcheckit2(|$|\s|\b)" -or $logline -match "(^|\s|\b)$newcheckit3($|\s|\b)"){
                 $match2++
                 $maxdcm2=[math]::round($match2/$totalc,3)   
                 if($maxdcm2 -gt $maxdcm){
@@ -322,6 +320,7 @@ foreach($resultpath in $resultpaths){
           if ($maxdcm2 -eq 1){
             $passmatch[$j].matched=1
           }
+          
           $j++
         }
         if($maxdcm -ge $showpct){ # if setting % then log
@@ -330,6 +329,41 @@ foreach($resultpath in $resultpaths){
           $matchedlines+=@($logline+" ($maxdcmp)")
           }
       }
+      $passexaple=($passmatch|Where-Object{$_.matched -eq 1}).checkline
+      $failexaple=($passmatch|Where-Object{$_.matched -eq 0}).checkline
+      if($passexaple){
+        $passexaples+=@($passexaple)
+      }
+      if($failexaple){
+        $failexaples+=@($failexaple)
+      }
+      }
+
+      $example = $csvexample.split("`n")|foreach-object{
+        $example1=$_
+        foreach($ekey in $eckeys){
+          $example1=($example1.replace($ekey," ")).trim()
+        }
+        if($example1.length -gt 0){
+          if( $example1 -in  $failexaples){
+            $newline=$_ + "<span class='xfail'> (NG) </span><br>"
+          }
+          else{
+            $newline=$_ + "<br>"
+          }
+         <#
+          if( $example1 -in $passexaples){
+            $newline=$_ + " (v) <br>"
+          }
+          elseif( $example1 -in $failexaples){
+            $newline=$_ + " (x) <br>"
+          }
+          else{
+            $newline=$_ + " (na) <br>"
+          }
+          #>
+          $newline
+        }
       }
         
         $htmllog=$reportPathlog+"\"+(get-childitem $log).name
