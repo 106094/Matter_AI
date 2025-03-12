@@ -347,9 +347,9 @@ if( !($cmdline -match "\./chip\-tool\s") -and !$skipcheck){
     start-sleep -s 1
 }
 $logfile=(Get-ChildItem $logputty|Sort-Object LastWriteTime|Select-Object -last 1).fullname
-start-process notepad $logfile -WindowStyle Minimized
-start-sleep -s 3
-(get-process notepad).CloseMainWindow()|Out-Null
+#start-process notepad $logfile -WindowStyle Minimized
+#start-sleep -s 3
+#(get-process notepad).CloseMainWindow()|Out-Null
 $checkend=((get-content $logfile)[-1]|Out-String).Trim()
 $lastword=$checkend[-1]
 }until($lastword -eq ":" -or $lastword -eq "$" -or $lastword -eq "#" -or $checkend -eq "logout" -or $checkend -eq ">>>")
