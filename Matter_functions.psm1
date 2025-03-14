@@ -1190,7 +1190,8 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
     Remove-Item "$ENV:UserProfile\downloads\*.csv" -force
     $link_save=$goo_link+"export?format=csv&gid=$($gid)&range=$($sv_range)"
     #$link_save
-    $checkopen=((get-process msedge)|Where-Object{$_.MainWindowTitle.length -gt 0}).id.count
+    $starttime=get-date
+    $checkopen=((get-process msedge -ea SilentlyContinue)|Where-Object{$_.MainWindowTitle.length -gt 0}).id.count
     $newedge=Start-Process "msedge.exe" -ArgumentList $link_save -wait -PassThru
     
     do{
@@ -1207,6 +1208,10 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
      }
     copy-item $downloadname -Destination $savepath -Force  
     Remove-Item "$ENV:UserProfile\downloads\*.csv" -force
+    if($checkopen -eq 0){
+       (get-process msedge -ea SilentlyContinue).CloseMainWindow()
+       start-sleep -s 5
+    }
     return "Download ok"
     }
     else{
@@ -1220,16 +1225,14 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
       Subject = $errormessage
       Body = "Region: $region <br>IP: $ipAddress <br>$env:COMPUTERNAME/$env:UserName<br> Fail to download $goo_link"
      }
-     
      Send-MailMessage @paramHash -Encoding utf8 -SmtpServer zimbra.allion.com.tw 
      return "Fail Download"
     }
     if($checkopen -eq 0){
-        (get-process msedge).CloseMainWindow()
+        (get-process msedge -ea SilentlyContinue).CloseMainWindow()
     }
     
   } 
-
 
   function getparameter([string]$getlastkey,[string]$setparaname){
       
@@ -2058,7 +2061,7 @@ new-item -ItemType File -path $logpath|Out-Null
 function downloads([switch]$google){
   
     if($google){
-
+    $checkopen=((get-process msedge -ea SilentlyContinue)|Where-Object{$_.MainWindowTitle.length -gt 0}).id.count
     #region download manual speacial settings
     $goo_link="https://docs.google.com/spreadsheets/d/19ZPA2Z6SYYtvIj9qXM0FuDASF0FaZP2xjx7jcebrJEQ/"
     $gid="1307777084"
@@ -2105,10 +2108,11 @@ function downloads([switch]$google){
     webdownload -goo_link $goo_link -gid $gid -sv_range $sv_range -savepath $savepath -errormessage $errormessage
     #endregion
     }
-
+    if($checkopen -eq 0){
+        taskkill /IM msedge.exe /F
+        start-sleep -s 5
     }
 
-    start-sleep -s 2
-    (get-process -name "msedge" -ea SilentlyContinue).CloseMainWindow()|Out-Null   
+    }
     
 }
