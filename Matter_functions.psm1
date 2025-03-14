@@ -1184,13 +1184,15 @@ function puttystart ([string]$puttyname) {
 
 #endregion
 
+
 function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$savepath,[string]$errormessage){
     
     Remove-Item "$ENV:UserProfile\downloads\*.csv" -force
     $link_save=$goo_link+"export?format=csv&gid=$($gid)&range=$($sv_range)"
     #$link_save
-    $starttime=get-date
-    $newedge=Start-Process "msedge.exe" -ArgumentList "--headless", "--disable-gpu", $link_save -wait -PassThru
+    $checkopen=((get-process msedge)|Where-Object{$_.MainWindowTitle.length -gt 0}).id.count
+    $newedge=Start-Process "msedge.exe" -ArgumentList $link_save -wait -PassThru
+    
     do{
     Start-Sleep -s 2
     $lsnewc=(Get-ChildItem -path "$ENV:UserProfile\Downloads\*.csv" -file).count
@@ -1222,9 +1224,12 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
      Send-MailMessage @paramHash -Encoding utf8 -SmtpServer zimbra.allion.com.tw 
      return "Fail Download"
     }
-    $newedge.close()
-
+    if($checkopen -eq 0){
+        (get-process msedge).CloseMainWindow()
+    }
+    
   } 
+
 
   function getparameter([string]$getlastkey,[string]$setparaname){
       
@@ -1860,7 +1865,7 @@ if($port.IsOpen){
  if(!(Test-Path C:\Matter_AI\platform-tools\adb.exe -ea SilentlyContinue)){
     $addr="https://drive.usercontent.google.com/download?id=1gMy2--1i4zLNfe_XveadM_mQHd3krBPQ&export=download&authuser=0&confirm=t&uuid=bb454201-395f-4236-9410-a4da87d1e945&at=APvzH3oNZ8sm2djB_FXOLFr6DvnS:1735882409292"
    #start-process msedge "https://drive.usercontent.google.com/download?id=1gMy2--1i4zLNfe_XveadM_mQHd3krBPQ&export=download&authuser=0&confirm=t&uuid=bb454201-395f-4236-9410-a4da87d1e945&at=APvzH3oNZ8sm2djB_FXOLFr6DvnS:1735882409292"
-   $newedge=Start-Process "msedge.exe" -ArgumentList "--headless", "--disable-gpu", $addr -wait -PassThru
+   $newedge=Start-Process "msedge.exe" -ArgumentList $addr -wait -PassThru
   while (!(test-path "$env:USERPROFILE\downloads\platform-tools*.zip")){
   start-sleep -s 3
   }
