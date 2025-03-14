@@ -1190,8 +1190,7 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
     $link_save=$goo_link+"export?format=csv&gid=$($gid)&range=$($sv_range)"
     #$link_save
     $starttime=get-date
-    Start-Process msedge $link_save
-    
+    Start-Process "msedge.exe" -ArgumentList "--new-window", $link_save
     do{
     Start-Sleep -s 2
     $lsnewc=(Get-ChildItem -path "$ENV:UserProfile\Downloads\*.csv" -file).count
@@ -1199,14 +1198,13 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
     }until($lsnewc -eq 1 -or $timepassed -gt 30)
     
     if($lsnewc){
+    Start-Sleep -s 2
     $downloadname= (Get-ChildItem -path "$ENV:UserProfile\Downloads\*.csv").FullName
     if(!(test-path $savepath)){
         New-Item -ItemType Directory $savepath -Force |Out-Null
      }
     copy-item $downloadname -Destination $savepath -Force  
     Remove-Item "$ENV:UserProfile\downloads\*.csv" -force
-     start-sleep -s 2
-    (get-process -name "msedge" -ea SilentlyContinue).CloseMainWindow()|Out-Null   
     return "Download ok"
     }
     else{
@@ -1224,6 +1222,7 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
      Send-MailMessage @paramHash -Encoding utf8 -SmtpServer zimbra.allion.com.tw 
      return "Fail Download"
     }
+    (get-process -name "msedge" -ea SilentlyContinue|where-object {$_.StartTime -gt $starttime}).CloseMainWindow()|Out-Null 
 
   } 
 
