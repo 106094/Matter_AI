@@ -1207,11 +1207,8 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
     copy-item $downloadname -Destination $savepath -Force  
     Remove-Item "$ENV:UserProfile\downloads\*.csv" -force
     if($checkopen -eq 0){
-       (get-process msedge -ea SilentlyContinue).CloseMainWindow()|Out-Null
+      $closeedge=(get-process msedge -ea SilentlyContinue).CloseMainWindow()|Out-Null
        start-sleep -s 5
-    }
-    if($checkopen -eq 0){
-        (get-process msedge -ea SilentlyContinue).CloseMainWindow()|Out-Null
     }
     return "Download ok"
     }
@@ -1230,7 +1227,7 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
      return "Fail Download"
     }
     if($checkopen -eq 0){
-        (get-process msedge -ea SilentlyContinue).CloseMainWindow()|out-null
+        $closeedge=(get-process msedge -ea SilentlyContinue).CloseMainWindow()|out-null
     }
     
   } 
@@ -2073,7 +2070,7 @@ function downloads([switch]$google){
      if($checkdownload -match "fail"){      
           alarmmsg "Please login in authorized google account at edge first"
           start-sleep -s 2
-          (get-process -name "msedge" -ea SilentlyContinue).CloseMainWindow()|Out-Null   
+          $closeedge=(get-process -name "msedge" -ea SilentlyContinue).CloseMainWindow()|Out-Null   
         exit
     }
     #endregion
