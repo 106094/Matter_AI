@@ -1183,8 +1183,6 @@ function puttystart ([string]$puttyname) {
 }
 
 #endregion
-
-
 function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$savepath,[string]$errormessage){
     
     Remove-Item "$ENV:UserProfile\downloads\*.csv" -force
