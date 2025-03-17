@@ -1207,11 +1207,11 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
     copy-item $downloadname -Destination $savepath -Force  
     Remove-Item "$ENV:UserProfile\downloads\*.csv" -force
     if($checkopen -eq 0){
-       (get-process msedge -ea SilentlyContinue).CloseMainWindow()
+       (get-process msedge -ea SilentlyContinue).CloseMainWindow()|Out-Null
        start-sleep -s 5
     }
     if($checkopen -eq 0){
-        (get-process msedge -ea SilentlyContinue).CloseMainWindow()
+        (get-process msedge -ea SilentlyContinue).CloseMainWindow()|Out-Null
     }
     return "Download ok"
     }
@@ -1230,7 +1230,7 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
      return "Fail Download"
     }
     if($checkopen -eq 0){
-        (get-process msedge -ea SilentlyContinue).CloseMainWindow()
+        (get-process msedge -ea SilentlyContinue).CloseMainWindow()|out-null
     }
     
   } 
@@ -2110,7 +2110,12 @@ function downloads([switch]$google){
     #endregion
     }
     if($checkopen -eq 0){
+        try{
         taskkill /IM msedge.exe /F
+        }
+        catch{
+            #do nothing
+        }
         start-sleep -s 5
     }
 
