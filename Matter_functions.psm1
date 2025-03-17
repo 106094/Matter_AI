@@ -1190,7 +1190,7 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
     #$link_save
     $starttime=get-date
     $checkopen=((get-process msedge -ea SilentlyContinue)|Where-Object{$_.MainWindowTitle.length -gt 0}).id.count
-    $newedge=Start-Process "msedge.exe" -ArgumentList $link_save -wait -PassThru
+    $newedge=Start-Process "msedge.exe" -ArgumentList $link_save
     
     do{
     Start-Sleep -s 2
@@ -1869,7 +1869,7 @@ if($port.IsOpen){
  if(!(Test-Path C:\Matter_AI\platform-tools\adb.exe -ea SilentlyContinue)){
     $addr="https://drive.usercontent.google.com/download?id=1gMy2--1i4zLNfe_XveadM_mQHd3krBPQ&export=download&authuser=0&confirm=t&uuid=bb454201-395f-4236-9410-a4da87d1e945&at=APvzH3oNZ8sm2djB_FXOLFr6DvnS:1735882409292"
    #start-process msedge "https://drive.usercontent.google.com/download?id=1gMy2--1i4zLNfe_XveadM_mQHd3krBPQ&export=download&authuser=0&confirm=t&uuid=bb454201-395f-4236-9410-a4da87d1e945&at=APvzH3oNZ8sm2djB_FXOLFr6DvnS:1735882409292"
-   $newedge=Start-Process "msedge.exe" -ArgumentList $addr -wait -PassThru
+   $newedge=Start-Process "msedge.exe" -ArgumentList $addr 
   while (!(test-path "$env:USERPROFILE\downloads\platform-tools*.zip")){
   start-sleep -s 3
   }
