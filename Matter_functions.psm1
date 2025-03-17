@@ -2108,7 +2108,7 @@ function downloads([switch]$google){
     }
     if($checkopen -eq 0){
         try{
-        taskkill /IM msedge.exe /F
+        taskkill /IM msedge.exe /F |out-null
         }
         catch{
             #do nothing
