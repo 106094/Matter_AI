@@ -1210,6 +1210,9 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
        (get-process msedge -ea SilentlyContinue).CloseMainWindow()
        start-sleep -s 5
     }
+    if($checkopen -eq 0){
+        (get-process msedge -ea SilentlyContinue).CloseMainWindow()
+    }
     return "Download ok"
     }
     else{
