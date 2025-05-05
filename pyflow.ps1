@@ -907,7 +907,18 @@ $driver.ExecuteScript($script)
           new-item -ItemType Directory $tclogfdr | Out-Null
           get-childitem $tclogfd\* -file  | move-item  -Destination $tclogfdr -Force
           if ($testrun -eq $retesttime){
-             rename-item $tclogfd -NewName "$($webtc)_Failed"
+            $filerenamesuccess=$false
+            while (!$filerenamesuccess){
+                rename-item $tclogfd -NewName "$($webtc)_Failed"
+                if(test-path $tclogfd){
+                  $filerenamesuccess=$false
+                  start-sleep -s 5
+                }
+                else{
+                  $filerenamesuccess=$true
+                }  
+               
+              }              
           }
           $testrun+=1
         }
