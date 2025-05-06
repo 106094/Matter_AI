@@ -106,6 +106,7 @@ if(!$checkfile){
 }
 
 if ($testtype -match 2){
+  . "C:\Matter_AI\cmdcollecting_tool\Matter_getpy.ps1"
   if(!$global:testing){
     downloads -google
     }

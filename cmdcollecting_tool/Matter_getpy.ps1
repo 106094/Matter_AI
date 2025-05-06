@@ -47,12 +47,14 @@ if(!($chkmod)){
 #reg read excel to csv
 $a=(Import-Excel $global:excelfile -WorksheetName "Python Script Command" -StartRow 2 -EndRow 1 -StartColumn 7)
 $a[-1]|export-csv $spath\settings.csv -NoTypeInformation -force
+if($testtype -eq 2){
+write-host "seletion only manual, get settings then quit"
+exit
+}
 $clnsets=((Import-Excel $global:excelfile -WorksheetName "Python Script Command" -StartRow 2 -EndRow 2 -startcolumn 7)[0]).psobject.Properties | Select-Object -ExpandProperty Name
 $clnsets1= @("Test Case ID" , "*sample command*") + $clnsets
 $clnsets2= @("TestCaseID" , "command")+ $clnsets
 $newclns=$clnsets2 -join ","
-
-
 
 Import-Excel $global:excelfile -WorksheetName "Python Script Command" -StartRow 2 |Select-Object -Property  $clnsets1 `
 |Export-Csv $spath\py0.csv -NoTypeInformation
