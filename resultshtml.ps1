@@ -28,7 +28,22 @@ if(!(Test-Path $reportPathlog)){
 $reportPath = "$resultlog\report.html"
 #check if there is availble test case folder
 $checktcfile=Get-ChildItem $resultlog -File -Recurse|where-object{$_.name -like "*.log" -and !($_.name -like "*pairing*.log") -and !($_.fullname -like "*html*")}
-if($checktcfile.count -gt 0){
+if($checktcfile.count -eq 0){
+  $htmlContent= @"
+<!DOCTYPE html>
+<html>
+<head>
+<title>Page Title</title>
+</head>
+<body>
+<h1>No logs found</h1>
+<p>All testcase pairing failed !.</p>
+</body>
+</html>
+"@
+  $htmlContent| Out-File -FilePath $reportPath -Encoding UTF8
+}
+else{
 # Start building the HTML content
 # Start building the HTML content with enhanced CSS for text wrapping
 $htmlContentmain = @"
