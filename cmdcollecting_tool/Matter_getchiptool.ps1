@@ -35,9 +35,24 @@ foreach($line in $piccontent){
 }
 
 #endregion
-
+<#
+#region hash control
 $excelfile=get-childitem -path $global:excelfile
 $excelfull=$excelfile.FullName
+$excelname=$excelfile.Name
+$filehash=(Get-FileHash -Path $global:excelfile -Algorithm SHA256).Hash
+$fileuse="C:\Matter_AI\settings\_manual\$($excelfile.basename)_hash.txt"
+if(!(test-path $fileuse)){
+  $global:updatechiptool = "Yes"
+}
+else{
+  $lasthast=get-content $fileuse
+  if($filehash -ne $lasthast){
+    $global:updatechiptool = "Yes"
+  }
+}
+#endregion
+#>
 
 #$excelfiles=get-childitem "C:\Matter_AI\settings\_docs\*TestPlanVerificationSteps_Auto.xlsx"
 $csvname0="C:\Matter_AI\settings\_manual\manualcmd_"+$excelfile.basename.replace("TestPlanVerificationSteps_Auto","")+"0.csv"
@@ -525,6 +540,43 @@ if($excludetcs){
 $csvcontentnew|Where-Object{$_.cmd.length -gt 0 -and $_.results.length -eq 0 -and $_.TestCaseID -notin $TH2tcline} |export-csv $csvname -NoTypeInformation
 #endregion
 
+
+#region hash control
+$picfilename=(get-childitem -path $picfile).basename
+$picfilehash=(Get-FileHash -Path $picfile -Algorithm SHA256).Hash
+$picfileuse="C:\Matter_AI\settings\_manual\$($excelfile.basename)_hash.txt"
+if(!(test-path $picfileuse)){
+  $updatepics = "Yes"
+}
+else{
+  $lasthast=get-content $picfileuse
+  if($picfilehash -ne $lasthast){
+    $updatepics = "Yes"
+  }
+}
+#endregion
+if($updatepics -eq "Yes"){
+#update pics
+$flowcontent=Import-Csv $csvname
+foreach($flowline in $flowcontent){
+  if($flowline.pics.length -gt 0){
+    $newchecklines=@()
+    $picsuses=$flowline.pics.split("`n")
+    foreach($picuse in $picsuses){
+      $newcheck="1"
+      if ($picuse -in $picexclusions){
+        $newcheck="0"
+      }
+      $newchecklines+=$newcheck 
+    }
+    $newcheckline=$newchecklines -join "`n"
+    $flowline.pics_check=$newcheckline
+  }
+
+}
+$flowcontent|export-csv $csvname -NoTypeInformation
+set-content $picfileuse -Value $picfilehash
+}
 
 $csvname
 #pause
