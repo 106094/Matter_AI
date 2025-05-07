@@ -48,7 +48,7 @@ if(!($chkmod)){
 $a=(Import-Excel $global:excelfile -WorksheetName "Python Script Command" -StartRow 2 -EndRow 1 -StartColumn 7)
 $a[-1]|export-csv $spath\settings.csv -NoTypeInformation -force
 if($testtype -eq 2){
-write-host "seletion only manual, get settings then quit"
+write-host "get manual pairing settings"
 exit
 }
 $clnsets=((Import-Excel $global:excelfile -WorksheetName "Python Script Command" -StartRow 2 -EndRow 2 -startcolumn 7)[0]).psobject.Properties | Select-Object -ExpandProperty Name
