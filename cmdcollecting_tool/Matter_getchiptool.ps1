@@ -575,7 +575,7 @@ foreach($flowline in $flowcontent){
 }
 $flowcontent|export-csv $csvname -NoTypeInformation
 set-content $picfileuse -Value $picfilehash
-add-content $picfileuse -Value "$picfilename LastwriteTiem is $(get-date(Get-ChildItem $picfile).LastWriteTime)"
+add-content $picfileuse -Value "$picfilename LastwriteTime is $(get-date(Get-ChildItem $picfile).LastWriteTime)"
 add-content $picfileuse -Value $(get-content $picfile)
 }
 
