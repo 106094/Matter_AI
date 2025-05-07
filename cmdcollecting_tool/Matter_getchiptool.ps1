@@ -549,7 +549,7 @@ if(!(test-path $picfileuse)){
   $updatepics = "Yes"
 }
 else{
-  $lasthast=get-content $picfileuse
+  $lasthast=get-content $picfileuse|Select-Object -First 1
   if($picfilehash -ne $lasthast){
     $updatepics = "Yes"
   }
@@ -576,6 +576,8 @@ foreach($flowline in $flowcontent){
 }
 $flowcontent|export-csv $csvname -NoTypeInformation
 set-content $picfileuse -Value $picfilehash
+add-content $picfileuse -Value "$picfilename LastwriteTiem is $(get-date(Get-ChildItem $picfile).LastWriteTime)"
+add-content $picfileuse -Value $(get-content $picfile)
 }
 
 $csvname
