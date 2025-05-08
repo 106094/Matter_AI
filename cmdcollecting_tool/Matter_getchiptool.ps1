@@ -535,10 +535,9 @@ if($excludetcs){
   }
 }
 #>
-
+$TH2tcline=get-content $TH2list
 $csvcontentnew|Where-Object{$_.cmd.length -gt 0 -and $_.results.length -eq 0 -and $_.TestCaseID -notin $TH2tcline} |export-csv $csvname -NoTypeInformation
 #endregion
-
 
 #region hash control
 $picfilename=(get-childitem -path $picfile).basename
