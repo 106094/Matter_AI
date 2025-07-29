@@ -2320,33 +2320,48 @@ $BtnrsetE = $window.FindName("BtnrsetE")
 $BtnrsetF = $window.FindName("BtnrsetF")
 $ResetTypesText = $window.FindName("ResetTypesText")
 
-$script:isrASelected = $false
-$script:isrBSelected = $false
-$script:isrCSelected = $false
-$script:isrDSelected = $false
-$script:isrESelected = $false
-$script:isrFSelected = $false
-$script:selectedResetButton = $null
-function ResetAllResetButtons {
+
+function ResetAllResetButtons ([string]$clickreset) {
+    if($clickreset -ne "A"){
     $BtnrsetA.Background = 'WhiteSmoke'; $BtnrsetA.Foreground = 'Blue'
+    $script:isrASelected = $false
+    }
+    if($clickreset -ne "B"){
     $BtnrsetB.Background = 'WhiteSmoke'; $BtnrsetB.Foreground = 'Blue'
+    $script:isrBSelected = $false
+    }
+    if($clickreset -ne "C"){
     $BtnrsetC.Background = 'WhiteSmoke'; $BtnrsetC.Foreground = 'Blue'
+    $script:isrCSelected = $false
+    }
+    if($clickreset -ne "D"){
     $BtnrsetD.Background = 'WhiteSmoke'; $BtnrsetD.Foreground = 'Blue'
+    $script:isrDSelected = $false
+    }
+    if($clickreset -ne "E"){
     $BtnrsetE.Background = 'WhiteSmoke'; $BtnrsetE.Foreground = 'Blue'
+    $script:isrESelected = $false
+    }
+    if($clickreset -ne "F"){
     $BtnrsetF.Background = 'WhiteSmoke'; $BtnrsetF.Foreground = 'Blue'
+    $script:isrFSelected = $false
+    }
 }
 
+ResetAllResetButtons
+$script:selectedResetButton = $null
+
 $BtnrsetA.Add_Click({
-  ResetAllResetButtons
+  ResetAllResetButtons -clickreset "A"
    $script:isrASelected = -not $script:isrASelected
    $BtnrsetA.Background = if ($script:isrASelected) { 'Blue' } else { 'WhiteSmoke' }
    $BtnrsetA.Foreground=if ($script:isrASelected) { 'WhiteSmoke' } else { 'Blue' }
-    $Global:selectedResetButton = if ($script:isrASelected){$BtnrsetA.Content.ToString()}else{$null}
-    $ResetTypesText.Text =  $Global:selectedResetButton
+   $Global:selectedResetButton = if ($script:isrASelected){$BtnrsetA.Content.ToString()}else{$null}
+   $ResetTypesText.Text =  $Global:selectedResetButton
 })
 
 $BtnrsetB.Add_Click({  
-  ResetAllResetButtons
+  ResetAllResetButtons -clickreset "B"
    $script:isrBSelected = -not $script:isrBSelected
    $BtnrsetB.Background = if ($script:isrBSelected) { 'Blue' } else { 'WhiteSmoke' }
    $BtnrsetB.Foreground=if ($script:isrBSelected) { 'WhiteSmoke' } else { 'Blue' }
@@ -2355,7 +2370,7 @@ $BtnrsetB.Add_Click({
 })
 
 $BtnrsetC.Add_Click({
-  ResetAllResetButtons
+  ResetAllResetButtons -clickreset "C"
    $script:isrCSelected = -not $script:isrCSelected
    $BtnrsetC.Background = if ($script:isrCSelected) { 'Blue' } else { 'WhiteSmoke' }
    $BtnrsetC.Foreground=if ($script:isrCSelected) { 'WhiteSmoke' } else { 'Blue' }
@@ -2364,7 +2379,7 @@ $BtnrsetC.Add_Click({
 })
 
 $BtnrsetD.Add_Click({
-  ResetAllResetButtons
+  ResetAllResetButtons -clickreset "D" 
    $script:isrDSelected = -not $script:isrDSelected
    $BtnrsetD.Background = if ($script:isrDSelected) { 'Blue' } else { 'WhiteSmoke' }
    $BtnrsetD.Foreground=if ($script:isrDSelected) { 'WhiteSmoke' } else { 'Blue' }
@@ -2373,7 +2388,7 @@ $BtnrsetD.Add_Click({
 })
 
 $BtnrsetE.Add_Click({
-  ResetAllResetButtons
+  ResetAllResetButtons -clickreset "E"
    $script:isrESelected = -not $script:isrESelected
    $BtnrsetE.Background = if ($script:isrESelected) { 'Blue' } else { 'WhiteSmoke' }
    $BtnrsetE.Foreground=if ($script:isrESelected) { 'WhiteSmoke' } else { 'Blue' }
@@ -2382,7 +2397,7 @@ $BtnrsetE.Add_Click({
 })
 
 $BtnrsetF.Add_Click({
-  ResetAllResetButtons
+  ResetAllResetButtons -clickreset "F"
    $script:isrFSelected = -not $script:isrFSelected
    $BtnrsetF.Background = if ($script:isrFSelected) { 'Blue' } else { 'WhiteSmoke' }
    $BtnrsetF.Foreground=if ($script:isrFSelected) { 'WhiteSmoke' } else { 'Blue' }
