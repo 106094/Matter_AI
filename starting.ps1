@@ -5,6 +5,7 @@ param (
 if($testing){
   [int32]$global:testing=1
 }
+#endregion
 
 Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Bypass -Force;
 Add-Type -AssemblyName Microsoft.VisualBasic,System.Windows.Forms,System.Drawing,PresentationFramework
@@ -25,6 +26,11 @@ $ctcmds=import-csv "$rootpath\settings\chiptoolcmds.csv"
 $settingsPath = "$rootpath\settings\config_linux.txt"
 $global:matchcmds=$ctcmds.name|Get-Unique
 $global:puttyset = @()
+
+$SW_HIDE = 0
+$consoleHandle = (Get-Process -Id $PID).MainWindowHandle
+[Win32]::ShowWindow($consoleHandle, $SW_HIDE)
+
 function ini {
 $testtype=$dutcontrol=$null
 newGUI
@@ -186,6 +192,9 @@ if((test-path $testlogfile -ea SilentlyContinue) -and (get-content $testlogfile)
 $continueq="Yes"
 while ($continueq -eq "Yes"){
   $ini=ini
+  $SW_SHOW = 5
+  [Win32]::ShowWindow($consoleHandle, $SW_SHOW)
+  
   if($global:closeaction){exit}
   $testtype=($ini.split(","))[0]
    $dutcontrol=($ini.split(","))[1]

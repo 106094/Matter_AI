@@ -1,25 +1,31 @@
 
 #region windows functions
-
 Add-Type @"
-              using System;
-              using System.Runtime.InteropServices;
-              public class Window {
-                [DllImport("user32.dll")]
-                [return: MarshalAs(UnmanagedType.Bool)]
-                public static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
-                [DllImport("User32.dll")]
-                public extern static bool MoveWindow(IntPtr handle, int x, int y, int width, int height, bool redraw);
-              }
-              public struct RECT
-              {
-                public int Left;        // x position of upper-left corner
-                public int Top;         // y position of upper-left corner
-                public int Right;       // x position of lower-right corner
-                public int Bottom;      // y position of lower-right corner
-              }
-"@
+using System;
+using System.Runtime.InteropServices;
 
+[StructLayout(LayoutKind.Sequential)]
+public struct RECT {
+    public int Left;
+    public int Top;
+    public int Right;
+    public int Bottom;
+}
+public class Window {
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
+
+    [DllImport("user32.dll")]
+    public static extern bool MoveWindow(IntPtr hWnd, int x, int y, int width, int height, bool redraw);
+}
+public class Win32 {
+    [DllImport("user32.dll")]
+    public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+    [DllImport("user32.dll")]
+    public static extern bool SetForegroundWindow(IntPtr hWnd);
+}
+"@
 
 $cSource = @'
 using System;
@@ -2120,7 +2126,8 @@ function downloads([switch]$google){
     
 }
 
-function newGUI{$testtypes=@("Python","Manual","Auto")
+function newGUI{
+$testtypes=@("Python","Manual","Auto")
 $reesttypes=@("Manual","Power On/Off","Simulator-1P","Simulator-2P","CMD-Win","CMD-SerailPort","CMD-ComPort","Web UI")
 $ipsettings0=Get-Content $settingsPath
 $originalIP = $ipsettings0 | ForEach-Object {
