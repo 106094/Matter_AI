@@ -1,4 +1,3 @@
-
 param (
     [switch]$testing               
 )
@@ -8,40 +7,40 @@ if($testing){
 }
 
 Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Bypass -Force;
-Add-Type -AssemblyName Microsoft.VisualBasic,System.Windows.Forms,System.Drawing
+Add-Type -AssemblyName Microsoft.VisualBasic,System.Windows.Forms,System.Drawing,PresentationFramework
 $shell=New-Object -ComObject shell.application
 $wshell=New-Object -ComObject wscript.shell
 
-Import-Module C:\Matter_AI\Matter_functions.psm1
+if ($PSScriptRoot) {
+    $rootpath = $PSScriptRoot
+} else {
+    $rootpath = [System.AppDomain]::CurrentDomain.BaseDirectory
+}
+if($rootpath -like "*WINDOWS\System32*"){
+  $rootpath="C:\Users\106094-DUTN\Desktop\Auto\Matter\Matter_AI\"
+}
 
-$ctcmds=import-csv C:\Matter_AI\settings\chiptoolcmds.csv
+Import-Module "$rootpath\Matter_functions.psm1" -Force
+$ctcmds=import-csv "$rootpath\settings\chiptoolcmds.csv"
+$settingsPath = "$rootpath\settings\config_linux.txt"
 $global:matchcmds=$ctcmds.name|Get-Unique
 $global:puttyset = @()
-
-#region check test type
 function ini {
 $testtype=$dutcontrol=$null
-while(!$testtype){
-  $testtype=read-host "Which kind of testing? 1. Python 2. Manual 3. Auto (support multi-select) (q for quit)"
-  if($testtype -eq "q"){
-    exit
-  }
- }
- #endregion
+newGUI
+if($global:closeaction){
+  exit
+}
+$testtype=$global:allselections[0]
+$dutcontrol=$global:allselections[1]
 
-#region check dut contril mode
-while(!$dutcontrol -or ($dutcontrol -ne 1 -and $dutcontrol -ne 2 -and $dutcontrol -ne 3 -and $dutcontrol -ne 4 -and $dutcontrol -ne 5)){
-  $dutcontrol=read-host "The DUT Reset mode is ? 1.Manual 2. Power on/off 3. Simulator switch 4. Cmd_serailport 5.Cmd_Win (input 1/2/3/4/5) (q for quit)"
-  if($dutcontrol -eq "q"){
-    exit
-  }
-  if($dutcontrol -ne 1 -and $dutcontrol -ne 5){
-    $currnetset=get-content C:\Matter_AI\settings\config_linux.txt
+if($dutcontrol -ne 1 -and $dutcontrol -ne 5){
+    $currnetset=get-content "$rootpath\settings\config_linux.txt"
    if (!($currnetset|Where-Object{$_ -match "serialport"})){
      $newsettings=get-content C:\Matter_Git\settings\config_linux.txt
      Compare-Object $newsettings $currnetset|where-object{$_.sideIndicator -eq "<="}|ForEach-Object{
       $newadd+=@($_.inputObject)
-      add-content C:\Matter_AI\settings\config_linux.txt -value $_.inputObject
+      add-content "$rootpath\settings\config_linux.txt" -value $_.inputObject
      }
      $newadds=[string]::Join("`n",$newadd)
     $messinfo="please update config_linux.txt for new settings of $newadds"
@@ -54,9 +53,6 @@ while(!$dutcontrol -or ($dutcontrol -ne 1 -and $dutcontrol -ne 2 -and $dutcontro
       exit  
    }
   }
-
- }
- #endregion
 #region check internet connection
 if (!(test-Connection "www.google.com" -count 1 -ErrorAction SilentlyContinue)) {
   $messinfo="Internet disconnected, please check internet connection"
@@ -67,34 +63,34 @@ if (!(test-Connection "www.google.com" -count 1 -ErrorAction SilentlyContinue)) 
 
 #region check ssh/webui connection
 if(!$global:testing){
-  $settings=get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "sship"}
+  $settings=get-content $settingsPath|Where-Object{$_ -match "sship"}
   $sship=($settings.split(":"))[-1]
   #$sshusername=($settings[1].split(":"))[-1]
   write-host "check ssh ip $sship if connected"
   if (!(Test-Connection -ComputerName $sship -Count 1 -ErrorAction SilentlyContinue)) {
     $messinfo="SSH IP disconnected, please check RPI connection or SSH IP is correct"
     [System.Windows.Forms.MessageBox]::Show($messinfo,"Info",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Information)
-    start-process C:\Matter_AI\settings\config_linux.txt
+    start-process $settingsPath
     exit
   }
   write-host "ssh ip $sship is connected"
 }
 #endregion
 
-$logpath="C:\Matter_AI\logs"
+$logpath="$rootpath\logs"
 if(!(test-path $logpath)){
 new-item -Path $logpath -ItemType directory|out-null
 }
 
 #select xlsx file
-$global:excelfile=. "C:\Matter_AI\cmdcollecting_tool\selections_xlsx.ps1"
+$global:excelfile=. "$rootpath\cmdcollecting_tool\selections_xlsx.ps1"
 if($global:excelfile -eq 0){
     exit
 }
 
 if ($testtype -match 1){
- $getcmdpsfile="C:\Matter_AI\cmdcollecting_tool\Matter_getpy.ps1"
-   $cmdcsvfile="C:\Matter_AI\settings\_py\py.csv"
+ $getcmdpsfile="$rootpath\cmdcollecting_tool\Matter_getpy.ps1"
+   $cmdcsvfile="$rootpath\settings\_py\py.csv"
    
 $timestart=get-date
 . $getcmdpsfile
@@ -106,11 +102,11 @@ if(!$checkfile){
 }
 
 if ($testtype -match 2){
-  . "C:\Matter_AI\cmdcollecting_tool\Matter_getpy.ps1"
+  . "$rootpath\cmdcollecting_tool\Matter_getpy.ps1"
   if(!$global:testing){
     downloads -google
     }
-  $getcmdpsfile="C:\Matter_AI\cmdcollecting_tool\Matter_getchiptool.ps1"
+  $getcmdpsfile="$rootpath\cmdcollecting_tool\Matter_getchiptool.ps1"
   $global:updatechiptool = [System.Windows.Forms.MessageBox]::Show("Need update UI-Manual database?", "Check", [System.Windows.Forms.MessageBoxButtons]::YesNo, [System.Windows.Forms.MessageBoxIcon]::Question, [System.Windows.Forms.MessageBoxDefaultButton]::Button2)
   if ($global:updatechiptool -eq "Yes") {
     $InfoParams = @{
@@ -146,9 +142,9 @@ if ($testtype -match 2){
 }
 
 if ($testtype -match 3){
-  $getprojects=(get-childitem C:\Matter_AI\settings\_auto\ -Directory).Name
+  $getprojects=(get-childitem "$rootpath\settings\_auto\" -Directory).Name
   if (!$getprojects){
-   [System.Windows.Forms.MessageBox]::Show("Please create C:\Matter_AI\settings\_auto\<Project name> include ""json.txt"" and ""xml"" folder with xml files"  ,"Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
+   [System.Windows.Forms.MessageBox]::Show("Please create $rootpath\settings\_auto\<Project name> include ""json.txt"" and ""xml"" folder with xml files"  ,"Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
    exit
   }
 }
@@ -160,11 +156,11 @@ return "$testtype,$dutcontrol"
 
 $starttime=get-date
 $datesuffix=get-date -Format yyMMddHHmm
-$testlogfile="C:\Matter_AI\logs\testing.log"
-$testseriallog="C:\Matter_AI\logs\testing_serailport.log"
-$testseriallog="C:\Matter_AI\logs\dutcmd\cmd_output*.log"
-$bacupfolder="C:\Matter_AI\logs\log_backups"
-$bacupfolder2="C:\Matter_AI\logs\log_backups\dutcmd"
+$testlogfile="$rootpath\logs\testing.log"
+$testseriallog="$rootpath\logs\testing_serailport.log"
+$testseriallog="$rootpath\logs\dutcmd\cmd_output*.log"
+$bacupfolder="$rootpath\logs\log_backups"
+$bacupfolder2="$rootpath\logs\log_backups\dutcmd"
 if(! (test-path $bacupfolder -ea SilentlyContinue)){
   new-item -ItemType Directory -path $bacupfolder|Out-Null
 }
@@ -173,32 +169,33 @@ if(! (test-path $bacupfolder2 -ea SilentlyContinue)){
 }
 if((test-path $testlogfile -ea SilentlyContinue) -and (get-content $testlogfile).Length -gt 0){
   Rename-Item $testlogfile -NewName "testing_$($datesuffix).log" -ea silentlycontinue
-  move-item "C:\Matter_AI\logs\testing_$($datesuffix).log" -Destination $bacupfolder
+  move-item "$rootpath\logs\testing_$($datesuffix).log" -Destination $bacupfolder
   new-item -path $testlogfile -Force|Out-Null
   }
   if((get-content $testseriallog -ea SilentlyContinue).Length -gt 0){
   Rename-Item $testseriallog -NewName "testing_serailport_$($datesuffix).log" -ea silentlycontinue
-  move-item "C:\Matter_AI\logs\testing_serailport_$($datesuffix).log" -Destination $bacupfolder
+  move-item "$rootpath\logs\testing_serailport_$($datesuffix).log" -Destination $bacupfolder
   new-item -path $testseriallog -Force|Out-Null
   }
   if(test-path $testseriallog -ea SilentlyContinue){
     move-item $testseriallog -Destination $bacupfolder2
   }
 
- Get-ChildItem "C:\Matter_AI\logs\*putty*.log"|where-object{$_.lastwritetime -lt $((get-date).adddays("-2"))}|Move-Item -Destination $bacupfolder
+ Get-ChildItem "$rootpath\logs\*putty*.log"|where-object{$_.lastwritetime -lt $((get-date).adddays("-2"))}|Move-Item -Destination $bacupfolder
 
 $continueq="Yes"
 while ($continueq -eq "Yes"){
   $ini=ini
+  if($global:closeaction){exit}
   $testtype=($ini.split(","))[0]
    $dutcontrol=($ini.split(","))[1]
-     $testtypeall=@()
+    $testtypeall=@()
     for($i=0; $i -lt ($testtype -join "").length; $i++){
       $testtypeall+=@($testtype.Substring($i,1))
     }
 
   if ($testtypeall -contains 1){
-    $caseids=(import-csv C:\Matter_AI\settings\_py\py.csv).TestCaseID
+    $caseids=(import-csv "$rootpath\settings\_py\py.csv").TestCaseID
     selguis -Inputdata $caseids -instruction "Please select Python caseids" -errmessage "No caseid selected"
     if(!$global:selss){
       [System.Windows.Forms.MessageBox]::Show("Fail to select the test case id, test will be stopped","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
@@ -207,7 +204,7 @@ while ($continueq -eq "Yes"){
       $pycaseids=$global:selss
       #create a log folder
       $datetime=get-date -Format yyyyMMdd_HHmmss
-      $logtc="C:\Matter_AI\logs\_py\$($datetime)"
+      $logtc="$rootpath\logs\_py\$($datetime)"
       if(!(test-path $logtc)){
         new-item -ItemType Directory -Path $logtc | Out-Null
       }
@@ -225,7 +222,7 @@ while ($continueq -eq "Yes"){
       $mancaseids=$global:sels
       #create a log folder
       $datetime=get-date -Format yyyyMMdd_HHmmss
-      $logtc="C:\Matter_AI\logs\_manual\$($datetime)"
+      $logtc="$rootpath\logs\_manual\$($datetime)"
       if(!(test-path $logtc)){
         new-item -ItemType Directory -Path $logtc | Out-Null
       }
@@ -233,7 +230,7 @@ while ($continueq -eq "Yes"){
   }
 
   if ($testtypeall -contains 3){  
-   $getprojects=(get-childitem C:\Matter_AI\settings\_auto\ -Directory).Name
+   $getprojects=(get-childitem "$rootpath\settings\_auto\" -Directory).Name
    $global:getproject=selgui -Inputdata $getprojects -instruction "Please select Auto project" -errmessage "No project selected"
    if(!($global:getproject[-1])){
        [System.Windows.Forms.MessageBox]::Show("Fail to get Auto project setting (folder)","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
@@ -246,9 +243,9 @@ while ($continueq -eq "Yes"){
       $continueq=0
    }
    else{
-    $getcmdpsfile="C:\Matter_AI\cmdcollecting_tool\Matter_getauto.ps1"
+    $getcmdpsfile="$rootpath\cmdcollecting_tool\Matter_getauto.ps1"
     . $getcmdpsfile  
-    $autocaseids=$global:webuicases
+    #$autocaseids=$global:webuicases
    }
 
   }
@@ -257,10 +254,12 @@ while ($continueq -eq "Yes"){
  if($continueq){
   foreach($testtp in $testtypeall){
   $global:testtype=$testtp 
-    . C:\Matter_AI\pyflow.ps1 
+   $pyprogram="$rootpath\pyflow.ps1"
+    . $pyprogram
    #create result html
     if ($global:testtype -eq 2){
-      . C:\Matter_AI\resultshtml.ps1
+      $resultp="$rootpath\resultshtml.ps1"
+      . $resultp
     }
 #>
 }
@@ -286,7 +285,7 @@ $timegap="{0} Hours, {1} minutes, {2} seconds" -f $timepassed.Hours, $timepassed
 
 #puttyexit
 if ($testtypeall -contains 2 -and !$testing){
-$resultlog=(get-childitem "C:\Matter_AI\logs\_manual\" -directory | Sort-Object LastWriteTime -Descending | Select-Object -First 1).fullname
+$resultlog=(get-childitem "$rootpath\logs\_manual\" -directory | Sort-Object LastWriteTime -Descending | Select-Object -First 1).fullname
 $reportPath = join-path $resultlog "report.html"
 Start-Process $reportPath -ErrorAction SilentlyContinue
 }

@@ -2119,3 +2119,275 @@ function downloads([switch]$google){
     }
     
 }
+
+function newGUI{$testtypes=@("Python","Manual","Auto")
+$reesttypes=@("Manual","Power On/Off","Simulator-1P","Simulator-2P","CMD-Win","CMD-SerailPort","CMD-ComPort","Web UI")
+$ipsettings0=Get-Content $settingsPath
+$originalIP = $ipsettings0 | ForEach-Object {
+    if ($_ -match "sship:(\d{1,3}(?:\.\d{1,3}){3})") {
+        $matches[1]
+    }
+}
+$settingsxml="<TextBox Name=""TH_IP"" BorderThickness=""0"" FontSize=""16"" Height=""30"" Width=""250"" Text=""$($originalIP)"" Margin=""0,2,0,2""/>"
+
+# Create the WPF XAML
+[xml]$xaml = @"
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        Title="Settings Editor" Height="710" Width="350">
+    <StackPanel Margin="10">
+      <Label Content="TH IP :" FontSize="15" FontWeight="Bold" FontFamily="Arial" Margin="5,0,0,0"/>
+        <Border BorderBrush="Black" BorderThickness="1" CornerRadius="5" Background="White" Width="280" Height="30">
+         $settingsxml
+          </Border>
+         <Label Content="Select the testing Types" Margin="5,10,0,5" FontSize="15" FontWeight="Bold" FontFamily="Arial"/>
+           <Border BorderBrush="Black" BorderThickness="1" CornerRadius="5" Background="White" Width="280" Height="150">
+             <StackPanel Margin="10">
+                 <WrapPanel>
+                   <Button Name="BtnA" Content="Python" Foreground="Blue" Background="WhiteSmoke" Width="60" Height="40" Margin="5"/>
+                   <Button Name="BtnB" Content="Manual" Foreground="Blue" Background="WhiteSmoke" Width="60" Height="40" Margin="5"/>
+                   <Button Name="BtnC" Content="Auto" Foreground="Blue" Background="WhiteSmoke" Width="60" Height="40" Margin="5"/>
+                 </WrapPanel>
+                <Label Content="Testing Order:" Margin="5,10,0,5" FontSize="15" FontWeight="Bold" FontFamily="Arial"/>
+              <TextBlock Name="SelTypesText" Margin="10,2,0,0" FontSize="13" Foreground="Blue" FontWeight="Bold" FontFamily="Arial"/>
+            </StackPanel>
+          </Border>
+
+        <Label Content="Select the Reset Type" Margin="5,10,0,5" FontSize="15" FontWeight="Bold" FontFamily="Arial"/>        
+        <Border BorderBrush="Black" BorderThickness="1" CornerRadius="5" Background="White" Width="280" Height="280" Margin="10">
+                  <StackPanel Margin="10">
+                    <WrapPanel HorizontalAlignment="Center">
+                        <Button Name="BtnrsetA" Content="Manual" Foreground="Blue" Background="WhiteSmoke" Width="100" Height="40" Margin="5"/>
+                        <Button Name="BtnrsetB" Content="Power On/Off" Foreground="Blue" Background="WhiteSmoke" Width="100" Height="40" Margin="5"/>
+                    </WrapPanel>
+                    <WrapPanel HorizontalAlignment="Center"> 
+                        <Button Name="BtnrsetC" Content="Simulator-1P" Foreground="Blue" Background="WhiteSmoke" Width="100" Height="40" Margin="5"/>                                       
+                        <Button Name="BtnrsetD" Content="Simulator-2P" Foreground="Blue" Background="WhiteSmoke" Width="100" Height="40" Margin="5"/>
+                    </WrapPanel>
+                    <WrapPanel HorizontalAlignment="Center">                         
+                        <Button Name="BtnrsetE" Content="CMD-Win" Foreground="Blue" Background="WhiteSmoke" Width="100" Height="40" Margin="5"/>                        
+                        <Button Name="BtnrsetF" Content="CMD-SerailPort" Foreground="Blue" Background="WhiteSmoke" Width="100" Height="40" Margin="5"/>                    
+                    </WrapPanel>
+                    <WrapPanel HorizontalAlignment="Center"> 
+                        <Button Name="BtnrsetG" Content="CMD-ComPort" Foreground="Gray" Background="WhiteSmoke" Width="100" Height="40" Margin="5" IsEnabled="False"/>
+                        <Button Name="BtnrsetH" Content="Web UI" Foreground="Gray" Background="WhiteSmoke" Width="100" Height="40" Margin="5" IsEnabled="False"/>
+                    </WrapPanel>                        
+                    <Label Content="Reset Method:" Margin="5,10,0,5" FontSize="15" FontWeight="Bold" FontFamily="Arial"/>
+                    <TextBlock Name="ResetTypesText" Margin="10,2,0,0" FontSize="13" Foreground="Blue" FontWeight="Bold" FontFamily="Arial"/>
+                </StackPanel>
+              </Border>
+
+
+      <Button Name="SaveBtn" Content="Save Settings" Width="100" Height="40" Margin="0,10,0,0"/>
+     </StackPanel>
+</Window>
+"@
+
+# Load the XAML
+$reader = [System.Xml.XmlReader]::Create([System.IO.StringReader]::new($xaml.OuterXml))
+$window = [Windows.Markup.XamlReader]::Load($reader)
+
+# Access controls
+
+# Set initial values
+$th_ip = $window.FindName("TH_IP")
+$th_ip.Text = $originalIP
+
+$SaveBtn = $window.FindName("SaveBtn")
+# Save logic
+$SaveBtn.Add_Click({
+$th_ip = $window.FindName("TH_IP")
+$newIP=$th_ip.Text
+$newIP
+$originalIP
+if($newIP -ne $originalIP){
+  $lineset = "sship:$($newIP)"
+  $ipsettings=$ipsettings0|ForEach-Object {
+    if($_ -like "*sship:*"){
+       $lineset
+    }
+    else{
+     $_
+    }
+    
+  }  
+  $ipsettings| Set-Content $settingsPath
+}
+   
+
+$selection1=$global:clickbuttons
+
+if ($selection1.trim().Length -gt 0 -and $Global:selectedResetButton){
+  $window.Close()
+  $global:closeaction=$false
+  $selection2=($reesttypes.IndexOf($Global:selectedResetButton)+1).ToString()
+  $global:allselections=@($selection1,$selection2)
+}
+else{
+[System.Windows.MessageBox]::Show("Please Complete the settings")
+}
+})
+
+# Initialize buttons
+$BtnA = $window.FindName("BtnA")
+$BtnB = $window.FindName("BtnB")
+$BtnC = $window.FindName("BtnC")
+
+$script:isASelected = $false
+$script:isBSelected = $false
+$script:isCSelected = $false
+function testtypes{
+$seltypesa=@()
+for($x=0; $x -lt $global:clickbuttons.Length; $x++){
+$typenumber=[int]$global:clickbuttons.substring($x,1)
+$seltypesa+=$testtypes[$typenumber-1]
+}
+$global:seltypes=$seltypesa -join " Å® "
+$window.FindName("SelTypesText").Text =$global:seltypes
+}
+
+$global:clickbuttons=""
+$BtnA.Add_Click({
+    $global:clickbuttonA=""
+    $script:isASelected = -not $script:isASelected
+    $BtnA.Background = if ($script:isASelected) { 'Blue' } else { 'WhiteSmoke' }
+    $BtnA.Foreground=if ($script:isASelected) { 'WhiteSmoke' } else { 'Blue' }
+    if($script:isASelected){
+        $global:clickbuttonA="1"
+        if($global:clickbuttons -like "*1*"){
+        $global:clickbuttons=$global:clickbuttons.replace($global:clickbuttonA,"")
+        }
+        $global:clickbuttons+=$global:clickbuttonA
+    }else{
+        if($global:clickbuttons -like "*1*"){
+        $global:clickbuttons=$global:clickbuttons.replace("1","")
+        }
+    }
+    testtypes
+})
+
+$BtnB.Add_Click({
+    $global:clickbuttonB=""
+    $script:isBSelected = -not $script:isBSelected
+    $BtnB.Background = if ($script:isBSelected) { 'Blue' } else { 'WhiteSmoke' }
+    $BtnB.Foreground=if ($script:isBSelected) { 'WhiteSmoke' } else { 'Blue' }
+    if($script:isBSelected){
+        $global:clickbuttonB="2"
+         if($global:clickbuttons -like "*2*"){
+        $global:clickbuttons=$global:clickbuttons.replace($global:clickbuttonB,"")
+        }
+        $global:clickbuttons+=$global:clickbuttonB
+    }else{
+            if($global:clickbuttons -like "*2*"){
+        $global:clickbuttons=$global:clickbuttons.replace("2","")
+            }
+    }
+    testtypes
+})
+
+$BtnC.Add_Click({
+    $global:clickbuttonC=""
+    $script:isCSelected = -not $script:isCSelected
+    $BtnC.Background = if ($script:isCSelected) { 'Blue' } else { 'WhiteSmoke' }
+    $BtnC.Foreground=if ($script:isCSelected) { 'WhiteSmoke' } else { 'Blue' }
+    if($script:isCSelected){
+        $global:clickbuttonC="3"
+       if($global:clickbuttons -like "*3*"){
+        $global:clickbuttons=$global:clickbuttons.replace($global:clickbuttonC,"")
+       }
+        $global:clickbuttons+=$global:clickbuttonC
+    }else{
+            if($global:clickbuttons -like "*3*"){
+        $global:clickbuttons=$global:clickbuttons.replace("3","")
+            }
+    }
+    testtypes
+})
+
+#for reset selection$script:selectedResetButton = $null
+
+$BtnrsetA = $window.FindName("BtnrsetA")
+$BtnrsetB = $window.FindName("BtnrsetB")
+$BtnrsetC = $window.FindName("BtnrsetC")
+$BtnrsetD = $window.FindName("BtnrsetD")
+$BtnrsetE = $window.FindName("BtnrsetE")
+$BtnrsetF = $window.FindName("BtnrsetF")
+$ResetTypesText = $window.FindName("ResetTypesText")
+
+$script:isrASelected = $false
+$script:isrBSelected = $false
+$script:isrCSelected = $false
+$script:isrDSelected = $false
+$script:isrESelected = $false
+$script:isrFSelected = $false
+$script:selectedResetButton = $null
+function ResetAllResetButtons {
+    $BtnrsetA.Background = 'WhiteSmoke'; $BtnrsetA.Foreground = 'Blue'
+    $BtnrsetB.Background = 'WhiteSmoke'; $BtnrsetB.Foreground = 'Blue'
+    $BtnrsetC.Background = 'WhiteSmoke'; $BtnrsetC.Foreground = 'Blue'
+    $BtnrsetD.Background = 'WhiteSmoke'; $BtnrsetD.Foreground = 'Blue'
+    $BtnrsetE.Background = 'WhiteSmoke'; $BtnrsetE.Foreground = 'Blue'
+    $BtnrsetF.Background = 'WhiteSmoke'; $BtnrsetF.Foreground = 'Blue'
+}
+
+$BtnrsetA.Add_Click({
+  ResetAllResetButtons
+   $script:isrASelected = -not $script:isrASelected
+   $BtnrsetA.Background = if ($script:isrASelected) { 'Blue' } else { 'WhiteSmoke' }
+   $BtnrsetA.Foreground=if ($script:isrASelected) { 'WhiteSmoke' } else { 'Blue' }
+    $Global:selectedResetButton = if ($script:isrASelected){$BtnrsetA.Content.ToString()}else{$null}
+    $ResetTypesText.Text =  $Global:selectedResetButton
+})
+
+$BtnrsetB.Add_Click({  
+  ResetAllResetButtons
+   $script:isrBSelected = -not $script:isrBSelected
+   $BtnrsetB.Background = if ($script:isrBSelected) { 'Blue' } else { 'WhiteSmoke' }
+   $BtnrsetB.Foreground=if ($script:isrBSelected) { 'WhiteSmoke' } else { 'Blue' }
+    $Global:selectedResetButton = if ($script:isrBSelected){$BtnrsetB.Content.ToString()}else{$null}
+    $ResetTypesText.Text =  $Global:selectedResetButton
+})
+
+$BtnrsetC.Add_Click({
+  ResetAllResetButtons
+   $script:isrCSelected = -not $script:isrCSelected
+   $BtnrsetC.Background = if ($script:isrCSelected) { 'Blue' } else { 'WhiteSmoke' }
+   $BtnrsetC.Foreground=if ($script:isrCSelected) { 'WhiteSmoke' } else { 'Blue' }
+   $Global:selectedResetButton = if ($script:isrCSelected){$BtnrsetC.Content.ToString()}else{$null}
+   $ResetTypesText.Text =  $Global:selectedResetButton
+})
+
+$BtnrsetD.Add_Click({
+  ResetAllResetButtons
+   $script:isrDSelected = -not $script:isrDSelected
+   $BtnrsetD.Background = if ($script:isrDSelected) { 'Blue' } else { 'WhiteSmoke' }
+   $BtnrsetD.Foreground=if ($script:isrDSelected) { 'WhiteSmoke' } else { 'Blue' }
+   $Global:selectedResetButton = if ($script:isrDSelected){$BtnrsetD.Content.ToString()}else{$null}
+    $ResetTypesText.Text =  $Global:selectedResetButton
+})
+
+$BtnrsetE.Add_Click({
+  ResetAllResetButtons
+   $script:isrESelected = -not $script:isrESelected
+   $BtnrsetE.Background = if ($script:isrESelected) { 'Blue' } else { 'WhiteSmoke' }
+   $BtnrsetE.Foreground=if ($script:isrESelected) { 'WhiteSmoke' } else { 'Blue' }
+   $Global:selectedResetButton = if ($script:isrESelected){$BtnrsetE.Content.ToString()}else{$null}
+    $ResetTypesText.Text =  $Global:selectedResetButton
+})
+
+$BtnrsetF.Add_Click({
+  ResetAllResetButtons
+   $script:isrFSelected = -not $script:isrFSelected
+   $BtnrsetF.Background = if ($script:isrFSelected) { 'Blue' } else { 'WhiteSmoke' }
+   $BtnrsetF.Foreground=if ($script:isrFSelected) { 'WhiteSmoke' } else { 'Blue' }
+   $Global:selectedResetButton = if ($script:isrFSelected){$BtnrsetF.Content.ToString()}else{$null}
+    $ResetTypesText.Text =  $Global:selectedResetButton
+})
+
+# Show the window
+$window.Add_Closing({
+    $global:closeaction=$true
+})
+$global:closeaction=$false
+$window.ShowDialog() | Out-Null
+
+}

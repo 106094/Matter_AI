@@ -547,7 +547,7 @@ $addelement = $wait.Until([System.Func[OpenQA.Selenium.IWebDriver, OpenQA.Seleni
   
     # start loop
    $webv=($driver.FindElement([OpenQA.Selenium.By]::ClassName("sha-version"))).Text 
-   foreach($webtc in $autocaseids){
+   foreach($webtc in $global:webuicases){
     $testrun=1
     while($testrun -le $retesttime){     
       #if ( $global:webuicases.indexof($webtc) -ne 0 -or $testrun -gt 1){
