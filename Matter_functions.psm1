@@ -1381,155 +1381,6 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
         }
     
      }
-
-  function dutcmd{
-    $serailout="C:\Matter_AI\logs\testing_serailport.log"
-
- $portid=((get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "serialport"}) -split ":")[1]
- $speed="115200"
- new-item $serailout -force | out-null
- add-content $serailout -value "$(get-date) serial port  $portid connecting records:" -force
-
-        $port = New-Object System.IO.Ports.SerialPort
-        $port.PortName = $portid
-        $port.BaudRate = $speed
-        $port.Parity = "None"
-        $port.DataBits = 8
-        $port.StopBits = 1
-        $port.ReadTimeout = 100 # 0.1 seconds
-        $port.DtrEnable = "true"
-        $port.open() #opens serial connection
-
-if($port.IsOpen){
-        $sending="reboot"        
-        #$sending2="chip"
-        $sending3="chip entercommmode"
-        $readportall=@()
-        $readport=@()
-        $line=$null
-        $starttime=Get-Date
-    do {
-       try{
-        $line = $port.ReadLine()
-        }catch{
-         $null
-        }       
-        if($line -ne $lastline){        
-        Write-Host $line  
-        $lastline=$line        
-        $readport+=@($line)
-        $readportall+=@($line)
-        }
-        $timegap=(New-TimeSpan -start $starttime -end (Get-date)).TotalSeconds
-    }while ( !($readport -like "*Available heap*") -and $timegap -lt 120 )
-
-    if ($readport -like "*Available heap*"){
-     add-content $serailout -value "open done in $([math]::round($timegap,1)) s at $(get-date)"
-     $starttime=Get-Date
-     do{
-     #$port.WriteLine("`r") 
-     $port.WriteLine("reboot")     
-     $port.WriteLine("`r")
-     $starttime2=Get-Date
-      $readport=@()
-        do {
-        try{
-            $line = $port.ReadLine()
-            }catch{
-            $null
-            }      
-            if($line -ne $lastline){        
-            Write-Host $line  
-            $lastline=$line        
-            $readport+=@($line)            
-            $readportall+=@($line)
-            }
-            $timegap2=(New-TimeSpan -start $starttime2 -end (Get-date)).TotalSeconds
-        }while (  !($readport -like "*Available heap*") -and $timegap2 -lt 90 )      
-        $timegap=(New-TimeSpan -start $starttime -end (Get-date)).TotalSeconds
-    } until($readportall -like "*Provisioning succeeded*" -or $timegap -lt 300)
-
-    if($readportall -like "*Provisioning succeeded*"){    
-        add-content $serailout -value "reboot done at $(get-date)"
-   
-    $starttime=Get-Date
-    $notfoundc=0
-    do{
-
-        if($notfoundc -eq 1){
-        write-output "send commission mode cmd again"
-        $notfoundc=0
-        }
-      
-         start-sleep -s 2
-         $port.WriteLine("chip") 
-         $port.WriteLine("`r")
-         start-sleep -s 2
-         $port.WriteLine("chip entercommmode") 
-         $port.WriteLine("`r") 
-         $starttime2=Get-Date
-         $readport=@()
-       
-        do {
-            try{
-            $line = $port.ReadLine()
-            }catch{
-            $null
-            }
-            if($line -ne $lastline){        
-            Write-Host $line  
-            $lastline=$line        
-            $readport+=@($line)
-            $readportall+=@($line)
-            }
-            if ($line -like "*Command not found*"){
-              $notfoundc=1
-             }  
-            $timegap2=(New-TimeSpan -start $starttime2 -end (Get-date)).TotalSeconds
-        } while ( !($readport -like "*Entering Matter Commissioning Mode*") -and  $notfoundc -eq 0 -and $timegap2 -lt 60 )
-       
-        $timegap=(New-TimeSpan -start $starttime -end (Get-date)).TotalSeconds
-        $timegap
-    }until($readportall -like "*Entering Matter Commissioning Mode*" -or $timegap -lt 200)
-    
-    if($readportall -like "*Entering Matter Commissioning Mode*"){
-     $starttime=Get-Date
-       $readport=@()
-        do {
-        try{
-        $line = $port.ReadLine()
-        }catch{
-         $null
-        }
-        if($line -ne $lastline){        
-        Write-Host $line  
-        $lastline=$line        
-        $readportall+=@($line)
-        }
-        $timegap=(New-TimeSpan -start $starttime -end (Get-date)).TotalSeconds
-        } while ($timegap -lt 5 )
-        add-content $serailout -value "commission mode ok at $(get-date)"
-    }
-    else{
-        add-content $serailout -value "commission mode fail at $(get-date)"
-    }
-    }
-    else{
-    add-content $serailout -value "reboot failed at $(get-date)"
-    }
-    }
-    else {
-    #write-output "open start failed"
-    add-content $serailout -value "open start failed at $(get-date)"
-    }
-     $port.Close()
-      
-    add-content $serailout -value "$($readportall -join "`")"
-    add-content $serailout -value "--------- End--------"
-    
-   }
-     }
-
   function dutpower([int32]$mode){    
     if($mode -eq 1){
         $InfoParams = @{
@@ -2248,7 +2099,7 @@ for($x=0; $x -lt $global:clickbuttons.Length; $x++){
 $typenumber=[int]$global:clickbuttons.substring($x,1)
 $seltypesa+=$testtypes[$typenumber-1]
 }
-$global:seltypes=$seltypesa -join " Å® "
+$global:seltypes=$seltypesa -join " ÔøΩÔøΩ "
 $window.FindName("SelTypesText").Text =$global:seltypes
 }
 
@@ -2413,3 +2264,97 @@ $global:closeaction=$false
 $window.ShowDialog() | Out-Null
 
 }
+
+function dutcmd ([string]$scriptname){
+    $Global:comportreset=$null
+    $serailout="C:\Matter_AI\logs\testing_serailport.log"
+    $cmdserails=import-csv "C:\Matter_AI\settings\Command_COMPort.csv"|Where-Object{$_.scriptname -eq $scriptname}
+ $portid=((get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "serialport"}) -split ":")[1]
+ $speed="115200"
+ set-content $serailout -value "$(get-date) serial port  $portid connecting records:" -force -Encoding UTF8 -force | out-null
+        $port = New-Object System.IO.Ports.SerialPort
+        $port.PortName = $portid
+        $port.BaudRate = $speed
+        $port.Parity = "None"
+        $port.DataBits = 8
+        $port.StopBits = 1
+        $port.ReadTimeout = 100 # 0.1 seconds
+        $port.DtrEnable = "true"
+        $port.open() #opens serial connection
+
+if($port.IsOpen){
+    start-sleep -s 10
+    $readportall=@()
+    $line=$steppassed=$nextstep=$null
+    $cmdserail=$cmdserails[0]
+    while($cmdserail -and !($steppassed -and $nextstep -eq "end")){
+        $cmdsstep=$cmdserail.step
+        $cmdsrlp=$cmdserail.cmd
+        $cmdwait=[int32]$cmdserail.waittime
+        $checkline=$cmdserail.checkline
+        $nextstep=$cmdserail.next
+        $failthen=$cmdserail.failthen
+        $okmessage=$cmdserail.index_ok
+        if($okmessage.length -eq 0){
+            $okmessage="done"
+        }
+        $ngmessage=$cmdserail.index_fail
+        $steppassed=$true
+        $stepresult=$okmessage
+        $readport=@()        
+        $starttime2=Get-Date
+       if($cmdsrlp.Length -gt 0 -and $cmdsrlp -ne "-"){
+        $cmdsrlps=$cmdsrlp.split("|")
+        foreach ($cmdsr in  $cmdsrlps){
+            $port.WriteLine($cmdsr)
+            start-sleep -s 1
+            #$port.WriteLine("`r") 
+        }
+       }
+      if($cmdwait -ne 0){
+        do {
+            try{
+                $line = $port.ReadLine()
+                }catch{
+                $null
+                }      
+                if($line -ne $lastline){        
+                Write-Host $line  
+                $lastline=$line        
+                $readport+=@($line)            
+                $readportall+=@($line)
+                }
+                $timegap2=(New-TimeSpan -start $starttime2 -end (Get-date)).TotalSeconds
+            }while ( $timegap2 -lt $cmdwait ) 
+         }
+        if($checkline -ne "-" -and $checkline.length -gt 0){
+            $checklines2=$checkline.replace("|","*")
+            $readportlines= $readport -join "`n"
+            if( !($readportlines -like "*$checklines2*")){
+                $steppassed=$false             
+                $stepresult=$ngmessage
+            }
+        }
+        if(!$steppassed -and $failthen){
+            $cmdserail=$cmdserails|Where-Object{$_.step -eq "$failthen"}
+            $nextstep=$failthen
+        }else{
+            $cmdserail=$cmdserails|Where-Object{$_.step -eq "$nextstep"}
+        }
+     $timegapstep=(New-TimeSpan -start $starttime2 -end (Get-date)).TotalSeconds
+    add-content $serailout -value "step $($cmdsstep) $stepresult in $([math]::round($timegapstep,1)) s at $(get-date), next step is $nextstep"
+  if($nextstep -eq "end" -and $steppassed -eq $false){
+    $Global:comportreset="failed"
+  }
+}
+   }
+   else {
+    #write-output "open start failed"
+    add-content $serailout -value "open start failed at $(get-date)"
+    }
+    $port.Close()
+    add-content $serailout -value "$($readportall -join "`n")" -Encoding UTF8
+    add-content $serailout -value "--------- End--------"
+    $daterecord=get-date -Format "yyMMdd_HHmm"
+    rename-item $serailout -NewName "testing_serailport_$($daterecord).log"
+ }
