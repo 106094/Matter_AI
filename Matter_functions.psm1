@@ -1145,8 +1145,8 @@ function puttystart ([string]$puttyname) {
        $pskey=($settings[2].split(":"))[-1]
        #$sshpath=($settings[3].split(":"))[-1]
        $fname=(Get-ChildItem $global:excelfile).name
-       $sshpath=(import-csv "C:\Matter_AI\settings\manualcmd_Matter - filesettings.csv"|Where-Object{$_.filename -eq $fname}).python_path
-       $sshpathmanual=(import-csv "C:\Matter_AI\settings\manualcmd_Matter - filesettings.csv"|Where-Object{$_.filename -eq $fname}).manual_path
+       $sshpath=(import-csv "C:\Matter_AI\settings\filesettings.csv"|Where-Object{$_.filename -eq $fname}).python_path
+       $sshpathmanual=(import-csv "C:\Matter_AI\settings\filesettings.csv"|Where-Object{$_.filename -eq $fname}).manual_path
        $wshell = New-Object -ComObject WScript.Shell
        $wshell.AppActivate($puttypid)
        start-sleep -s 5
@@ -1949,7 +1949,6 @@ function downloads([switch]$google){
     $errormessage="matter TC_filter download failed"
     $checkdownload=webdownload -goo_link $goo_link -gid $gid -sv_range $sv_range -savepath $savepath -errormessage $errormessage
     #endregion
-
     if(!(test-path "C:\Matter_AI\settings\chip-tool_clustercmd - id_list.csv")){
       if(test-path "C:\Matter_AI\settings\chip-tool_clustercmd*.csv"){
       remove-item "C:\Matter_AI\settings\chip-tool_clustercmd*.csv" -ErrorAction SilentlyContinue
@@ -1962,6 +1961,15 @@ function downloads([switch]$google){
     $errormessage="matter endpoint referance download failed"
     webdownload -goo_link $goo_link -gid $gid -sv_range $sv_range -savepath $savepath -errormessage $errormessage
     #endregion
+    #region download Command_COMPort
+    $goo_link="https://docs.google.com/spreadsheets/d/19ZPA2Z6SYYtvIj9qXM0FuDASF0FaZP2xjx7jcebrJEQ/"
+    $gid="1452195954"
+    $sv_range="A1:I7000"
+    $savepath="C:\Matter_AI\settings\"
+    $errormessage="matter Command_COMPort download failed"
+    webdownload -goo_link $goo_link -gid $gid -sv_range $sv_range -savepath $savepath -errormessage $errormessage
+    #endregion
+
     }
     if($checkopen -eq 0){
         try{
@@ -2268,7 +2276,7 @@ $window.ShowDialog() | Out-Null
 function dutcmd ([string]$scriptname){
     $Global:comportreset=$null
     $serailout="C:\Matter_AI\logs\testing_serailport.log"
-    $cmdserails=import-csv "C:\Matter_AI\settings\Command_COMPort.csv"|Where-Object{$_.scriptname -eq $scriptname}
+    $cmdserails=import-csv "C:\Matter_AI\settings\*Command_COMPort.csv"|Where-Object{$_.scriptname -eq $scriptname}
  $portid=((get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "serialport"}) -split ":")[1]
  $speed="115200"
  set-content $serailout -value "$(get-date) serial port  $portid connecting records:" -force -Encoding UTF8 -force | out-null
@@ -2356,3 +2364,118 @@ if($port.IsOpen){
     $daterecord=get-date -Format "yyMMdd_HHmm"
     rename-item $serailout -NewName "testing_serailport_$($daterecord).log"
  }
+
+
+function importmodule([string]$modulename,[string]$getcmdtest){
+    #"importexcel|import-excel"
+    #"googlesheetscmdlets|Connect-GoogleSheets"
+$chkmod=Get-Module -name $modulename
+if(!($chkmod)){
+  $PSfolder=(($env:PSModulePath).split(";")|Where-Object{$_ -match "user" -and $_ -match "WindowsPowerShell"})+"\$($modulename)"
+  $checkPSfolder=Get-ChildItem $PSfolder  -Recurse -file -Filter ImportExcel.psd1 -ErrorAction SilentlyContinue
+ 
+ if(!($checkPSfolder)){
+  New-Item -ItemType directory $PSfolder -ea SilentlyContinue|out-null
+  $A1=(Get-ChildItem "$rootpath\cmdcollecting_tool\tool\$($modulename)*.zip").fullname
+  $shell.NameSpace($PSfolder).copyhere($shell.NameSpace($A1).Items(),4)
+  }
+ 
+  $checkPSfolder=Get-ChildItem $PSfolder -Recurse -file -Filter "$($modulename).psd1"
+ 
+   if(!$checkPSfolder){
+   return "importexcel Package Tool unzip FAILED"
+     }
+ 
+   if(test-path "$($PSfolder)\$($modulename).psd1"){
+    Get-ChildItem -path $PSfolder -Recurse|Unblock-File
+      Import-Module $modulename|out-null
+     try{ 
+      Get-Command $getcmdtest  |out-null
+      } catch{
+     return "$modulename Package Tool installed FAILED"
+        }
+    return "$modulename Package Tool installed OK"
+ 
+   }
+}
+else{
+    
+    return "$modulename already installed"
+}
+ }
+
+function googleapisinit{
+$libPath = "$rootpath\cmdcollecting_tool\tool\googleapis"
+Add-Type -Path "$libPath\Google.Apis.dll"
+Add-Type -Path "$libPath\Google.Apis.Auth.dll"
+Add-Type -Path "$libPath\Google.Apis.Core.dll"
+Add-Type -Path "$libPath\Google.Apis.Sheets.v4.dll"
+Add-Type -Path "$libPath\Newtonsoft.Json.dll"
+$credFile = "$libPath\service_account.json"
+$scope = "https://www.googleapis.com/auth/spreadsheets.readonly"
+$stream = [System.IO.File]::OpenRead($credFile)
+$gCred = [Google.Apis.Auth.OAuth2.GoogleCredential]::FromStream($stream).CreateScoped($scope)
+# Create the Sheets API service
+$initializer = New-Object Google.Apis.Services.BaseClientService+Initializer
+$initializer.HttpClientInitializer = $gCred
+$initializer.ApplicationName = "PowerShell-GoogleSheets"
+$global:googleservice = New-Object Google.Apis.Sheets.v4.SheetsService -ArgumentList $initializer
+}
+
+function Export-GSheetRangesToCsv {
+    param (
+        [string]$SpreadsheetId,
+        [string[]]$Ranges,
+        [string[]]$Filenames,
+        [Google.Apis.Sheets.v4.SheetsService]$googleservice
+    )
+
+    # Create and execute batchGet request
+    $batchRequest = $googleservice.Spreadsheets.Values.BatchGet($SpreadsheetId)
+    $batchRequest.Ranges = $Ranges
+    $batchRequest.MajorDimension = "ROWS"
+    $response = $batchRequest.Execute()
+
+    # Loop over each range and export to CSV
+    for ($i = 0; $i -lt $response.ValueRanges.Count; $i++) {
+        $rangeData = $response.ValueRanges[$i]
+        $rows = $rangeData.Values
+
+        if ($rows.Count -eq 0) {
+            Write-Warning "No data in range: $($Ranges[$i])"
+            continue
+        }
+
+        $headers = $rows[0]
+        $dataObjects = @()
+
+        for ($j = 1; $j -lt $rows.Count; $j++) {
+            $row = $rows[$j]
+            $obj = [PSCustomObject]@{}
+            for ($k = 0; $k -lt $headers.Count; $k++) {
+                $colName = $headers[$k]
+                $value = if ($k -lt $row.Count) { $row[$k] } else { "" }
+                $obj | Add-Member -NotePropertyName $colName -NotePropertyValue $value
+            }
+            $dataObjects += $obj
+        }
+
+        $csvPath = "$rootpathset\$($Filenames[$i])"
+        $dataObjects | Export-Csv -Path $csvPath -NoTypeInformation -Encoding UTF8 -Force
+    }
+}
+
+function downloadsapi{
+googleapisinit
+$googleservice=$global:googleservice
+$spreadsheetId="19ZPA2Z6SYYtvIj9qXM0FuDASF0FaZP2xjx7jcebrJEQ"
+$ranges=@("manual_special!A1:N300","filesettings!A1:G10","TC_filter!A1:E200","Command_COMPort!A1:I50","report_exclude!A1:A10")
+$Filenames=@("manual_special.csv","filesettings.csv","TC_filter.csv","Command_COMPort.csv","report_exclude.csv")
+Export-GSheetRangesToCsv -spreadsheetId $spreadsheetId -Ranges $ranges -Filenames $Filenames -googleservice $googleservice
+
+
+$spreadsheetId="1-vSsxIMLxcSibvRLyez-SJD0ZfF-Su7aVUCV2bUJuWk"
+$ranges=@("id_list!A1:E6720")
+$Filenames=@("id_list.csv")
+Export-GSheetRangesToCsv -SpreadsheetId $spreadsheetId -Ranges $ranges -Filenames $Filenames -googleservice $googleservice
+}
