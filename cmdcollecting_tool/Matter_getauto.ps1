@@ -11,15 +11,15 @@ if($PSScriptRoot.length -eq 0){
 importmodule "importexcel" "import-excel" 
 $excelfilename=(Get-ChildItem $global:excelfile).name
 #reg read excel to csv
-$columncor=((import-csv "C:\Matter_AI\settings\manualcmd_Matter - filesettings.csv"|Where-Object{$_.filename -eq $excelfilename}|Select-Object -Property webui_column_No).webui_column_No).trim()
-$sumsheetname=((import-csv "C:\Matter_AI\settings\manualcmd_Matter - filesettings.csv"|Where-Object{$_.filename -eq $excelfilename}|Select-Object -Property webui_page).webui_page).trim()
+$columncor=((import-csv "$rootpathset\filesettings.csv"|Where-Object{$_.filename -eq $excelfilename}|Select-Object -Property webui_column_No).webui_column_No).trim()
+$sumsheetname=((import-csv "$rootpathset\filesettings.csv"|Where-Object{$_.filename -eq $excelfilename}|Select-Object -Property webui_page).webui_page).trim()
 #$worksheetNames = (Get-ExcelSheetInfo -Path $excelfull).Name
 #$excelPackage = [OfficeOpenXml.ExcelPackage]::new((Get-Item $global:excelfile))
 $worksheetsum=Import-Excel $global:excelfile -WorksheetName $sumsheetname
 $columnName = ($worksheetsum[0].PSObject.Properties.Name)[[int32]$columncor-1]
 $filteredtcs = ($worksheetsum |Where-Object{$_."Test Case ID".length -gt 0}|  Where-Object {$_.$columnName -eq "UI-Automated" -or $_.$columnName -eq "Verification Step Document"})."Test Case ID"|Sort-Object
 #tc-filter
-$tcfilters=(import-csv "C:\Matter_AI\settings\manualcmd_Matter - TC_filter.csv")
+$tcfilters=(import-csv "$rootpathset\TC_filter.csv")
 $matchtcs=($tcfilters|where-object{$_."matched_webui" -ne ""})."TC"
 #$excludetcs=($tcfilters|where-object{$_."exclude_webui" -ne ""})."TC"
 if($matchtcs){

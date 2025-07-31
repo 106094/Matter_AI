@@ -1145,8 +1145,8 @@ function puttystart ([string]$puttyname) {
        $pskey=($settings[2].split(":"))[-1]
        #$sshpath=($settings[3].split(":"))[-1]
        $fname=(Get-ChildItem $global:excelfile).name
-       $sshpath=(import-csv "C:\Matter_AI\settings\manualcmd_Matter - filesettings.csv"|Where-Object{$_.filename -eq $fname}).python_path
-       $sshpathmanual=(import-csv "C:\Matter_AI\settings\manualcmd_Matter - filesettings.csv"|Where-Object{$_.filename -eq $fname}).manual_path
+       $sshpath=(import-csv "C:\Matter_AI\settings\filesettings.csv"|Where-Object{$_.filename -eq $fname}).python_path
+       $sshpathmanual=(import-csv "C:\Matter_AI\settings\filesettings.csv"|Where-Object{$_.filename -eq $fname}).manual_path
        $wshell = New-Object -ComObject WScript.Shell
        $wshell.AppActivate($puttypid)
        start-sleep -s 5
@@ -1949,7 +1949,6 @@ function downloads([switch]$google){
     $errormessage="matter TC_filter download failed"
     $checkdownload=webdownload -goo_link $goo_link -gid $gid -sv_range $sv_range -savepath $savepath -errormessage $errormessage
     #endregion
-
     if(!(test-path "C:\Matter_AI\settings\chip-tool_clustercmd - id_list.csv")){
       if(test-path "C:\Matter_AI\settings\chip-tool_clustercmd*.csv"){
       remove-item "C:\Matter_AI\settings\chip-tool_clustercmd*.csv" -ErrorAction SilentlyContinue
@@ -1962,6 +1961,15 @@ function downloads([switch]$google){
     $errormessage="matter endpoint referance download failed"
     webdownload -goo_link $goo_link -gid $gid -sv_range $sv_range -savepath $savepath -errormessage $errormessage
     #endregion
+    #region download Command_COMPort
+    $goo_link="https://docs.google.com/spreadsheets/d/19ZPA2Z6SYYtvIj9qXM0FuDASF0FaZP2xjx7jcebrJEQ/"
+    $gid="1452195954"
+    $sv_range="A1:I7000"
+    $savepath="C:\Matter_AI\settings\"
+    $errormessage="matter Command_COMPort download failed"
+    webdownload -goo_link $goo_link -gid $gid -sv_range $sv_range -savepath $savepath -errormessage $errormessage
+    #endregion
+
     }
     if($checkopen -eq 0){
         try{
@@ -2268,7 +2276,7 @@ $window.ShowDialog() | Out-Null
 function dutcmd ([string]$scriptname){
     $Global:comportreset=$null
     $serailout="C:\Matter_AI\logs\testing_serailport.log"
-    $cmdserails=import-csv "C:\Matter_AI\settings\Command_COMPort.csv"|Where-Object{$_.scriptname -eq $scriptname}
+    $cmdserails=import-csv "C:\Matter_AI\settings\*Command_COMPort.csv"|Where-Object{$_.scriptname -eq $scriptname}
  $portid=((get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "serialport"}) -split ":")[1]
  $speed="115200"
  set-content $serailout -value "$(get-date) serial port  $portid connecting records:" -force -Encoding UTF8 -force | out-null
