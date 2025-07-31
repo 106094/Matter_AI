@@ -1,4 +1,4 @@
-# Path to your CSV file
+﻿# Path to your CSV file
 param (
     [string]$csvfile,
     [string]$selections

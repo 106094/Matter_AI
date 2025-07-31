@@ -11,4 +11,7 @@
     "scm.showActionButton": false,
     "scm.showInputActionButton": false,
     "scm.showHistoryGraph": false
+},
+{
+  "files.encoding": "utf8"
 }

@@ -1,4 +1,4 @@
-Import-Module C:\Matter_AI\Matter_functions.psm1
+﻿Import-Module C:\Matter_AI\Matter_functions.psm1
 $getcmdpsfile="C:\Matter_AI\cmdcollecting_tool\Matter_getchiptool.ps1"
 $excelfilename=(get-childitem $global:excelfile).Name
 $global:csvfilename=. $getcmdpsfile

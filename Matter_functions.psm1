@@ -1,4 +1,4 @@
-
+﻿
 #region windows functions
 Add-Type @"
 using System;
@@ -2099,7 +2099,7 @@ for($x=0; $x -lt $global:clickbuttons.Length; $x++){
 $typenumber=[int]$global:clickbuttons.substring($x,1)
 $seltypesa+=$testtypes[$typenumber-1]
 }
-$global:seltypes=$seltypesa -join " �� "
+$global:seltypes=$seltypesa -join " → "
 $window.FindName("SelTypesText").Text =$global:seltypes
 }
 
@@ -2304,12 +2304,10 @@ if($port.IsOpen){
         $readport=@()        
         $starttime2=Get-Date
        if($cmdsrlp.Length -gt 0 -and $cmdsrlp -ne "-"){
-        $cmdsrlps=$cmdsrlp.split("|")
-        foreach ($cmdsr in  $cmdsrlps){
-            $port.WriteLine($cmdsr)
+            $cmdsrlp=$cmdsrlp.trim()
+            $port.WriteLine($cmdsrlp)
             start-sleep -s 1
             #$port.WriteLine("`r") 
-        }
        }
       if($cmdwait -ne 0){
         do {
