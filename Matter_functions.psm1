@@ -2379,10 +2379,8 @@ if(!($chkmod)){
   $A1=(Get-ChildItem "$rootpath\cmdcollecting_tool\tool\$($modulename)*.zip").fullname
   $shell.NameSpace($PSfolder).copyhere($shell.NameSpace($A1).Items(),4)
   }
- 
   $checkPSfolder=Get-ChildItem $PSfolder -Recurse -file -Filter "$($modulename).psd1"
- 
-   if(!$checkPSfolder){
+    if(!$checkPSfolder){
    return "importexcel Package Tool unzip FAILED"
      }
  
@@ -2397,10 +2395,11 @@ if(!($chkmod)){
     return "$modulename Package Tool installed OK"
  
    }
-}
+
 else{
     
     return "$modulename already installed"
+}
 }
  }
 
