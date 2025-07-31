@@ -1,4 +1,5 @@
 {
+    "files.encoding": "utf8",
     "scm.autoReveal": false,
     "scm.compactFolders": false,
     "scm.countBadge": "off",
@@ -11,7 +12,4 @@
     "scm.showActionButton": false,
     "scm.showInputActionButton": false,
     "scm.showHistoryGraph": false
-},
-{
-  "files.encoding": "utf8"
 }
