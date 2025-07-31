@@ -18,12 +18,12 @@ if ($PSScriptRoot) {
     $rootpath = [System.AppDomain]::CurrentDomain.BaseDirectory
 }
 if($rootpath -like "*WINDOWS\System32*"){
-  $rootpath="C:\Users\106094-DUTN\Desktop\Auto\Matter\Matter_AI"
+  $rootpath="C:\Users\106094-DUTN\Desktop\Auto\Matter\Matter_AI\"
 }
-$rootpathset="$rootpath\settings"
+
 Import-Module "$rootpath\Matter_functions.psm1" -Force
-$ctcmds=import-csv "$rootpathset\chiptoolcmds.csv"
-$settingsPath = "$rootpathset\config_linux.txt"
+$ctcmds=import-csv "$rootpath\settings\chiptoolcmds.csv"
+$settingsPath = "$rootpath\settings\config_linux.txt"
 $global:matchcmds=$ctcmds.name|Get-Unique
 $global:puttyset = @()
 
@@ -41,12 +41,12 @@ $testtype=$global:allselections[0]
 $dutcontrol=$global:allselections[1]
 
 if($dutcontrol -ne 1 -and $dutcontrol -ne 5){
-    $currnetset=get-content "$rootpathset\config_linux.txt"
+    $currnetset=get-content "$rootpath\settings\config_linux.txt"
    if (!($currnetset|Where-Object{$_ -match "serialport"})){
      $newsettings=get-content C:\Matter_Git\settings\config_linux.txt
      Compare-Object $newsettings $currnetset|where-object{$_.sideIndicator -eq "<="}|ForEach-Object{
       $newadd+=@($_.inputObject)
-      add-content "$rootpathset\config_linux.txt" -value $_.inputObject
+      add-content "$rootpath\settings\config_linux.txt" -value $_.inputObject
      }
      $newadds=[string]::Join("`n",$newadd)
     $messinfo="please update config_linux.txt for new settings of $newadds"
@@ -96,7 +96,7 @@ if($global:excelfile -eq 0){
 
 if ($testtype -match 1){
  $getcmdpsfile="$rootpath\cmdcollecting_tool\Matter_getpy.ps1"
-   $cmdcsvfile="$rootpathset\_py\py.csv"
+   $cmdcsvfile="$rootpath\settings\_py\py.csv"
    
 $timestart=get-date
 . $getcmdpsfile
@@ -148,9 +148,9 @@ if ($testtype -match 2){
 }
 
 if ($testtype -match 3){
-  $getprojects=(get-childitem "$rootpathset\_auto\" -Directory).Name
+  $getprojects=(get-childitem "$rootpath\settings\_auto\" -Directory).Name
   if (!$getprojects){
-   [System.Windows.Forms.MessageBox]::Show("Please create $rootpathset\_auto\<Project name> include ""json.txt"" and ""xml"" folder with xml files"  ,"Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
+   [System.Windows.Forms.MessageBox]::Show("Please create $rootpath\settings\_auto\<Project name> include ""json.txt"" and ""xml"" folder with xml files"  ,"Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
    exit
   }
 }
@@ -204,7 +204,7 @@ while ($continueq -eq "Yes"){
     }
 
   if ($testtypeall -contains 1){
-    $caseids=(import-csv "$rootpathset\_py\py.csv").TestCaseID
+    $caseids=(import-csv "$rootpath\settings\_py\py.csv").TestCaseID
     selguis -Inputdata $caseids -instruction "Please select Python caseids" -errmessage "No caseid selected"
     if(!$global:selss){
       [System.Windows.Forms.MessageBox]::Show("Fail to select the test case id, test will be stopped","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
@@ -239,7 +239,7 @@ while ($continueq -eq "Yes"){
   }
 
   if ($testtypeall -contains 3){  
-   $getprojects=(get-childitem "$rootpathset\_auto\" -Directory).Name
+   $getprojects=(get-childitem "$rootpath\settings\_auto\" -Directory).Name
    $global:getproject=selgui -Inputdata $getprojects -instruction "Please select Auto project" -errmessage "No project selected"
    if(!($global:getproject[-1])){
        [System.Windows.Forms.MessageBox]::Show("Fail to get Auto project setting (folder)","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)

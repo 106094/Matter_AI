@@ -66,7 +66,7 @@ $a=(Import-Excel $excelfull -WorksheetName "Python Script Command" -StartRow 2 -
 $a[-1]|export-csv C:\Matter_AI\settings\_manual\settings.csv -NoTypeInformation -force
 
 #tc-filter
-$tcfilters=(import-csv "C:\Matter_AI\settings\TC_filter.csv")
+$tcfilters=(import-csv "C:\Matter_AI\settings\manualcmd_Matter - TC_filter.csv")
 $matchtcs=($tcfilters|where-object{$_."matched_manual" -ne ""})."TC"
 #$extratcs=($tcfilters|where-object{$_."extra_manual" -ne ""})."TC"
 #$excludetcs=($tcfilters|where-object{$_."exclude_manual" -ne ""})."TC"
@@ -109,8 +109,8 @@ if(!($chkmod)){
   $matchcmds=$ctcmds.name|Get-Unique
   #endregion
 #reg read excel to csv
-$columncor=((import-csv "C:\Matter_AI\settings\filesettings.csv"|Where-Object{$_.filename -eq ($excelfile).name}|Select-Object -Property manual_column_title).manual_column_title).trim()
-$sumsheetname=((import-csv "C:\Matter_AI\settings\filesettings.csv"|Where-Object{$_.filename -eq ($excelfile).name}|Select-Object -Property manual_page).manual_page).trim()
+$columncor=((import-csv "C:\Matter_AI\settings\manualcmd_Matter - filesettings.csv"|Where-Object{$_.filename -eq ($excelfile).name}|Select-Object -Property manual_column_title).manual_column_title).trim()
+$sumsheetname=((import-csv "C:\Matter_AI\settings\manualcmd_Matter - filesettings.csv"|Where-Object{$_.filename -eq ($excelfile).name}|Select-Object -Property manual_page).manual_page).trim()
 $worksheetNames = (Get-ExcelSheetInfo -Path $excelfull).Name
 #$sumsheetname=$worksheetNames|Where-Object{$_ -match "cert_repo"}
 

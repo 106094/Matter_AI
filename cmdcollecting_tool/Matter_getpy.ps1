@@ -60,7 +60,7 @@ Import-Excel $global:excelfile -WorksheetName "Python Script Command" -StartRow 
 |Export-Csv $spath\py0.csv -NoTypeInformation
 
 $filtercsv=import-csv  $spath\py0.csv |Where-Object{$_."Test Case ID".length -gt 0}
-$tcfilters=(import-csv "C:\Matter_AI\settings\TC_filter.csv")
+$tcfilters=(import-csv "C:\Matter_AI\settings\manualcmd_Matter - TC_filter.csv")
 $matchtcs=($tcfilters|where-object{$_."matched_py" -ne ""})."TC"
 #$excludetcs=($tcfilters|where-object{$_."exclude_py" -ne ""})."TC"
 if($matchtcs){
