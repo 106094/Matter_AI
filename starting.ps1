@@ -107,11 +107,12 @@ if(!$checkfile){
 }
 }
 
+if(!$global:testing){
+  downloadsapi
+ }
+
 if ($testtype -match 2){
   . "$rootpath\cmdcollecting_tool\Matter_getpy.ps1"
-  if(!$global:testing){
-    downloads -google
-    }
   $getcmdpsfile="$rootpath\cmdcollecting_tool\Matter_getchiptool.ps1"
   $global:updatechiptool = [System.Windows.Forms.MessageBox]::Show("Need update UI-Manual database?", "Check", [System.Windows.Forms.MessageBoxButtons]::YesNo, [System.Windows.Forms.MessageBoxIcon]::Question, [System.Windows.Forms.MessageBoxDefaultButton]::Button2)
   if ($global:updatechiptool -eq "Yes") {

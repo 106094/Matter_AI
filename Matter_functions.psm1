@@ -145,7 +145,7 @@ function putty_paste([string]$puttyname,[string]$cmdline,[int64]$check_sec,[int6
     $global:puttylogname=$puttynamedest=$null
     if ($manual -and !$skipcheck){
         $lastword=$endpoint=$destid=$endpoint=$null
-        $eplists=import-csv "C:\Matter_AI\settings\chip-tool_clustercmd - id_list.csv"
+        $eplists=import-csv "C:\Matter_AI\settings\id_list.csv"
         $splitcmd=($cmdline.replace("./chip-tool ","")).split(" ")|where-object{$_.Length -gt 0}
         #checkif  attribute with ''
         if ($cmdline -match "'([^']*)'") {
@@ -1914,8 +1914,7 @@ new-item -ItemType File -path $logpath|Out-Null
 }
 
 function downloads([switch]$google){
-  
-    if($google){
+   if($google){
     $checkopen=((get-process msedge -ea SilentlyContinue)|Where-Object{$_.MainWindowTitle.length -gt 0}).id.count
     #region download manual speacial settings
     $goo_link="https://docs.google.com/spreadsheets/d/19ZPA2Z6SYYtvIj9qXM0FuDASF0FaZP2xjx7jcebrJEQ/"
@@ -1949,11 +1948,7 @@ function downloads([switch]$google){
     $errormessage="matter TC_filter download failed"
     $checkdownload=webdownload -goo_link $goo_link -gid $gid -sv_range $sv_range -savepath $savepath -errormessage $errormessage
     #endregion
-    if(!(test-path "C:\Matter_AI\settings\chip-tool_clustercmd - id_list.csv")){
-      if(test-path "C:\Matter_AI\settings\chip-tool_clustercmd*.csv"){
-      remove-item "C:\Matter_AI\settings\chip-tool_clustercmd*.csv" -ErrorAction SilentlyContinue
-      }
-    #region download manual endpoint referance
+     #region download manual endpoint referance
     $goo_link="https://docs.google.com/spreadsheets/d/1-vSsxIMLxcSibvRLyez-SJD0ZfF-Su7aVUCV2bUJuWk/"
     $gid="1082391814"
     $sv_range="A1:E7000"
@@ -1969,8 +1964,6 @@ function downloads([switch]$google){
     $errormessage="matter Command_COMPort download failed"
     webdownload -goo_link $goo_link -gid $gid -sv_range $sv_range -savepath $savepath -errormessage $errormessage
     #endregion
-
-    }
     if($checkopen -eq 0){
         try{
         taskkill /IM msedge.exe /F |out-null
@@ -2405,7 +2398,12 @@ else{
  }
 
 function googleapisinit{
-$libPath = "$rootpath\cmdcollecting_tool\tool\googleapis"
+   $libPath = "$rootpath\cmdcollecting_tool\tool\googleapis"
+  if(!(test-path "$libPath\Google.Apis.dll")){
+    New-Item -ItemType directory $libPath -ea SilentlyContinue|out-null
+  $A1=(Get-ChildItem "$rootpath\cmdcollecting_tool\tool\googleapis.zip").fullname
+  $shell.NameSpace($libPath).copyhere($shell.NameSpace($A1).Items(),4)
+}
 Add-Type -Path "$libPath\Google.Apis.dll"
 Add-Type -Path "$libPath\Google.Apis.Auth.dll"
 Add-Type -Path "$libPath\Google.Apis.Core.dll"
