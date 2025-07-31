@@ -8,7 +8,7 @@ if($PSScriptRoot.length -eq 0){
   $scriptRoot=$PSScriptRoot
   }
 
-importmodule "importexcel" "import-excel" 
+importmodule -modulename "importexcel" -getcmdtest "import-excel" 
 $excelfilename=(Get-ChildItem $global:excelfile).name
 #reg read excel to csv
 $columncor=((import-csv "$rootpathset\filesettings.csv"|Where-Object{$_.filename -eq $excelfilename}|Select-Object -Property webui_column_No).webui_column_No).trim()

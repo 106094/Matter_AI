@@ -2471,8 +2471,6 @@ $spreadsheetId="19ZPA2Z6SYYtvIj9qXM0FuDASF0FaZP2xjx7jcebrJEQ"
 $ranges=@("manual_special!A1:N300","filesettings!A1:G10","TC_filter!A1:E200","Command_COMPort!A1:I50","report_exclude!A1:A10")
 $Filenames=@("manual_special.csv","filesettings.csv","TC_filter.csv","Command_COMPort.csv","report_exclude.csv")
 Export-GSheetRangesToCsv -spreadsheetId $spreadsheetId -Ranges $ranges -Filenames $Filenames -googleservice $googleservice
-
-
 $spreadsheetId="1-vSsxIMLxcSibvRLyez-SJD0ZfF-Su7aVUCV2bUJuWk"
 $ranges=@("id_list!A1:E6720")
 $Filenames=@("id_list.csv")
