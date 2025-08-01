@@ -32,6 +32,17 @@ $consoleHandle = (Get-Process -Id $PID).MainWindowHandle
 [Win32]::ShowWindow($consoleHandle, $SW_HIDE)
 
 function ini {
+#region check internet connection and download googlesheets
+if (!(test-Connection "www.google.com" -count 1 -ErrorAction SilentlyContinue)) {
+  $messinfo="Internet disconnected, please check internet connection"
+  [System.Windows.Forms.MessageBox]::Show($messinfo,"Info",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Information)
+  exit
+}
+else{
+  if(!$global:testing){
+  downloadsapi
+ }
+}
 $testtype=$dutcontrol=$null
 newGUI
 if($global:closeaction){
@@ -47,17 +58,7 @@ if($dutcontrol -ne 1 -and $dutcontrol -ne 6){
       exit  
    }
 }
-#region check internet connection and download googlesheets
-if (!(test-Connection "www.google.com" -count 1 -ErrorAction SilentlyContinue)) {
-  $messinfo="Internet disconnected, please check internet connection"
-  [System.Windows.Forms.MessageBox]::Show($messinfo,"Info",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Information)
-  exit
-}
-else{
-  if(!$global:testing){
-  downloadsapi
- }
-}
+
 #endregion
 
 #region check ssh/webui connection
