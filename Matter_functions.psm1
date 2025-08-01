@@ -1717,22 +1717,18 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
         }
         
        
- function compal_cmd ([switch]$ending) {
-
-
- if(!(Test-Path C:\Matter_AI\platform-tools\adb.exe -ea SilentlyContinue)){
-    $addr="https://drive.usercontent.google.com/download?id=1gMy2--1i4zLNfe_XveadM_mQHd3krBPQ&export=download&authuser=0&confirm=t&uuid=bb454201-395f-4236-9410-a4da87d1e945&at=APvzH3oNZ8sm2djB_FXOLFr6DvnS:1735882409292"
-   #start-process msedge "https://drive.usercontent.google.com/download?id=1gMy2--1i4zLNfe_XveadM_mQHd3krBPQ&export=download&authuser=0&confirm=t&uuid=bb454201-395f-4236-9410-a4da87d1e945&at=APvzH3oNZ8sm2djB_FXOLFr6DvnS:1735882409292"
-   $newedge=Start-Process "msedge.exe" -ArgumentList $addr 
-  while (!(test-path "$env:USERPROFILE\downloads\platform-tools*.zip")){
-  start-sleep -s 3
-  }
-  start-sleep -s 3
-  $A1=(Get-ChildItem "$env:USERPROFILE\downloads\platform-tools*.zip").fullname
-  $shell.NameSpace("C:\Matter_AI\").copyhere($shell.NameSpace($A1).Items(),4)
- }
-
-
+function compal_cmd ([switch]$ending) {
+    if(!(Test-Path C:\Matter_AI\platform-tools\adb.exe -ea SilentlyContinue)){
+        $addr="https://drive.usercontent.google.com/download?id=1gMy2--1i4zLNfe_XveadM_mQHd3krBPQ&export=download&authuser=0&confirm=t&uuid=bb454201-395f-4236-9410-a4da87d1e945&at=APvzH3oNZ8sm2djB_FXOLFr6DvnS:1735882409292"
+    #start-process msedge "https://drive.usercontent.google.com/download?id=1gMy2--1i4zLNfe_XveadM_mQHd3krBPQ&export=download&authuser=0&confirm=t&uuid=bb454201-395f-4236-9410-a4da87d1e945&at=APvzH3oNZ8sm2djB_FXOLFr6DvnS:1735882409292"
+    $newedge=Start-Process "msedge.exe" -ArgumentList $addr 
+    while (!(test-path "$env:USERPROFILE\downloads\platform-tools*.zip")){
+    start-sleep -s 3
+    }
+    start-sleep -s 3
+    $A1=(Get-ChildItem "$env:USERPROFILE\downloads\platform-tools*.zip").fullname
+    $shell.NameSpace("C:\Matter_AI\").copyhere($shell.NameSpace($A1).Items(),4)
+    }
 if($PSScriptRoot.length -eq 0){
 $scriptRoot="C:\Matter_AI"
 }
@@ -1743,9 +1739,7 @@ $screen = [System.Windows.Forms.Screen]::PrimaryScreen
 $bounds = $screen.Bounds
 $width  = $bounds.Width
 $height  =$bounds.Height
-
 $passwds=get-content "C:\Matter_AI\settings\compal_passwds.txt"
-
 $cmd1="C:\Matter_AI\platform-tools\adb.exe shell" 
 $cmd2="ping 8.8.8.8 -c 5"
 $cmd3="rm -rf /data/matter/*"
@@ -1755,31 +1749,25 @@ $cmd5={
 start-sleep -s 10
 }
 
-
 function selectcopy ([string]$cmdlet){
-
-Start-Sleep -s 2
-  Set-Clipboard -Value $cmdlet
-  Start-Sleep -s 2
-  $wshell.SendKeys("+^{p}")
-  Start-Sleep -s 2
-  $wshell.SendKeys("^v")
-  Start-Sleep -s 2  
-  $wshell.SendKeys("{tab}")
-  Start-Sleep -s 2  
-  
-# Press the Enter key
-[KeySends.KeySend]::KeyDown([System.Windows.Forms.Keys]::Enter)
-Start-Sleep -s 0.1
-[KeySends.KeySend]::KeyUp([System.Windows.Forms.Keys]::Enter)
- Start-Sleep -s 2
-
- if($cmdlet -eq "select all text"){
-[KeySends.KeySend]::KeyDown([System.Windows.Forms.Keys]::Enter)
-Start-Sleep -s 0.1
-[KeySends.KeySend]::KeyUp([System.Windows.Forms.Keys]::Enter)
-}
-
+    Start-Sleep -s 2
+    Set-Clipboard -Value $cmdlet
+    Start-Sleep -s 2
+    $wshell.SendKeys("+^{p}")
+    Start-Sleep -s 2
+    $wshell.SendKeys("^v")
+    Start-Sleep -s 2  
+    $wshell.SendKeys("{tab}")
+    Start-Sleep -s 2  
+    [KeySends.KeySend]::KeyDown([System.Windows.Forms.Keys]::Enter)
+    Start-Sleep -s 0.1
+    [KeySends.KeySend]::KeyUp([System.Windows.Forms.Keys]::Enter)
+    Start-Sleep -s 2
+    if($cmdlet -eq "select all text"){
+    [KeySends.KeySend]::KeyDown([System.Windows.Forms.Keys]::Enter)
+    Start-Sleep -s 0.1
+    [KeySends.KeySend]::KeyUp([System.Windows.Forms.Keys]::Enter)
+    }
     Start-Sleep -Seconds 2
 }
 
@@ -1981,25 +1969,35 @@ function downloads([switch]$google){
 function newGUI{
 $testtypes=@("Python","Manual","Auto")
 $reesttypes=@("Manual","Power On/Off","Simulator-1P","Simulator-2P","CMD-Win","CMD-SerailPort","CMD-ComPort","Web UI")
-$ipsettings0=Get-Content $settingsPath
-$originalIP = $ipsettings0 | ForEach-Object {
+$settings0=Get-Content $settingsPath
+$originalportid=((($settings0 -match "serialport").split(":"))[1]).ToString()
+$portnames=[System.IO.Ports.SerialPort]::getportnames()
+$serialscripts=(import-csv -path "$rootpathset\Command_COMPort.csv").scriptname|Get-Unique
+$xmlcomports=$portnames|ForEach-Object {
+  "<ComboBoxItem Content=""$_""/>"
+}
+$xmlscripts=$serialscripts|ForEach-Object {
+  "<ComboBoxItem Content=""$_""/>"
+}
+$originalIP = $settings0 | ForEach-Object {
     if ($_ -match "sship:(\d{1,3}(?:\.\d{1,3}){3})") {
         $matches[1]
     }
 }
 $settingsxml="<TextBox Name=""TH_IP"" BorderThickness=""0"" FontSize=""16"" Height=""30"" Width=""250"" Text=""$($originalIP)"" Margin=""0,2,0,2""/>"
-
 # Create the WPF XAML
 [xml]$xaml = @"
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        Title="Settings Editor" Height="710" Width="350">
-    <StackPanel Margin="10">
+        Title="Settings Editor" Height="710" Width="350"
+        WindowStartupLocation="CenterScreen">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+     <StackPanel Margin="10">
       <Label Content="TH IP :" FontSize="15" FontWeight="Bold" FontFamily="Arial" Margin="5,0,0,0"/>
         <Border BorderBrush="Black" BorderThickness="1" CornerRadius="5" Background="White" Width="280" Height="30">
          $settingsxml
           </Border>
          <Label Content="Select the testing Types" Margin="5,10,0,5" FontSize="15" FontWeight="Bold" FontFamily="Arial"/>
-           <Border BorderBrush="Black" BorderThickness="1" CornerRadius="5" Background="White" Width="280" Height="150">
+           <Border BorderBrush="Black" BorderThickness="1" CornerRadius="5" Background="White" Width="280" Height="140">
              <StackPanel Margin="10">
                  <WrapPanel>
                    <Button Name="BtnA" Content="Python" Foreground="Blue" Background="WhiteSmoke" Width="60" Height="40" Margin="5"/>
@@ -2012,7 +2010,7 @@ $settingsxml="<TextBox Name=""TH_IP"" BorderThickness=""0"" FontSize=""16"" Heig
           </Border>
 
         <Label Content="Select the Reset Type" Margin="5,10,0,5" FontSize="15" FontWeight="Bold" FontFamily="Arial"/>        
-        <Border BorderBrush="Black" BorderThickness="1" CornerRadius="5" Background="White" Width="280" Height="280" Margin="10">
+        <Border BorderBrush="Black" BorderThickness="1" CornerRadius="5" Background="White" Width="280" Height="300" Margin="10">
                   <StackPanel Margin="10">
                     <WrapPanel HorizontalAlignment="Center">
                         <Button Name="BtnrsetA" Content="Manual" Foreground="Blue" Background="WhiteSmoke" Width="100" Height="40" Margin="5"/>
@@ -2030,29 +2028,178 @@ $settingsxml="<TextBox Name=""TH_IP"" BorderThickness=""0"" FontSize=""16"" Heig
                         <Button Name="BtnrsetG" Content="CMD-ComPort" Foreground="Gray" Background="WhiteSmoke" Width="100" Height="40" Margin="5" IsEnabled="False"/>
                         <Button Name="BtnrsetH" Content="Web UI" Foreground="Gray" Background="WhiteSmoke" Width="100" Height="40" Margin="5" IsEnabled="False"/>
                     </WrapPanel>                        
-                    <Label Content="Reset Method:" Margin="5,10,0,5" FontSize="15" FontWeight="Bold" FontFamily="Arial"/>
-                    <TextBlock Name="ResetTypesText" Margin="10,2,0,0" FontSize="13" Foreground="Blue" FontWeight="Bold" FontFamily="Arial"/>
+                    <Label Content="Reset Method:" Margin="5,2,0,5" FontSize="15" FontWeight="Bold" FontFamily="Arial"/>
+                    <TextBlock Name="ResetTypesText" Margin="10,0,0,0" FontSize="13" Foreground="Blue" FontWeight="Bold" FontFamily="Arial"/>
                 </StackPanel>
               </Border>
-
-
-      <Button Name="SaveBtn" Content="Save Settings" Width="100" Height="40" Margin="0,10,0,0"/>
+      <Button Name="SaveBtn" Content="Save Settings" Width="100" Height="40" Margin="0,2,0,0"/>
      </StackPanel>
+    </ScrollViewer>
 </Window>
 "@
 
-# Load the XAML
-$reader = [System.Xml.XmlReader]::Create([System.IO.StringReader]::new($xaml.OuterXml))
-$window = [Windows.Markup.XamlReader]::Load($reader)
+[xml]$popupXamla = @"
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        Title="Popup Window" Height="160" Width="350">
+  <Grid Margin="10">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+    <StackPanel Orientation="Horizontal" Margin="0,10" Grid.Row="0">
+        <TextBlock Text="Select Serial Port:" Margin="0,0,10,0" VerticalAlignment="Center"/>
+        <ComboBox Name="ComboBox1" Width="200">
+        $xmlcomports
+        </ComboBox>
+     </StackPanel>
+   <Button Name="popSave" Content="Save Settings" Width="100" Height="40" Margin="0,10,0,0" Grid.Row="1"/>
+  </Grid>
+</Window>
+"@
 
-# Access controls
+[xml]$popupXamlb = @"
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        Title="Popup Window" Height="160" Width="350">
+  <Grid Margin="10">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+    <StackPanel Orientation="Horizontal" Margin="0,10" Grid.Row="0">
+      <TextBlock Text="Select cmd script:" Margin="0,0,10,0" VerticalAlignment="Center"/>
+      <ComboBox Name="ComboBox2" Width="200">
+        $xmlscripts
+      </ComboBox>
+    </StackPanel>
+   <Button Name="popSave" Content="Save Settings" Width="100" Height="40" Margin="0,10,0,0" Grid.Row="1"/>
+  </Grid>
+</Window>
+"@
 
-# Set initial values
+[xml]$popupXamlc = @"
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        Title="Popup Window" Height="220" Width="350">
+    <Grid Margin="10">
+      <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+    <StackPanel Orientation="Horizontal" Margin="0,10" Grid.Row="0">
+      <TextBlock Text="Select Serial Port:" Margin="0,0,10,0" VerticalAlignment="Center"/>
+      <ComboBox Name="ComboBox1" Width="200">
+       $xmlcomports
+      </ComboBox>
+    </StackPanel>
+    <StackPanel Orientation="Horizontal" Margin="0,10" Grid.Row="1">
+      <TextBlock Text="Select cmd script:" Margin="0,0,10,0" VerticalAlignment="Center"/>
+      <ComboBox Name="ComboBox2" Width="200">
+        $xmlscripts
+      </ComboBox>
+    </StackPanel>
+   <Button Name="popSave" Content="Save Settings" Width="100" Height="40" Margin="0,10,0,0" Grid.Row="2"/>
+  </Grid>
+</Window>
+"@
+
+function loadXaml($xamlset) {
+    $readerset = [System.Xml.XmlReader]::Create([System.IO.StringReader]::new($xamlset.OuterXml))
+    $windowset = [Windows.Markup.XamlReader]::Load($readerset)
+    return $windowset
+}
+function popupwindow($popupXaml,$mainwindow){
+$popupWindow = loadXaml $popupXaml
+$global:selectedItem1=$global:selectedItem2=$null
+$popupWindow.Owner = $mainwindow
+$popupWindow.Left = $mainwindow.Left + $mainwindow.Width + 10
+$popupWindow.Top  = $mainwindow.Top + 300
+$combo1 = $popupWindow.FindName("ComboBox1")
+$combo2 = $popupWindow.FindName("ComboBox2")
+$popSaveBtn = $popupWindow.FindName("popSave")
+$popSaveBtn.Add_Click({
+    $selectedItem1 = $combo1.SelectedItem
+    $selectedItem2 = $combo2.SelectedItem
+
+    # Only require selection if there are items
+    if ($combo1.Items.Count -gt 0 -and -not $selectedItem1) {
+        [System.Windows.MessageBox]::Show("Please choose a Port")
+        return
+    }
+
+    if ($combo2.Items.Count -gt 0 -and -not $selectedItem2) {
+        [System.Windows.MessageBox]::Show("Please choose a Script")
+        return
+    }
+
+    # Save selected values globally if selected
+    $global:selectedItem1 = if ($selectedItem1) {
+        if ($selectedItem1 -is [System.Windows.Controls.ComboBoxItem]) {
+            $selectedItem1.Content
+        } else {
+            $selectedItem1.ToString()
+        }
+    } else { $null }
+
+    $global:selectedItem2 = if ($selectedItem2) {
+        if ($selectedItem2 -is [System.Windows.Controls.ComboBoxItem]) {
+            $selectedItem2.Content
+        } else {
+            $selectedItem2.ToString()
+        }
+    } else { $null }
+
+    $popupWindow.Close()
+    #if ($selectedItem1){$addline1="Port:[$($global:selectedItem1)]"}
+    #if ($selectedItem2){$addline2="Script:[$($global:selectedItem2)]"}
+    #$ResetTypesText.Text =  @($Global:selectedResetButton,$addline1,$addline2) -join "`n"
+
+})
+if($combo1){
+$combo1.Add_SelectionChanged({
+    $sel = $combo1.SelectedItem
+    $global:selectedItem1 = if ($sel -is [System.Windows.Controls.ComboBoxItem]) {
+        $sel.Content
+    } elseif ($sel) {
+        $sel.ToString()
+    } else {
+        $null
+    }
+
+    # Update text
+    $ResetTypesText.Text = @($Global:selectedResetButton,
+        $(if ($global:selectedItem1) { "Port:[$($global:selectedItem1)]" }),
+        $(if ($global:selectedItem2) { "Script:[$($global:selectedItem2)]" })
+    ) -join "`n"
+})
+}
+if($combo2){
+$combo2.Add_SelectionChanged({
+    $sel = $combo2.SelectedItem
+    $global:selectedItem2 = if ($sel -is [System.Windows.Controls.ComboBoxItem]) {
+        $sel.Content
+    } elseif ($sel) {
+        $sel.ToString()
+    } else {
+        $null
+    }
+
+    # Update text
+    $ResetTypesText.Text = @(
+        $Global:selectedResetButton,
+        $(if ($global:selectedItem1) { "Port:[$($global:selectedItem1)]" }),
+        $(if ($global:selectedItem2) { "Script:[$($global:selectedItem2)]" })
+    ) -join "`n"
+})
+}
+$popupWindow.ShowDialog() | Out-Null
+}
+#Main window Load the XAML
+$window = loadXaml $xaml
+
 $th_ip = $window.FindName("TH_IP")
 $th_ip.Text = $originalIP
 
 $SaveBtn = $window.FindName("SaveBtn")
-# Save logic
 $SaveBtn.Add_Click({
 $th_ip = $window.FindName("TH_IP")
 $newIP=$th_ip.Text
@@ -2060,7 +2207,7 @@ $newIP
 $originalIP
 if($newIP -ne $originalIP){
   $lineset = "sship:$($newIP)"
-  $ipsettings=$ipsettings0|ForEach-Object {
+  $ipsettings=$settings0|ForEach-Object {
     if($_ -like "*sship:*"){
        $lineset
     }
@@ -2217,8 +2364,12 @@ $BtnrsetB.Add_Click({
    $script:isrBSelected = -not $script:isrBSelected
    $BtnrsetB.Background = if ($script:isrBSelected) { 'Blue' } else { 'WhiteSmoke' }
    $BtnrsetB.Foreground=if ($script:isrBSelected) { 'WhiteSmoke' } else { 'Blue' }
-    $Global:selectedResetButton = if ($script:isrBSelected){$BtnrsetB.Content.ToString()}else{$null}
-    $ResetTypesText.Text =  $Global:selectedResetButton
+   $Global:selectedResetButton = if ($script:isrBSelected){$BtnrsetB.Content.ToString()}else{$null}
+   $ResetTypesText.Text =  $Global:selectedResetButton 
+   if ($script:isrBSelected) {
+    popupwindow -popupXaml $popupXamla -mainwindow $window
+     }
+
 })
 
 $BtnrsetC.Add_Click({
@@ -2227,7 +2378,10 @@ $BtnrsetC.Add_Click({
    $BtnrsetC.Background = if ($script:isrCSelected) { 'Blue' } else { 'WhiteSmoke' }
    $BtnrsetC.Foreground=if ($script:isrCSelected) { 'WhiteSmoke' } else { 'Blue' }
    $Global:selectedResetButton = if ($script:isrCSelected){$BtnrsetC.Content.ToString()}else{$null}
-   $ResetTypesText.Text =  $Global:selectedResetButton
+   $ResetTypesText.Text =  $Global:selectedResetButton 
+    if ($script:isrCSelected) {
+    popupwindow -popupXaml $popupXamla -mainwindow $window
+     }
 })
 
 $BtnrsetD.Add_Click({
@@ -2236,7 +2390,10 @@ $BtnrsetD.Add_Click({
    $BtnrsetD.Background = if ($script:isrDSelected) { 'Blue' } else { 'WhiteSmoke' }
    $BtnrsetD.Foreground=if ($script:isrDSelected) { 'WhiteSmoke' } else { 'Blue' }
    $Global:selectedResetButton = if ($script:isrDSelected){$BtnrsetD.Content.ToString()}else{$null}
-    $ResetTypesText.Text =  $Global:selectedResetButton
+   $ResetTypesText.Text =  $Global:selectedResetButton
+   if ($script:isrDSelected) { 
+    popupwindow -popupXaml $popupXamla -mainwindow $window
+    }
 })
 
 $BtnrsetE.Add_Click({
@@ -2245,7 +2402,10 @@ $BtnrsetE.Add_Click({
    $BtnrsetE.Background = if ($script:isrESelected) { 'Blue' } else { 'WhiteSmoke' }
    $BtnrsetE.Foreground=if ($script:isrESelected) { 'WhiteSmoke' } else { 'Blue' }
    $Global:selectedResetButton = if ($script:isrESelected){$BtnrsetE.Content.ToString()}else{$null}
-    $ResetTypesText.Text =  $Global:selectedResetButton
+   $ResetTypesText.Text =  $Global:selectedResetButton
+   if ($script:isrESelected) {
+    popupwindow -popupXaml $popupXamlb -mainwindow $window
+    }
 })
 
 $BtnrsetF.Add_Click({
@@ -2254,7 +2414,10 @@ $BtnrsetF.Add_Click({
    $BtnrsetF.Background = if ($script:isrFSelected) { 'Blue' } else { 'WhiteSmoke' }
    $BtnrsetF.Foreground=if ($script:isrFSelected) { 'WhiteSmoke' } else { 'Blue' }
    $Global:selectedResetButton = if ($script:isrFSelected){$BtnrsetF.Content.ToString()}else{$null}
-    $ResetTypesText.Text =  $Global:selectedResetButton
+   $ResetTypesText.Text =  $Global:selectedResetButton 
+    if ($script:isrFSelected){
+    popupwindow -popupXaml $popupXamlc -mainwindow $window
+    }
 })
 
 # Show the window
@@ -2264,6 +2427,20 @@ $window.Add_Closing({
 $global:closeaction=$false
 $window.ShowDialog() | Out-Null
 
+#update Comport settings
+if($global:selectedItem1 -and $global:selectedItem1 -ne $originalportid){
+  $linesetport = "serialport:$($global:selectedItem1)"
+  $portsettings=$settings0|ForEach-Object {
+    if($_ -like "*serialport:*"){
+       $linesetport
+    }
+    else{
+     $_
+    }
+    
+  }  
+  $portsettings| Set-Content $settingsPath
+}
 }
 
 function dutcmd ([string]$scriptname){
