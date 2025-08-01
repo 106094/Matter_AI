@@ -40,30 +40,23 @@ if($global:closeaction){
 $testtype=$global:allselections[0]
 $dutcontrol=$global:allselections[1]
 
-if($dutcontrol -ne 1 -and $dutcontrol -ne 5){
-    $currnetset=get-content "$rootpathset\config_linux.txt"
-   if (!($currnetset|Where-Object{$_ -match "serialport"})){
-     $newsettings=get-content C:\Matter_Git\settings\config_linux.txt
-     Compare-Object $newsettings $currnetset|where-object{$_.sideIndicator -eq "<="}|ForEach-Object{
-      $newadd+=@($_.inputObject)
-      add-content "$rootpathset\config_linux.txt" -value $_.inputObject
-     }
-     $newadds=[string]::Join("`n",$newadd)
-    $messinfo="please update config_linux.txt for new settings of $newadds"
-      [System.Windows.Forms.MessageBox]::Show($messinfo,"Info",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Information)
-     exit
-   }
+if($dutcontrol -ne 1 -and $dutcontrol -ne 6){
    dutcontrol -mode testcom
    if ($Global:seialport -ne "ok"){
     [System.Windows.Forms.MessageBox]::Show("Fail to connect SerialPort","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
       exit  
    }
-  }
-#region check internet connection
+}
+#region check internet connection and download googlesheets
 if (!(test-Connection "www.google.com" -count 1 -ErrorAction SilentlyContinue)) {
   $messinfo="Internet disconnected, please check internet connection"
   [System.Windows.Forms.MessageBox]::Show($messinfo,"Info",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Information)
   exit
+}
+else{
+  if(!$global:testing){
+  downloadsapi
+ }
 }
 #endregion
 
@@ -106,10 +99,6 @@ if(!$checkfile){
     exit
 }
 }
-
-if(!$global:testing){
-  downloadsapi
- }
 
 if ($testtype -match 2){
   . "$rootpath\cmdcollecting_tool\Matter_getpy.ps1"

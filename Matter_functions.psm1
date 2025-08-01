@@ -1238,8 +1238,7 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
     
   } 
 
-  function getparameter([string]$getlastkey,[string]$setparaname){
-      
+  function getparameter([string]$getlastkey,[string]$setparaname){      
         $lastlogcontent=get-content -path C:\Matter_AI\logs\lastlog.log|Where-Object{$_.length -gt 0}|Select-Object -skip 2
         $getlastkey2=$getlastkey.replace("[","\[").replace("]","\]").replace(":","\:")
         $matchvalues=($lastlogcontent|Select-String -Pattern "\b($getlastkey2).*" -AllMatches |  ForEach-Object {$_.matches.value})
@@ -1307,22 +1306,12 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
    }
 
   function dutcontrol ([string]$mode){
-    if ($mode.length -gt 0 ){
-        $portid=((get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "serialport"}) -split ":")[1]
-        if(!($portid -match "\d+")){
-            selectcom
-            if($global:comport -match "\d+"){
-                $newcontent=get-content C:\Matter_AI\settings\config_linux.txt|ForEach-Object{
-                    if($_ -match "serialport"){
-                        $_="serialport:$global:comport"
-                    }
-                    $_
-                }
-                $newcontent|set-content C:\Matter_AI\settings\config_linux.txt
-            }
-            $portid=$global:comport
-        }
+    $global:comport=$global:selectedItem1
+    if ($mode.length -gt 0){
         $speed="9600"
+        if($dutcontrol -eq 5){
+            $speed="115200"
+        }
         $waittime=((get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "wait" -and $_ -match $mode}) -split ":")[1] 
         $modes=@("on","off","up","down","testcom")
         $sendings=@("o","f","b","c","")
@@ -1401,18 +1390,30 @@ function webdownload ([string]$goo_link,[string]$gid,[string]$sv_range,[string]$
          dutcontrol -mode on
         }
         }
+        #oneport
         if($mode -eq 3){
           $cycletime= ((get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "cycle" -and $_ -match "downup"}) -split ":")[1]
           foreach($i in 1..$cycletime){
             dutcontrol -mode down
             dutcontrol -mode up   
           }
-        }
+        }       
+        <#twpport
         if($mode -eq 4){
-                dutcmd   
+          $cycletime= ((get-content C:\Matter_AI\settings\config_linux.txt|Where-Object{$_ -match "cycle" -and $_ -match "downup"}) -split ":")[1]
+          foreach($i in 1..$cycletime){
+            dutcontrol -mode down
+            dutcontrol -mode up   
           }
+        }
+        #>
+        #Window cmd
          if($mode -eq 5){
                 compal_cmd     
+          }
+        #serialport cmd
+        if($mode -eq 6){
+                dutcmd -scriptname $global:selectedItem2   
           }
     }
 

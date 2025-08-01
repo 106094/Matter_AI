@@ -7,7 +7,7 @@ endpoint0:0
 endpoint1:1
 endpoint2:2
 showpercentage:60
-serialport:COM5
+serialport:COM6
 on_wait:6000
 off_wait:3000
 onoff_cycle:10
